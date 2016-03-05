@@ -22,13 +22,11 @@ under the License.
         <artifactId>flinkinaction</artifactId>
         <groupId>com.manning</groupId>
         <version>0.0.1-SNAPSHOT</version>
-    </parent>
-	
+    </parent>	
 	<groupId>com.manning</groupId>
 	<artifactId>flinkinactionjava</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
-
 	<name>Flink Quickstart Job</name>
 	<url>http://www.myorganization.org</url>
 
