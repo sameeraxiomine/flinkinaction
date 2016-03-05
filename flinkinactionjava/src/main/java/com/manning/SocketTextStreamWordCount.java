@@ -1,4 +1,4 @@
-package org.flinkinactionjava;
+package com.manning;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
