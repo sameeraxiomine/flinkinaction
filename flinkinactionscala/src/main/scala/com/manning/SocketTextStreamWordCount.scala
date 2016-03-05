@@ -1,4 +1,4 @@
-package org.flinkinactionscala
+package com.manning
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
