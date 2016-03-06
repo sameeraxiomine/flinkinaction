@@ -34,7 +34,7 @@ under the License.
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>0.10.2</flink.version>
+		<flink.version>1.0.0</flink.version>
 	</properties>
 
 	<repositories>
@@ -89,13 +89,25 @@ under the License.
 				</dependency>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
-					<artifactId>flink-streaming-java</artifactId>
+					<artifactId>flink-streaming-java_2.10</artifactId>
 					<version>${flink.version}</version>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
-					<artifactId>flink-clients</artifactId>
+					<artifactId>flink-runtime_2.10</artifactId>
+					<version>${flink.version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.flink</groupId>
+					<artifactId>flink-clients_2.10</artifactId>
+					<version>${flink.version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.flink</groupId>
+					<artifactId>flink-streaming-contrib_2.10</artifactId>
 					<version>${flink.version}</version>
 					<scope>provided</scope>
 				</dependency>

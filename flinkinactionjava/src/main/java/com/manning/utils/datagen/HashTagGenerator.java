@@ -12,10 +12,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
 
 /**
- * This class will generate data for word count application
+ * This class generates data for word count application
  * 
- * @author Sameer
- *
  */
 public class HashTagGenerator implements IDataGenerator<String>{
     public static int NO_OF_HOURS_IN_DAY = 24;
@@ -28,6 +26,7 @@ public class HashTagGenerator implements IDataGenerator<String>{
                                   "#DCFlinkMeetup", "#NYCFlinkMeetup", "#ApacheBeam",
                                   "#ApacheBeam", "#ApacheBeam", "#GoogleDataFlow",
                                   "#GoogleDataFlow" };
+
     private List<String> data;
     public HashTagGenerator(String defaultDt, Long randomSeed){
         try{
@@ -41,7 +40,7 @@ public class HashTagGenerator implements IDataGenerator<String>{
         }        
     }
     public HashTagGenerator(String defaultDt){
-        this(defaultDt,null);
+        this(defaultDt, null);
     }
     public HashTagGenerator(){
 
@@ -50,6 +49,7 @@ public class HashTagGenerator implements IDataGenerator<String>{
     public String[] getHashtags() {
         return hashtags;
     }
+
     public void setHashtags(String[] hashtags) {
         this.hashtags = hashtags;
     }
@@ -97,11 +97,11 @@ public class HashTagGenerator implements IDataGenerator<String>{
     }
 
     public static String[] getSampleHashTags() {
-        return new String[]{ "#Flink", "#Flink", "#Flink", "#Flink", "#Flink",
+        return new String[]{ "#Flink", "#Berlin", "#Flink", "#Flink", "#Flink",
                 "#Flink", "#ChicagoFlinkMeetup", "#ChicagoFlinkMeetup",
                 "#DCFlinkMeetup", "#NYCFlinkMeetup", "#ApacheBeam",
                 "#ApacheBeam", "#ApacheBeam", "#GoogleDataFlow",
-                "#GoogleDataFlow" };
+                "#GoogleDataFlow", "#TUBerlin" };
     }
 
     public static void main(String[] args) throws Exception {
