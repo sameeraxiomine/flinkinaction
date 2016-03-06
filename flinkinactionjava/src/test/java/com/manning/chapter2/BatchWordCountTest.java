@@ -48,11 +48,10 @@ public class BatchWordCountTest {
         FileUtils.deleteQuietly(new File(SAMPLE_OUTPUT_PATH));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testExecuteJobWithTestData() {
         BatchWordCount wordCountJob = new BatchWordCount(new String[0]);
-        wordCountJob.setDateGenerator(dataGenerator);
+        wordCountJob.setDataGenerator(dataGenerator);
         wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
         wordCountJob.executeJob();        
         List<Tuple3<String, String, Integer>> outputList = wordCountJob.getOutputList();
@@ -63,7 +62,6 @@ public class BatchWordCountTest {
         assertEquals(getTuple3("2016030113","#flink",1),outputList.get(3));        
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testExecuteJobWithInputFile() {
         File inputFile = new File(SAMPLE_INPUT_PATH, SAMPLE_INPUT_FILE_NAME);
@@ -80,7 +78,6 @@ public class BatchWordCountTest {
         
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testExecuteJobWithInputAndOutputFile() throws IOException {
         
