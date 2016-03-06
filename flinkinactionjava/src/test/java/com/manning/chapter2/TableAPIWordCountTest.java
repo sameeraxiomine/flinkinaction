@@ -8,12 +8,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -115,20 +111,13 @@ public class TableAPIWordCountTest {
         return new Word(dtTime,hashtag,count);
     }
 
-    private Comparator<TableAPIWordCount.Word> comparator = new Comparator<TableAPIWordCount.Word>() {
-        @Override
-        public int compare(Word wordA, Word wordB) {
-            int cmp = wordA.datetime.compareTo(wordB.datetime);
-            if (cmp != 0)
-                return cmp;
-            cmp = wordA.word.compareTo(wordB.word);
-            if (cmp != 0)
-                return cmp;
-            if(wordA.wrdCnt==wordA.wrdCnt) cmp=0;
-            if(wordA.wrdCnt<wordA.wrdCnt) cmp=-1;
-            if(wordA.wrdCnt>wordA.wrdCnt) cmp=1;
+    private Comparator<TableAPIWordCount.Word> comparator = (wordA, wordB) -> {
+        int cmp = wordA.datetime.compareTo(wordB.datetime);
+        if (cmp != 0)
             return cmp;
-        }
-
+        cmp = wordA.word.compareTo(wordB.word);
+        if (cmp != 0)
+            return cmp;
+        return 0;
     };
 }

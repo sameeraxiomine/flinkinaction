@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.manning.utils.datagen.HashTagGenerator;
@@ -40,7 +41,7 @@ public class BatchWordCountTest {
                 Arrays.asList(lines));
     }
 
-    
+
     public  void cleanup() throws IOException {
         FileUtils.deleteQuietly(new File(SAMPLE_INPUT_PATH));
         FileUtils.deleteQuietly(new File(SAMPLE_OUTPUT_PATH));
@@ -54,8 +55,7 @@ public class BatchWordCountTest {
         //batchWordCount.printToConsole();
         batchWordCount.executeJob();
         
-        List<Tuple3<String, String, Integer>> outputList = batchWordCount
-                .getOutputList();
+        List<Tuple3<String, String, Integer>> outputList = batchWordCount.getOutputList();
         Collections.sort(outputList, comparator);
         assertEquals(getTuple3("2016030112","#dcflinkmeetup",2),outputList.get(0));
         assertEquals(getTuple3("2016030112","#flink",1),outputList.get(1));
@@ -73,8 +73,7 @@ public class BatchWordCountTest {
         //batchWordCount.printToConsole();
         batchWordCount.executeJob();
         
-        List<Tuple3<String, String, Integer>> outputList = batchWordCount
-                .getOutputList();
+        List<Tuple3<String, String, Integer>> outputList = batchWordCount.getOutputList();
         Collections.sort(outputList, comparator);
         assertEquals(getTuple3("2016030112","#dcflinkmeetup",2),outputList.get(0));
         assertEquals(getTuple3("2016030112","#flink",1),outputList.get(1));
@@ -107,25 +106,21 @@ public class BatchWordCountTest {
     }
 
     private Tuple3<String,String,Integer> getTuple3(String dtTime,String hashtag,Integer count){
-        Tuple3<String,String,Integer> tuple3 = new Tuple3<String,String,Integer>();
+        Tuple3<String,String,Integer> tuple3 = new Tuple3<>();
         tuple3.f0 = dtTime;
         tuple3.f1 = hashtag;
         tuple3.f2 = count;
         return tuple3;
     }
 
-    private Comparator<Tuple3<String, String, Integer>> comparator = new Comparator<Tuple3<String, String, Integer>>() {
-        public int compare(Tuple3<String, String, Integer> tupleA,
-                Tuple3<String, String, Integer> tupleB) {
-            int cmp = tupleA.f0.compareTo(tupleB.f0);
-            if (cmp != 0)
-                return cmp;
-            cmp = tupleA.f1.compareTo(tupleB.f1);
-            if (cmp != 0)
-                return cmp;
-            cmp = tupleA.f2.compareTo(tupleB.f2);
+    private Comparator<Tuple3<String, String, Integer>> comparator = (tupleA, tupleB) -> {
+        int cmp = tupleA.f0.compareTo(tupleB.f0);
+        if (cmp != 0)
             return cmp;
-        }
-
+        cmp = tupleA.f1.compareTo(tupleB.f1);
+        if (cmp != 0)
+            return cmp;
+        cmp = tupleA.f2.compareTo(tupleB.f2);
+        return cmp;
     };
 }

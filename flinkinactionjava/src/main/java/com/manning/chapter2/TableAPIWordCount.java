@@ -10,18 +10,20 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.api.table.Table;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
-import org.apache.log4j.Logger;
 
 import com.manning.utils.datagen.HashTagGenerator;
 import com.manning.utils.datagen.IDataGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class TableAPIWordCount {
+    private static final Logger LOG = LoggerFactory.getLogger(TableAPIWordCount.class);
+
     private final ParameterTool params;
     private final ExecutionEnvironment env;
     private final TableEnvironment tblEnv;
-    private static Logger LOG = Logger.getLogger(TableAPIWordCount.class
-            .getName());
+
     private List<Word> outputList;
     private IDataGenerator<String> dataGenerator;
     private boolean printToConsole = false;
@@ -101,7 +103,7 @@ public class TableAPIWordCount {
         TableAPIWordCount batchWordCount = new TableAPIWordCount(args);
         batchWordCount.printToConsole();
         IDataGenerator<String> dataGenerator = new HashTagGenerator(
-                "030162016", 100l);
+                "030162016", 100L);
         dataGenerator.generateData();
 
         batchWordCount.setDateGenerator(dataGenerator);
@@ -157,10 +159,7 @@ public class TableAPIWordCount {
             cmp = wordA.word.compareTo(wordB.word);
             if (cmp != 0)
                 return cmp;
-            if(wordA.wrdCnt==wordA.wrdCnt) cmp=0;
-            if(wordA.wrdCnt<wordA.wrdCnt) cmp=-1;
-            if(wordA.wrdCnt>wordA.wrdCnt) cmp=1;
-            return cmp;
+            return 0;
         }
 
         @Override
@@ -193,9 +192,7 @@ public class TableAPIWordCount {
                     return false;
             } else if (!word.equals(other.word))
                 return false;
-            if (wrdCnt != other.wrdCnt)
-                return false;
-            return true;
+            return wrdCnt == other.wrdCnt;
         }
         
         
