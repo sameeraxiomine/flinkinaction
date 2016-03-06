@@ -1,5 +1,7 @@
 package com.manning.chapter2;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,16 +10,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.hadoop.util.StringUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 import com.manning.utils.datagen.HashTagGenerator;
 import com.manning.utils.datagen.IDataGenerator;
@@ -97,7 +94,7 @@ public class BatchWordCountTest {
         //batchWordCount.printToConsole();
         batchWordCount.executeJob(1);
         List<String> lines=FileUtils.readLines(outputFile);
-        List<Tuple3<String,String,Integer>> outputList = new ArrayList<Tuple3<String,String,Integer>>();
+        List<Tuple3<String,String,Integer>> outputList = new ArrayList<>();
         for(String line:lines){
             String[] tokens = StringUtils.split(line,',');
             outputList.add(this.getTuple3(tokens[0], tokens[1], Integer.parseInt(tokens[2])));
