@@ -92,7 +92,7 @@ public class BatchWordCount {
     public static void main(String[] args) throws Exception {        
         BatchWordCount batchWordCount = new BatchWordCount(args);
         batchWordCount.printToConsole();
-        IDataGenerator<String> dataGenerator = new HashTagGenerator("030162016",100l);
+        IDataGenerator<String> dataGenerator = new HashTagGenerator("030162016", 100L);
         dataGenerator.generateData();
         
         batchWordCount.setDateGenerator(dataGenerator);        
@@ -124,8 +124,7 @@ public class BatchWordCount {
                     Date inputDt = inputFormat.parse(tokens[0]);
                     String outputDt = ouputFormat.format(inputDt);
                     String word = tokens[1].toLowerCase();
-                    out.collect(new Tuple3<String, String, Integer>(outputDt,
-                            word, 1));
+                    out.collect(new Tuple3<>(outputDt, word, 1));
                 }
             } catch (Exception ex) {
                 Throwables.propagate(ex);
