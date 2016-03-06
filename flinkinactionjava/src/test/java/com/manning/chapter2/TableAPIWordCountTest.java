@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.flink.api.java.ExecutionEnvironment;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +42,7 @@ public class TableAPIWordCountTest {
                 Arrays.asList(lines));
     }
 
-    
+    @After
     public  void cleanup() throws IOException {
         FileUtils.deleteQuietly(new File(SAMPLE_INPUT_PATH));
         FileUtils.deleteQuietly(new File(SAMPLE_OUTPUT_PATH));
@@ -49,12 +51,12 @@ public class TableAPIWordCountTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testExecuteJobWithTestData() {
-        TableAPIWordCount batchWordCount = new TableAPIWordCount(new String[0]);
-        batchWordCount.setDateGenerator(dataGenerator);
-        //batchWordCount.printToConsole();
-        batchWordCount.executeJob();
+        TableAPIWordCount wordCountJob = new TableAPIWordCount(new String[0]);
+        wordCountJob.setDateGenerator(dataGenerator);
+        wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
+        wordCountJob.executeJob();
         
-        List<TableAPIWordCount.Word> outputList = batchWordCount
+        List<TableAPIWordCount.Word> outputList = wordCountJob
                 .getOutputList();
         Collections.sort(outputList, comparator);
         assertEquals(getWord("2016030112","#dcflinkmeetup",2),outputList.get(0));
@@ -69,8 +71,7 @@ public class TableAPIWordCountTest {
         File inputFile = new File(SAMPLE_INPUT_PATH, SAMPLE_INPUT_FILE_NAME);
         String[] args = {"--input",inputFile.getAbsolutePath()};
         TableAPIWordCount wordCountJob = new TableAPIWordCount(args);
-        //batchWordCount.setDateGenerator(dataGenerator);
-        //batchWordCount.printToConsole();
+        wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
         wordCountJob.executeJob();
         
         List<TableAPIWordCount.Word> outputList = wordCountJob
@@ -90,9 +91,8 @@ public class TableAPIWordCountTest {
         File outputFile = new File(SAMPLE_OUTPUT_PATH);
         String[] args = {"--input",inputFile.getAbsolutePath(), "--output",outputFile.getAbsolutePath()};
         TableAPIWordCount wordCountJob = new TableAPIWordCount(args);
-        //batchWordCount.setDateGenerator(dataGenerator);
-        //batchWordCount.printToConsole();
-        wordCountJob.executeJob(1);
+        wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
+        wordCountJob.executeJob();
         List<String> lines=FileUtils.readLines(outputFile);
         List<Word> outputList = new ArrayList<>();
         for(String line:lines){

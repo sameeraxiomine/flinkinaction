@@ -21,8 +21,8 @@ public class TableAPIWordCount {
     private static final Logger LOG = LoggerFactory.getLogger(TableAPIWordCount.class);
 
     private final ParameterTool params;
-    private final ExecutionEnvironment env;
-    private final TableEnvironment tblEnv;
+    private ExecutionEnvironment execEnv;
+    private TableEnvironment tblEnv;
 
     private List<Word> outputList;
     private IDataGenerator<String> dataGenerator;
@@ -30,9 +30,18 @@ public class TableAPIWordCount {
 
     public TableAPIWordCount(String[] args) {
         params = ParameterTool.fromArgs(args);
-        env = ExecutionEnvironment.getExecutionEnvironment();
+
+    }
+    public void initializeExecutionEnvironment(ExecutionEnvironment execEnv){
+        this.execEnv = execEnv;        
+        tblEnv = new TableEnvironment();
+        
+    }
+    public void initializeExecutionEnvironment(){
+        // set up the execution environment
+        execEnv = ExecutionEnvironment.getExecutionEnvironment();
         // make parameters available in the web interface
-        env.getConfig().setGlobalJobParameters(params);
+        execEnv.getConfig().setGlobalJobParameters(params);
         tblEnv = new TableEnvironment();
     }
 
@@ -44,17 +53,17 @@ public class TableAPIWordCount {
         this.printToConsole = true;
     }
 
-    public void executeJob(int sinkParallelism) {
+    public void executeJob() {
         try {
             DataSet<String> inputDataSet;
             if (params.has("input")) {
                 LOG.info("Reading the file from --input parameter");
                 
-                inputDataSet = env.readTextFile(params.get("input"));
+                inputDataSet = execEnv.readTextFile(params.get("input"));
             } else {
                 LOG.info("Execute job with generated data");
                 LOG.info("Alternatively use --input to specify input file");
-                inputDataSet = env.fromCollection(this.dataGenerator.getData());
+                inputDataSet = execEnv.fromCollection(this.dataGenerator.getData());
             }
             DataSet<Tuple3<String, String, Integer>> intermediateDS =
             // split up the lines in pairs (3-tuples) containing:
@@ -68,15 +77,8 @@ public class TableAPIWordCount {
             // emit result
             if (params.has("output")) {
                 LOG.info("Writing to file from --output parameter");
-                if (sinkParallelism > 0) {
-                    result.writeAsText(params.get("output"))
-                            .setParallelism(sinkParallelism);
-                } else {
-                    result.writeAsText(params.get("output"));
-                }
-
-                // execute program
-                env.execute("WordCount Example");
+                result.writeAsText(params.get("output"));                // execute program
+                execEnv.execute("TableAPI WordCount Example");
             } else {
                 LOG.info("No --output parameter specified. Collecting to list or to stdout");
                 if (this.printToConsole) {
@@ -91,23 +93,23 @@ public class TableAPIWordCount {
 
     }
 
-    public void executeJob() {
-        this.executeJob(0);
-    }
+
 
     public List<Word> getOutputList() {
         return this.outputList;
     }
 
     public static void main(String[] args) throws Exception {
-        TableAPIWordCount batchWordCount = new TableAPIWordCount(args);
-        batchWordCount.printToConsole();
+        TableAPIWordCount wordCountJob = new TableAPIWordCount(args);
+        wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment());
+        wordCountJob.printToConsole();
         IDataGenerator<String> dataGenerator = new HashTagGenerator(
                 "030162016", 100L);
         dataGenerator.generateData();
 
-        batchWordCount.setDateGenerator(dataGenerator);
-        batchWordCount.executeJob();
+        wordCountJob.setDateGenerator(dataGenerator);
+        
+        wordCountJob.executeJob();
 
     }
 

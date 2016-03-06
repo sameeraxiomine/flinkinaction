@@ -20,7 +20,7 @@ import com.manning.utils.datagen.IDataGenerator;
 @SuppressWarnings("serial")
 public class BatchWordCount {
     private final ParameterTool params;
-    private final ExecutionEnvironment env;
+    private ExecutionEnvironment execEnv;
     
     private static Logger LOG = Logger.getLogger(BatchWordCount.class.getName());
     private List<Tuple3<String,String,Integer>> outputList;
@@ -28,28 +28,36 @@ public class BatchWordCount {
     private boolean printToConsole = false;
     public BatchWordCount(String[] args) {
         params = ParameterTool.fromArgs(args);
-        // set up the execution environment
-        env = ExecutionEnvironment.getExecutionEnvironment();
-        // make parameters available in the web interface
-        env.getConfig().setGlobalJobParameters(params);
     }
     public void setDateGenerator(IDataGenerator<String> generator){
         this.dataGenerator = generator;
     }
 
+    
     public void printToConsole() {
         this.printToConsole = true;
     }
-    public void executeJob(int sinkParallelism) {        
+    
+    public void initializeExecutionEnvironment(ExecutionEnvironment execEnv){
+        this.execEnv = execEnv;
+    }
+    public void initializeEnvironment(){
+        // set up the execution environment
+        execEnv = ExecutionEnvironment.getExecutionEnvironment();
+        // make parameters available in the web interface
+        execEnv.getConfig().setGlobalJobParameters(params);
+    }
+
+    public void executeJob() {        
         try{
             DataSet<String> inputDataSet;
             if (params.has("input")) {
                 LOG.info("Reading the file from --input parameter");
-                inputDataSet = env.readTextFile(params.get("input"));
+                inputDataSet = execEnv.readTextFile(params.get("input"));
             } else {
                 LOG.info("Execute job with generated data");
                 LOG.info("Alternatively use --input to specify input file");
-                inputDataSet = env.fromCollection(this.dataGenerator.getData());
+                inputDataSet = execEnv.fromCollection(this.dataGenerator.getData());
             }
             DataSet<Tuple3<String, String, Integer>> counts =
             // split up the lines in pairs (3-tuples) containing: (date-time,word,1)
@@ -59,14 +67,9 @@ public class BatchWordCount {
             // emit result
             if (params.has("output")) {
                 LOG.info("Writing to file from --output parameter");
-                if(sinkParallelism>0){
-                    counts.writeAsCsv(params.get("output"), "\n", ",").setParallelism(sinkParallelism);    
-                }else{
-                    counts.writeAsCsv(params.get("output"), "\n", ",");
-                }
+                counts.writeAsCsv(params.get("output"), "\n", ",");
+                execEnv.execute("WordCount Example");
                 
-                // execute program
-                env.execute("WordCount Example");
             } else {
                 LOG.info("No --output parameter specified. Collecting to list or to stdout");
                 if(this.printToConsole){
@@ -82,9 +85,7 @@ public class BatchWordCount {
 
     }
 
-    public void executeJob() { 
-        this.executeJob(0);
-    }
+
     public List<Tuple3<String,String,Integer>> getOutputList(){
         return this.outputList;
     }

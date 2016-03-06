@@ -12,9 +12,10 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.manning.utils.datagen.HashTagGenerator;
@@ -32,16 +33,16 @@ public class BatchWordCountTest {
 
     @Before
     public  void setup() throws IOException {
+        // Delete Input/Output Folder if exists
+        this.cleanup();
         this.dataGenerator = new HashTagGenerator();
         dataGenerator.setData(Arrays.asList(lines));
-        // Delete Input Folder if exists
-        this.cleanup();
         FileUtils.writeLines(
                 new File(SAMPLE_INPUT_PATH, SAMPLE_INPUT_FILE_NAME),
                 Arrays.asList(lines));
     }
 
-
+    @After
     public  void cleanup() throws IOException {
         FileUtils.deleteQuietly(new File(SAMPLE_INPUT_PATH));
         FileUtils.deleteQuietly(new File(SAMPLE_OUTPUT_PATH));
@@ -50,12 +51,11 @@ public class BatchWordCountTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testExecuteJobWithTestData() {
-        BatchWordCount batchWordCount = new BatchWordCount(new String[0]);
-        batchWordCount.setDateGenerator(dataGenerator);
-        //batchWordCount.printToConsole();
-        batchWordCount.executeJob();
-        
-        List<Tuple3<String, String, Integer>> outputList = batchWordCount.getOutputList();
+        BatchWordCount wordCountJob = new BatchWordCount(new String[0]);
+        wordCountJob.setDateGenerator(dataGenerator);
+        wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
+        wordCountJob.executeJob();        
+        List<Tuple3<String, String, Integer>> outputList = wordCountJob.getOutputList();
         Collections.sort(outputList, comparator);
         assertEquals(getTuple3("2016030112","#dcflinkmeetup",2),outputList.get(0));
         assertEquals(getTuple3("2016030112","#flink",1),outputList.get(1));
@@ -68,12 +68,10 @@ public class BatchWordCountTest {
     public void testExecuteJobWithInputFile() {
         File inputFile = new File(SAMPLE_INPUT_PATH, SAMPLE_INPUT_FILE_NAME);
         String[] args = {"--input",inputFile.getAbsolutePath()};
-        BatchWordCount batchWordCount = new BatchWordCount(args);
-        //batchWordCount.setDateGenerator(dataGenerator);
-        //batchWordCount.printToConsole();
-        batchWordCount.executeJob();
-        
-        List<Tuple3<String, String, Integer>> outputList = batchWordCount.getOutputList();
+        BatchWordCount wordCountJob = new BatchWordCount(args);
+        wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
+        wordCountJob.executeJob();
+        List<Tuple3<String, String, Integer>> outputList = wordCountJob.getOutputList();
         Collections.sort(outputList, comparator);
         assertEquals(getTuple3("2016030112","#dcflinkmeetup",2),outputList.get(0));
         assertEquals(getTuple3("2016030112","#flink",1),outputList.get(1));
@@ -85,13 +83,13 @@ public class BatchWordCountTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testExecuteJobWithInputAndOutputFile() throws IOException {
+        
         File inputFile = new File(SAMPLE_INPUT_PATH, SAMPLE_INPUT_FILE_NAME);
         File outputFile = new File(SAMPLE_OUTPUT_PATH);
         String[] args = {"--input",inputFile.getAbsolutePath(), "--output",outputFile.getAbsolutePath()};
-        BatchWordCount batchWordCount = new BatchWordCount(args);
-        //batchWordCount.setDateGenerator(dataGenerator);
-        //batchWordCount.printToConsole();
-        batchWordCount.executeJob(1);
+        BatchWordCount wordCountJob = new BatchWordCount(args);
+        wordCountJob.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
+        wordCountJob.executeJob();        
         List<String> lines=FileUtils.readLines(outputFile);
         List<Tuple3<String,String,Integer>> outputList = new ArrayList<>();
         for(String line:lines){
