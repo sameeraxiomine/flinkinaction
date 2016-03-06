@@ -91,11 +91,11 @@ public class BatchWordCount {
     }
     
     public static void main(String[] args) throws Exception {        
-        BatchWordCount batchWordCount = new BatchWordCount(args);
-        batchWordCount.printToConsole();
         IDataGenerator<String> dataGenerator = new HashTagGenerator("030162016", 100L);
         dataGenerator.generateData();
-        
+        BatchWordCount batchWordCount = new BatchWordCount(args);
+        batchWordCount.initializeExecutionEnvironment(ExecutionEnvironment.createLocalEnvironment(1));
+        batchWordCount.printToConsole();        
         batchWordCount.setDateGenerator(dataGenerator);        
         batchWordCount.executeJob();
         
@@ -105,12 +105,6 @@ public class BatchWordCount {
     // USER FUNCTIONS
     // *************************************************************************
 
-    /**
-     * Implements the string tokenizer that splits sentences into words as a
-     * user-defined FlatMapFunction. The function takes a line (String) and
-     * splits it into multiple pairs in the form of "(word,1)" (
-     * {@code Tuple2<String, Integer>}).
-     */
     public static final class Tokenizer implements
             FlatMapFunction<String, Tuple3<String, String, Integer>> {
 
