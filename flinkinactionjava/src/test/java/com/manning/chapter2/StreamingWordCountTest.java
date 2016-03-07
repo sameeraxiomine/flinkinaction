@@ -49,17 +49,17 @@ public class StreamingWordCountTest {
   }
 
   @Test
-  public void testExecuteJobWithTestData() {
+  public void testExecuteJobWithTestData() throws Exception {
     StreamingWordCount wordCountJob = new StreamingWordCount(new String[0]);
-    wordCountJob.setDataGenerator(dataGenerator);
+    wordCountJob.setDataGenerator(this.dataGenerator);
     wordCountJob.initializeExecutionEnvironment(StreamExecutionEnvironment.createLocalEnvironment(1));
     wordCountJob.executeJob();
     List<Tuple3<String, String, Integer>> outputList = wordCountJob.getOutputList();
     Collections.sort(outputList, comparator);
-    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 2),outputList.get(0));
-    assertEquals(getTuple3("2016030112","#flink", 1),outputList.get(1));
-    assertEquals(getTuple3("2016030113","#dcflinkmeetup", 1),outputList.get(2));
-    assertEquals(getTuple3("2016030113","#flink", 1),outputList.get(3));
+    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 1),outputList.get(0));
+    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 2),outputList.get(1));
+    assertEquals(getTuple3("2016030112","#flink", 1),outputList.get(2));
+    assertEquals(getTuple3("2016030113","#dcflinkmeetup", 1),outputList.get(3));
   }
 
   @Test
@@ -71,11 +71,10 @@ public class StreamingWordCountTest {
     wordCountJob.executeJob();
     List<Tuple3<String, String, Integer>> outputList = wordCountJob.getOutputList();
     Collections.sort(outputList, comparator);
-    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 2),outputList.get(0));
-    assertEquals(getTuple3("2016030112","#flink", 1),outputList.get(1));
-    assertEquals(getTuple3("2016030113","#dcflinkmeetup", 1),outputList.get(2));
-    assertEquals(getTuple3("2016030113","#flink", 1),outputList.get(3));
-
+    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 1),outputList.get(0));
+    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 2),outputList.get(1));
+    assertEquals(getTuple3("2016030112","#flink", 1),outputList.get(2));
+    assertEquals(getTuple3("2016030113","#dcflinkmeetup", 1),outputList.get(3));
   }
 
   @Test
@@ -94,10 +93,10 @@ public class StreamingWordCountTest {
       outputList.add(this.getTuple3(tokens[0], tokens[1], Integer.parseInt(tokens[2])));
     }
     Collections.sort(outputList, comparator);
-    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 2),outputList.get(0));
-    assertEquals(getTuple3("2016030112","#flink", 1),outputList.get(1));
-    assertEquals(getTuple3("2016030113","#dcflinkmeetup", 1),outputList.get(2));
-    assertEquals(getTuple3("2016030113","#flink", 1),outputList.get(3));
+    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 1),outputList.get(0));
+    assertEquals(getTuple3("2016030112","#dcflinkmeetup", 2),outputList.get(1));
+    assertEquals(getTuple3("2016030112","#flink", 1),outputList.get(2));
+    assertEquals(getTuple3("2016030113","#dcflinkmeetup", 1),outputList.get(3));
   }
 
   private Tuple3<String,String,Integer> getTuple3(String dtTime,String hashtag,Integer count){
@@ -115,7 +114,7 @@ public class StreamingWordCountTest {
     cmp = tupleA.f1.compareTo(tupleB.f1);
     if (cmp != 0)
       return cmp;
-    cmp = tupleA.f2.compareTo(tupleB.f2);
+    cmp = tupleA.f0.compareTo(tupleB.f0);
     return cmp;
   };
 }
