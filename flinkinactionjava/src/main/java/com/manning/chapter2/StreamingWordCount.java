@@ -54,25 +54,28 @@ public class StreamingWordCount {
 
   public void initializeEnvironment() {
     // set up the execution environment
-    execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+    this.execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
     // make parameters available in the web interface
-    execEnv.getConfig().setGlobalJobParameters(params);
+    this.execEnv.getConfig().setGlobalJobParameters(params);
   }
+
+  public StreamExecutionEnvironment getStreamExecutionEnvironment() { return this.execEnv; }
 
   public void executeJob() {
     try {
-      DataStream<String> inputDataSet;
+      DataStream<String> inputDataStream;
       if (params.has("input")) {
         LOG.info("Reading the file from --input parameter");
-        inputDataSet = execEnv.readTextFile(params.get("input"));
+        inputDataStream = this.execEnv.readTextFile(params.get("input"));
       } else {
         LOG.info("Execute job with generated data");
         LOG.info("Alternatively use --input to specify input file");
-        inputDataSet = execEnv.fromCollection(this.dataGenerator.getData());
+        inputDataStream = this.execEnv.fromCollection(this.dataGenerator.getData());
       }
+
       DataStream<Tuple3<String, String, Integer>> counts =
           // split up the lines in pairs (3-tuples) containing: (date-time,word,1)
-          inputDataSet.flatMap(new Tokenizer())
+          inputDataStream.flatMap(new Tokenizer())
               // group by the tuple field "0","1" and sum up tuple field "2"
               .keyBy(0, 1)
               .sum(2);
@@ -109,6 +112,7 @@ public class StreamingWordCount {
     streamingWordCount.setDataGenerator(dataGenerator);
     streamingWordCount.printToConsole();
     streamingWordCount.executeJob();
+    streamingWordCount.execEnv.execute("Running Streaming Word Count");
   }
 
   /**
