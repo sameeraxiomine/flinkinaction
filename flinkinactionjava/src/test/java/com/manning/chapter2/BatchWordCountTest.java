@@ -25,9 +25,9 @@ public class BatchWordCountTest {
     public static String SAMPLE_INPUT_FILE_NAME = "hashtags.txt";
     public static String SAMPLE_INPUT_PATH = "src/test/resources/input/";
     public static String SAMPLE_OUTPUT_PATH = "src/test/resources/output/counts";
-    public static String[] lines = { "201603011201,#DCFlinkMeetup",
-            "201603011202,#DcFlinkMeetup", "201603011203,#Flink",
-            "201603011302,#Flink", "201603011302,#DCFlinkMeetup" };
+    public static String[] lines = { "20160301120100,#DCFlinkMeetup",
+            "20160301120200,#DcFlinkMeetup", "20160301120300,#Flink",
+            "20160301130200,#Flink", "20160301130200,#DCFlinkMeetup" };
 
     private IDataGenerator<String> dataGenerator = null;
 

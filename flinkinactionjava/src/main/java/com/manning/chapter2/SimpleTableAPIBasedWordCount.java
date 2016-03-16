@@ -16,9 +16,9 @@ public class SimpleTableAPIBasedWordCount {
 
     public static void main(String[] args) throws Exception {
         ExecutionEnvironment execEnv = ExecutionEnvironment.getExecutionEnvironment();
-        String[] lines = { "201603011201,#DCFlinkMeetup",
-                "201603011202,#DcFlinkMeetup", "201603011203,#Flink",
-                "201603011302,#Flink", "201603011302,#DCFlinkMeetup" };
+        String[] lines = { "20160301120100,#DCFlinkMeetup",
+                "20160301120200,#DcFlinkMeetup", "20160301120300,#Flink",
+                "20160301130200,#Flink", "20160301130200,#DCFlinkMeetup" };
         TableEnvironment tblEnv = new TableEnvironment();
         DataSet<String> source = execEnv.fromCollection(Arrays.asList(lines));
         

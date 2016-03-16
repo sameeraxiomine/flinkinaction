@@ -19,7 +19,7 @@ public class HashTagGenerator implements IDataGenerator<String>{
     public static int NO_OF_HOURS_IN_DAY = 24;
     public static int NO_OF_MINS_IN_HOUR = 60;
     private Random randomNumberGenerator = new Random();
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private Date inputDate;
     private String[] hashtags = { "#Flink", "#Flink", "#Flink", "#Flink", "#Flink",
                                   "#Flink", "#ChicagoFlinkMeetup", "#ChicagoFlinkMeetup",
@@ -91,6 +91,43 @@ public class HashTagGenerator implements IDataGenerator<String>{
             Throwables.propagate(ex);
         }
     }
+    
+    @Override
+    public void generateStreamingData(int hour,int min,int noOfMins) {        
+        data = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        try {
+            String[] allHashTags = HashTagGenerator.getSampleHashTags();
+            int noOfHashTags = allHashTags.length;
+            for(int i = 0;i<noOfMins;i++){
+                for (int j = 0; j < 59; j++) {                    
+                    int index = this.randomNumberGenerator.nextInt(noOfHashTags);
+                    String hashTagForMinuteOfDay = allHashTags[index];
+                    cal.setTime(inputDate);
+                    cal.set(Calendar.HOUR_OF_DAY, hour);
+                    cal.set(Calendar.MINUTE, min);
+                    cal.set(Calendar.SECOND, j);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    Date newDate = cal.getTime();
+                    String dtTime = sdf.format(newDate);
+                    data.add(dtTime + "," + hashTagForMinuteOfDay);                
+                }            
+                if(min==59){
+                    min=0;
+                    if(hour==23){
+                        hour=0;
+                    }else{
+                        hour = hour + 1;
+                    }
+                }else{
+                    min=min+1;
+                }
+            }
+
+        } catch (Exception ex) {
+            Throwables.propagate(ex);
+        }
+    }
     @Override
     public List<String> getData() {
         return this.data;
@@ -107,8 +144,9 @@ public class HashTagGenerator implements IDataGenerator<String>{
     public static void main(String[] args) throws Exception {
         HashTagGenerator tagGenerator = new HashTagGenerator("20160316", 1000L);
         tagGenerator.generateData();
-        FileUtils.writeLines(new File("c:/tmp/hashtags.txt"), tagGenerator.getData());
-        
+        FileUtils.writeLines(new File("src/main/resources/sample/hashtags.txt"), tagGenerator.getData());
+        tagGenerator.generateStreamingData(12,0,1);
+        FileUtils.writeLines(new File("src/main/resources/sample/streaminghashtags.txt"), tagGenerator.getData());
     }
 
 

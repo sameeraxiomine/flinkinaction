@@ -8,7 +8,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
 
-public class SimpleBatchWordCount {
+public class SimpleStreamWordCount {
 
     public static void main(String[] args) throws Exception {
         ExecutionEnvironment execEnv = ExecutionEnvironment.getExecutionEnvironment();

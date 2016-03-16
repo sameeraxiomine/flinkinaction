@@ -51,7 +51,7 @@ public class BatchWordCount {
   }
 
   public void executeJob() {
-    try {
+    try {        
       DataSet<String> inputDataSet;
       if (params.has("input")) {
         LOG.info("Reading the file from --input parameter");
@@ -111,7 +111,7 @@ public class BatchWordCount {
     @Override
     public void flatMap(String value,
                         Collector<Tuple3<String, String, Integer>> out) {
-      SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMddHHmm");
+      SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMddHHmmss");
       SimpleDateFormat ouputFormat = new SimpleDateFormat("yyyyMMddHH");
       try {
         if (!StringUtils.isBlank(value)) {
