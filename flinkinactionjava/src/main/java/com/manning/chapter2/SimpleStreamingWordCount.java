@@ -1,13 +1,10 @@
 package com.manning.chapter2;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.DataSet;
-import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -29,7 +26,7 @@ public class SimpleStreamingWordCount {
 
 
 public static void main(String[] args) throws Exception {
-    final StreamExecutionEnvironment streamingExecEnv = StreamExecutionEnvironment.createLocalEnvironment();
+    final StreamExecutionEnvironment streamingExecEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
     streamingExecEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);    
     List<String> hashTagsList = FileUtils.readLines(new File("src/main/resources/sample/streaminghashtags.txt"));
 
@@ -80,18 +77,7 @@ public static void main(String[] args) throws Exception {
      counts5.printToErr();
      streamingExecEnv.execute("Count windows triggered when count reaches 15 for any key");
      
-    /*
-     System.err.println("Start="+new Date(System.currentTimeMillis()));
-     server.startServer();
-     DataStream<String> source6 = streamingExecEnv.addSource(new SocketTextStreamFunction("127.0.0.1",PORT_NO, '\n', 1));
-     DataStream<Tuple2<String, Integer>> counts6 = source6.map(new Tokenizer())
-             .keyBy(0)   
-             .timeWindow(Time.seconds(10))
-             .sum(1);    
-     counts6.printToErr();
-     streamingExecEnv.execute("Batch as a special case of streaming");
-     System.err.println("End="+new Date(System.currentTimeMillis()));
-     */
+   
     }
     
     
