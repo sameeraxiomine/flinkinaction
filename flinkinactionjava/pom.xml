@@ -89,25 +89,25 @@ under the License.
 				</dependency>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
-					<artifactId>flink-streaming-java_2.11</artifactId>
+					<artifactId>flink-streaming-java_2.10</artifactId>
 					<version>${flink.version}</version>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
-					<artifactId>flink-runtime_2.11</artifactId>
+					<artifactId>flink-runtime_2.10</artifactId>
 					<version>${flink.version}</version>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
-					<artifactId>flink-clients_2.11</artifactId>
+					<artifactId>flink-clients_2.10</artifactId>
 					<version>${flink.version}</version>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
-					<artifactId>flink-streaming-contrib_2.11</artifactId>
+					<artifactId>flink-streaming-contrib_2.10</artifactId>
 					<version>${flink.version}</version>
 					<scope>provided</scope>
 				</dependency>
@@ -267,10 +267,11 @@ under the License.
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.3</version>
 				<configuration>
 					<source>1.8</source> <!-- If you want to use Java 8, change this to "1.8" -->
 					<target>1.8</target> <!-- If you want to use Java 8, change this to "1.8" -->
+					<optimize>true</optimize>
 				</configuration>
 			</plugin>
 		</plugins>

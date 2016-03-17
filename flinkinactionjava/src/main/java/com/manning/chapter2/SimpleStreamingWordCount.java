@@ -15,15 +15,10 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 public class SimpleStreamingWordCount {
   public static int PORT_NO=9500;
   public static StreamServer getStreamServer(List<String> hashTagsList){
-      
-      String[] hashtags = new String[hashTagsList.size()];
-      hashtags = hashTagsList.toArray(hashtags);
-      StreamServer server = new StreamServer(PORT_NO,hashtags,2,1000);
-      return server; 
+    String[] hashtags = new String[hashTagsList.size()];
+    hashtags = hashTagsList.toArray(hashtags);
+    return new StreamServer(PORT_NO,hashtags,2,1000);
   }
-  
-
-
 
 public static void main(String[] args) throws Exception {
     final StreamExecutionEnvironment streamingExecEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
@@ -33,7 +28,7 @@ public static void main(String[] args) throws Exception {
     StreamServer server = getStreamServer(hashTagsList);
     
     server.startServer();
-    Thread.sleep(5000);//Allow server to start
+    Thread.sleep(1000);//Allow server to start
     DataStream<String> source1 = streamingExecEnv.addSource(new SocketTextStreamFunction("127.0.0.1",PORT_NO, '\n', 1));
     DataStream<Tuple2<String, Integer>> counts1 = source1.map(new Tokenizer())
             .keyBy(0)
@@ -77,10 +72,8 @@ public static void main(String[] args) throws Exception {
      counts5.printToErr();
      streamingExecEnv.execute("Count windows triggered when count reaches 15 for any key");
      
-   
+
     }
-    
-    
 
   @SuppressWarnings("serial")
   public static final class Tokenizer implements
@@ -89,7 +82,6 @@ public static void main(String[] args) throws Exception {
     public Tuple2<String, Integer> map(String value)
         throws Exception {
       String[] tokens = value.toLowerCase().split(",");
-      String newDt = tokens[0].substring(0,10);
       String word = tokens[1].toLowerCase();
       return new Tuple2<>(word, 1);
     }
