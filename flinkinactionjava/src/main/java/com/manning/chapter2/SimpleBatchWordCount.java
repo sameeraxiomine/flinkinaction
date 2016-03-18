@@ -7,6 +7,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.table.Row;
 
 public class SimpleBatchWordCount {
 
@@ -25,6 +26,8 @@ public class SimpleBatchWordCount {
             System.out.println(line.f0 +","+line.f1 + ","+line.f2);
         }
         counts.print();
+        
+        
         
         /*Write to a file*/
         //counts.writeAsCsv(filePath, "\n", ",");
