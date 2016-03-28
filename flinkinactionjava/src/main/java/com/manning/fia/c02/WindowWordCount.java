@@ -1,4 +1,4 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;

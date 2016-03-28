@@ -1,4 +1,4 @@
-package com.manning.utils.datagen;
+package com.manning.fia.utils.datagen;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

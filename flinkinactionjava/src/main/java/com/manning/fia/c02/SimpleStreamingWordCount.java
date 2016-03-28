@@ -1,4 +1,4 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import java.io.File;
 import java.util.List;

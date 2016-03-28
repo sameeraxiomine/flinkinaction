@@ -1,4 +1,4 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import java.util.Comparator;
 import java.util.List;
@@ -11,8 +11,9 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.api.table.Table;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
 
-import com.manning.utils.datagen.HashTagGenerator;
-import com.manning.utils.datagen.IDataGenerator;
+import com.manning.fia.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.IDataGenerator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

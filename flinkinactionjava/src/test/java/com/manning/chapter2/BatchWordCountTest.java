@@ -18,8 +18,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.manning.utils.datagen.HashTagGenerator;
-import com.manning.utils.datagen.IDataGenerator;
+import com.manning.fia.c02.BatchWordCount;
+import com.manning.fia.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.IDataGenerator;
 
 public class BatchWordCountTest {
     public static String SAMPLE_INPUT_FILE_NAME = "hashtags.txt";

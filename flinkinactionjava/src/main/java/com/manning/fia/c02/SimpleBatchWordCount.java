@@ -1,4 +1,4 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +21,10 @@ public class SimpleBatchWordCount {
         DataSet<Tuple3<String, String, Integer>> counts = source.map(new Tokenizer())
                                                                 .groupBy(0, 1)
                                                                 .sum(2);
+        counts.writeAsCsv("c:/tmp/tmp.csv");
+        String execPlan = execEnv.getExecutionPlan();
+        System.err.println(execPlan);
+        
         List<Tuple3<String,String,Integer>> output = counts.collect();
         for (Tuple3<String,String,Integer> line : output) {
             System.out.println(line.f0 +","+line.f1 + ","+line.f2);

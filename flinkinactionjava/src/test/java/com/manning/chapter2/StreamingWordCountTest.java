@@ -18,8 +18,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.manning.utils.datagen.HashTagGenerator;
-import com.manning.utils.datagen.IDataGenerator;
+import com.manning.fia.c02.StreamingWordCount;
+import com.manning.fia.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.IDataGenerator;
 
 public class StreamingWordCountTest {
   public static String[] lines = { "20160301120100,#DCFlinkMeetup",

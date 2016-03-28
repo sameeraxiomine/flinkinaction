@@ -1,4 +1,4 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 

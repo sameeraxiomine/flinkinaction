@@ -1,4 +1,4 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -11,7 +11,7 @@ import org.apache.flink.api.java.table.TableEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.table.Table;
 
-import com.manning.chapter2.TableAPIWordCount.Word;
+import com.manning.fia.c02.TableAPIWordCount.Word;
 
 public class SimpleTableAPIBasedWordCount {
 

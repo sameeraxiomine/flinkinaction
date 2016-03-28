@@ -1,26 +1,30 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import com.manning.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.IDataGenerator;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.contrib.streaming.DataStreamUtils;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.hadoop.shaded.com.google.common.collect.Lists;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
+import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.manning.utils.datagen.IDataGenerator;
 
 /**
  * Flink Streaming WordCount Example
@@ -75,7 +79,7 @@ public class StreamingWordCount {
 
       DataStream<Tuple3<String, String, Integer>> counts =
           // split up the lines in pairs (3-tuples) containing: (date-time,word,1)
-          inputDataStream.flatMap(new Tokenizer())
+          inputDataStream.map(new Tokenizer())
               // group by the tuple field "0","1" and sum up tuple field "2"
               .keyBy(0, 1)
               .sum(2);
@@ -105,15 +109,46 @@ public class StreamingWordCount {
   }
 
   public static void main(String[] args) throws Exception {
-    IDataGenerator<String> dataGenerator = new HashTagGenerator("030162016", 100L);
-    dataGenerator.generateData();
-    StreamingWordCount streamingWordCount = new StreamingWordCount(args);
-    streamingWordCount.initializeExecutionEnvironment(StreamExecutionEnvironment.createLocalEnvironment(1));
-    streamingWordCount.setDataGenerator(dataGenerator);
-    streamingWordCount.printToConsole();
-    streamingWordCount.executeJob();
-    streamingWordCount.execEnv.execute("Running Streaming Word Count");
+    //#1. Fetch StreamExecutionEnvironment
+      StreamExecutionEnvironment execEnv =
+             StreamExecutionEnvironment.getExecutionEnvironment(); 
+      execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+
+      String[] lines = { "201603011201,#DCFlinkMeetup",
+                         "201603011202,#DcFlinkMeetup",
+                         "201603011203,#Flink", 
+                         "201603011302,#Flink", 
+                         "201603011302,#DCFlinkMeetup" };
+      //#2. Create sample data source from in-memory collection
+      DataStream<String> source = execEnv.fromCollection(Arrays.asList(lines)); 
+
+      DataStream<Tuple3<String, String, Integer>> counts = 
+      //#3. Tokenize each line
+      
+      source.map(new Tokenizer()) 
+      //#4. Key By the 0th and 1st attribute of tokenized line
+            .keyBy(0, 1) 
+      //#5. Aggregate the 2nd attribute to obtain word count
+           .sum(2); 
+      //#6. Collect results (or write to sink)
+      Iterator<Tuple3<String,String,Integer>> iter = 
+        DataStreamUtils.collect(counts);
+      List<Tuple3<String,String,Integer>> output = Lists.newArrayList(iter);
+      //#7. Display the output. Typically get from a distributed file.
+      for (Tuple3<String,String,Integer> line : output) {
+         System.err.println(line.f0 +","+line.f1 + ","+line.f2);
+      }
+      //#7.1 Alternative - Send output to console
+      //counts.print();     
+      //#7.2 Alternative - Send output to a CSV file where you specify the line and field separators
+      //counts.writeAsCsv(filePath, "\n", ",");
+      //#8 Call StreamExecutionEnvironment.execute() to trigger execution
+      execEnv.execute();
+
+
   }
+  
+
 
   /**
    * Implements the string tokenizer that splits sentences into words as a
@@ -122,24 +157,19 @@ public class StreamingWordCount {
    * {@code Tuple2<String, Integer>}).
    */
   public static final class Tokenizer implements
-      FlatMapFunction<String, Tuple3<String, String, Integer>> {
+      MapFunction<String, Tuple3<String, String, Integer>> {
 
     @Override
-    public void flatMap(String value, Collector<Tuple3<String, String, Integer>> out) {
-      SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-      SimpleDateFormat ouputFormat = new SimpleDateFormat("yyyyMMddHH");
-      try {
-        if (!StringUtils.isBlank(value)) {
-          String[] tokens = value.toLowerCase().split(",");
-          Date inputDt = inputFormat.parse(tokens[0]);
-          String outputDt = ouputFormat.format(inputDt);
-          String word = tokens[1].toLowerCase();
-          out.collect(new Tuple3<>(outputDt, word, 1));
-        }
-      } catch (Exception ex) {
-        Throwables.propagate(ex);
-      }
+    public Tuple3<String, String, Integer> map(String value) throws Exception {
+            String[] tokens = value.toLowerCase().split(",");
+            String newDt = tokens[0].substring(0, 10);
+            String word = tokens[1].toLowerCase();            
+            return new Tuple3<>(newDt, word, 1);
+          }
     }
-  }
+  
+  
+ 
+
 }
 

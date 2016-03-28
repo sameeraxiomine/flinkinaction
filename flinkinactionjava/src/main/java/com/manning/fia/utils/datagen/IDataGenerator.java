@@ -1,4 +1,4 @@
-package com.manning.utils.datagen;
+package com.manning.fia.utils.datagen;
 
 import java.util.List;
 

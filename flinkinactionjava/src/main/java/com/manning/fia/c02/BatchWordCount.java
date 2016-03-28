@@ -1,4 +1,4 @@
-package com.manning.chapter2;
+package com.manning.fia.c02;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,8 +15,8 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.manning.utils.datagen.HashTagGenerator;
-import com.manning.utils.datagen.IDataGenerator;
+import com.manning.fia.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.IDataGenerator;
 
 public class BatchWordCount {
   private final ParameterTool params;

@@ -17,9 +17,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import com.manning.chapter2.TableAPIWordCount.Word;
-import com.manning.utils.datagen.HashTagGenerator;
-import com.manning.utils.datagen.IDataGenerator;
+import com.manning.fia.c02.TableAPIWordCount;
+import com.manning.fia.c02.TableAPIWordCount.Word;
+import com.manning.fia.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.IDataGenerator;
 
 public class TableAPIWordCountTest {
     public static String SAMPLE_INPUT_FILE_NAME = "hashtags.txt";

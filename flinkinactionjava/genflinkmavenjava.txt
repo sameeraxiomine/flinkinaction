@@ -1,0 +1,12 @@
+mvn archetype:generate -DarchetypeGroupId=org.apache.flink  -DarchetypeArtifactId=flink-quickstart-java  -DarchetypeVersion=1.0.0  -DgroupId=com.manning.fia -DartifactId=flinkinaction2  -Dversion=1.0  -Dpackage=com.manning.fia  -DinteractiveMode=false
+  
+  mvn archetype:generate	  \
+ -DarchetypeGroupId=org.apache.flink \
+ -DarchetypeArtifactId=flink-quickstart-java \
+ -DarchetypeVersion=1.0.0 \
+ -DgroupId=com.manning.fia \
+ -DartifactId=flinkinaction \
+ -Dversion=0.1 \
+ -Dpackage=com.manning.fia \
+ -DinteractiveMode=false
+  
