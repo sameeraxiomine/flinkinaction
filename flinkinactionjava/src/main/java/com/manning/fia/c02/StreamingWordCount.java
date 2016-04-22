@@ -109,41 +109,32 @@ public class StreamingWordCount {
   }
 
   public static void main(String[] args) throws Exception {
-    //#1. Fetch StreamExecutionEnvironment
       StreamExecutionEnvironment execEnv =
-             StreamExecutionEnvironment.getExecutionEnvironment(); 
-      execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
-
+             StreamExecutionEnvironment.createLocalEnvironment(1); 
       String[] lines = { "201603011201,#DCFlinkMeetup",
                          "201603011202,#DcFlinkMeetup",
                          "201603011203,#Flink", 
                          "201603011302,#Flink", 
                          "201603011302,#DCFlinkMeetup" };
-      //#2. Create sample data source from in-memory collection
       DataStream<String> source = execEnv.fromCollection(Arrays.asList(lines)); 
 
-      DataStream<Tuple3<String, String, Integer>> counts = 
-      //#3. Tokenize each line
-      
-      source.map(new Tokenizer()) 
-      //#4. Key By the 0th and 1st attribute of tokenized line
+      DataStream<Tuple3<String, String, Integer>> counts = source.map(new Tokenizer()) 
             .keyBy(0, 1) 
-      //#5. Aggregate the 2nd attribute to obtain word count
            .sum(2); 
-      //#6. Collect results (or write to sink)
       Iterator<Tuple3<String,String,Integer>> iter = 
         DataStreamUtils.collect(counts);
       List<Tuple3<String,String,Integer>> output = Lists.newArrayList(iter);
-      //#7. Display the output. Typically get from a distributed file.
       for (Tuple3<String,String,Integer> line : output) {
          System.err.println(line.f0 +","+line.f1 + ","+line.f2);
       }
-      //#7.1 Alternative - Send output to console
-      //counts.print();     
-      //#7.2 Alternative - Send output to a CSV file where you specify the line and field separators
-      //counts.writeAsCsv(filePath, "\n", ",");
-      //#8 Call StreamExecutionEnvironment.execute() to trigger execution
+      counts.print();
+      //counts.print();
+      //counts.printToErr();
+      /*
+      counts.writeAsCsv("c:/tmp/tmp2.csv", "\n", ",");
       execEnv.execute();
+      */
+
 
 
   }

@@ -1,89 +1,98 @@
 package com.manning.fia.c02;
 
-import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
+import com.manning.fia.utils.datagen.HashTagGenerator;
+import com.manning.fia.utils.datagen.IDataGenerator;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.contrib.streaming.DataStreamUtils;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.hadoop.shaded.com.google.common.collect.Lists;
+import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.SocketTextStreamFunction;
-import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.util.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Flink Streaming WordCount Example
+ */
 public class SimpleStreamingWordCount {
-  public static int PORT_NO=9500;
-  public static StreamServer getStreamServer(List<String> hashTagsList){
-    String[] hashtags = new String[hashTagsList.size()];
-    hashtags = hashTagsList.toArray(hashtags);
-    return new StreamServer(PORT_NO,hashtags,2,1000);
+
+ 
+  public static void main(String[] args) throws Exception {
+    //#1. Fetch StreamExecutionEnvironment
+      StreamExecutionEnvironment execEnv =
+             StreamExecutionEnvironment.createLocalEnvironment(1); 
+      //execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+
+      String[] lines = { "201603011201,#DCFlinkMeetup",
+              "201603011201,#DcFlinkMeetup", "201603011201,#Flink",
+              "201603011201,#Flink", "201603011201,#DCFlinkMeetup" };
+
+      //#2. Create sample data source from in-memory collection
+      DataStream<String> source = execEnv.fromCollection(Arrays.asList(lines)); 
+
+      DataStream<Tuple3<String, String, Integer>> counts = 
+      //#3. Tokenize each line
+      
+      source.map(new Tokenizer()) 
+      //#4. Key By the 0th and 1st attribute of tokenized line
+            .keyBy(0, 1) 
+      //#5. Aggregate the 2nd attribute to obtain word count
+           .sum(2); 
+      //#6. Collect results (or write to sink)
+      /*
+      Iterator<Tuple3<String,String,Integer>> iter = 
+        DataStreamUtils.collect(counts);
+      List<Tuple3<String,String,Integer>> output = Lists.newArrayList(iter);
+      //#7. Display the output. Typically get from a distributed file.
+      for (Tuple3<String,String,Integer> line : output) {
+         System.err.println(line.f0 +","+line.f1 + ","+line.f2);
+      }
+      */
+      counts.printToErr();
+      execEnv.execute();
+      
+      //#7.1 Alternative - Send output to console
+      //counts.print();     
+      //#7.2 Alternative - Send output to a CSV file where you specify the line and field separators
+      //counts.writeAsCsv(filePath, "\n", ",");
+      //#8 Call StreamExecutionEnvironment.execute() to trigger execution
+      //execEnv.execute();
+      
+
   }
+  
 
-public static void main(String[] args) throws Exception {
-    final StreamExecutionEnvironment streamingExecEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
-    streamingExecEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);    
-    List<String> hashTagsList = FileUtils.readLines(new File("src/main/resources/sample/streaminghashtags.txt"));
 
-    StreamServer server = getStreamServer(hashTagsList);
-    
-    server.startServer();
-    Thread.sleep(1000);//Allow server to start
-    DataStream<String> source1 = streamingExecEnv.addSource(new SocketTextStreamFunction("127.0.0.1",PORT_NO, '\n', 1));
-    DataStream<Tuple2<String, Integer>> counts1 = source1.map(new Tokenizer())
-            .keyBy(0)
-            .sum(1);    
-     counts1.printToErr();
-     streamingExecEnv.execute("Default is rolling reduce. Sum keep getting added per key.Batch as a special case of streaming");
-    
-     server.startServer();
-     DataStream<String> source2 = streamingExecEnv.addSource(new SocketTextStreamFunction("127.0.0.1",PORT_NO, '\n', 1));
-     DataStream<Tuple2<String, Integer>> counts2 = source2.map(new Tokenizer())
-             .keyBy(0)   
-             .timeWindow(Time.seconds(5))
-             .sum(1);    
-         counts2.printToErr();
-     streamingExecEnv.execute("Tumbling window of 5 seconds");
 
-     server.startServer();
-     DataStream<String> source3 = streamingExecEnv.addSource(new SocketTextStreamFunction("127.0.0.1",PORT_NO, '\n', 1));
-     DataStream<Tuple2<String, Integer>> counts3 = source3.map(new Tokenizer())
-             .keyBy(0)   
-             .timeWindow(Time.seconds(15),Time.seconds(5))
-             .sum(1);    
-         counts3.printToErr();
-     streamingExecEnv.execute("Sliding window of word count in last 15 seconds, in each 5 second interval");
-     
-     server.startServer();
-     DataStream<String> source4 = streamingExecEnv.addSource(new SocketTextStreamFunction("127.0.0.1",PORT_NO, '\n', 1));
-     DataStream<Tuple2<String, Integer>> counts4 = source4.map(new Tokenizer())
-             .keyBy(0)   
-             .countWindow(5)
-             .sum(1);    
-     counts4.printToErr();
-     streamingExecEnv.execute("Count windows triggered when count reaches 5 for any key.Does not fire again for that key");
-
-     server.startServer();
-     DataStream<String> source5 = streamingExecEnv.addSource(new SocketTextStreamFunction("127.0.0.1",PORT_NO, '\n', 1));     
-     DataStream<Tuple2<String, Integer>> counts5 = source5.map(new Tokenizer())
-             .keyBy(0)   
-             .countWindow(15)
-             .sum(1);    
-     counts5.printToErr();
-     streamingExecEnv.execute("Count windows triggered when count reaches 15 for any key");
-     
-
-    }
-
-  @SuppressWarnings("serial")
   public static final class Tokenizer implements
-      MapFunction<String, Tuple2<String, Integer>> {
+      MapFunction<String, Tuple3<String, String, Integer>> {
+
     @Override
-    public Tuple2<String, Integer> map(String value)
-        throws Exception {
-      String[] tokens = value.toLowerCase().split(",");
-      String word = tokens[1].toLowerCase();
-      return new Tuple2<>(word, 1);
+    public Tuple3<String, String, Integer> map(String value) throws Exception {
+            String[] tokens = value.toLowerCase().split(",");
+            String newDt = tokens[0].substring(0, 10);
+            String word = tokens[1].toLowerCase();            
+            return new Tuple3<>(newDt, word, 1);
+          }
     }
-  }
+  
+  
+ 
+
 }
+
