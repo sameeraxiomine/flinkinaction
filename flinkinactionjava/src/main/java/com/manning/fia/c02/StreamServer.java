@@ -19,6 +19,10 @@ public class StreamServer {
         this.sleepIntervalInMillis = sleepIntervalInMillis;
     }
     public void startServer() {
+        
+    }
+    /*
+    public void startServer() {
 
         Runnable serverTask = () -> {
 						try{
@@ -50,4 +54,5 @@ public class StreamServer {
         serverThread.start();
 
     }
+    */
 }
