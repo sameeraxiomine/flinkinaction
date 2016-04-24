@@ -16,7 +16,6 @@ public final class TokenizeAndComputeTransactionValue implements
         String itemDesc = tokens[3];
         int itemQty = Integer.parseInt(tokens[4]);
         double pricePerItem = Double.parseDouble(tokens[5]);
-        long timestamp = Long.parseLong(tokens[6]);
         return new Tuple5<>(customerId, transactionId, itemId, itemDesc,
                 itemQty * pricePerItem);
     }

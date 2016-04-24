@@ -38,9 +38,7 @@ public class MapOperatorLocalClient {
         File outputFolder =  new File(outputFolderPath);
         FileUtils.deleteQuietly(outputFolder);
         transformedTuples.writeAsText(outputFolder.getAbsolutePath());
-        
         execEnv.execute();
-        System.out.println(outputFolder.getAbsolutePath());
     }
 
     public void usingTokenizeFollowedByTransformer(
@@ -55,8 +53,7 @@ public class MapOperatorLocalClient {
         List<Tuple5<Integer, Long, Integer, String, Double>> output = transformedTuples
                 .collect();
         for (Tuple5<Integer, Long, Integer, String, Double> line : output) {
-            System.out.println(line.f0 + "," + line.f1 + "," + line.f2 + ","
-                    + line.f3 + "," + line.f4);
+            System.out.println(line);
         }
     }
 
@@ -69,41 +66,41 @@ public class MapOperatorLocalClient {
         List<Tuple5<Integer, Long, Integer, String, Double>> output = transformedTuples
                 .collect();
         for (Tuple5<Integer, Long, Integer, String, Double> line : output) {
-            System.out.println(line.f0 + "," + line.f1 + "," + line.f2 + ","
-                    + line.f3 + "," + line.f4);
+            System.out.println(line);
         }
-
     }
 
     public static void main(String[] args) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         Date tDt = sdf.parse("20151231130000");
-        DateTime tDtTime = new DateTime(tDt);
-        DateTime tDtTime2 = tDtTime.plusHours(2);
-
+        DateTime tDtTime1 = new DateTime(tDt);
+        DateTime tDtTime2 = tDtTime1.plusHours(2);
+        String tDtTime1Str = sdf.format(tDtTime1.toDate());
+        String tDtTime2Str = sdf.format(tDtTime2.toDate());
         String[] transactionItemLines = {
-                "1000,1,1,1_item,5,1.0," + tDtTime.toDate().getTime(),
-                "1000,1,2,2_item,10,100.0," + tDtTime.toDate().getTime(),
-                "1000,1,3,3_item,3,200.0," + tDtTime.toDate().getTime(),
-                "1001,2,1,1_item,4,1.0," + tDtTime2.toDate().getTime(),
-                "1001,2,2,2_item,11,100.0," + tDtTime2.toDate().getTime(),
-                "1001,2,3,3_item,7,200.0," + tDtTime2.toDate().getTime(),
-                "1002,3,1,1_item,4,1.0," + tDtTime2.toDate().getTime(),
-                "1002,3,2,2_item,11,100.0," + tDtTime2.toDate().getTime(),
-                "1002,3,3,3_item,7,200.0," + tDtTime2.toDate().getTime(),
-                "1003,4,1,1_item,4,1.0," + tDtTime2.toDate().getTime(),
-                "1003,4,2,2_item,11,100.0," + tDtTime2.toDate().getTime(),
-                "1003,4,3,3_item,7,200.0," + tDtTime2.toDate().getTime(),
-                "1004,5,1,1_item,4,1.0," + tDtTime2.toDate().getTime(),
-                "1004,5,2,2_item,11,100.0," + tDtTime2.toDate().getTime(),
-                "1004,5,3,3_item,7,200.0," + tDtTime2.toDate().getTime(),
-                "1005,6,1,1_item,4,1.0," + tDtTime2.toDate().getTime(),
-                "1005,6,2,2_item,11,100.0," + tDtTime2.toDate().getTime(),
-                "1005,6,3,3_item,7,200.0," + tDtTime2.toDate().getTime(),
-                "1006,7,1,1_item,4,1.0," + tDtTime2.toDate().getTime(),
-                "1006,7,2,2_item,11,100.0," + tDtTime2.toDate().getTime(),
-                "1006,7,3,3_item,7,200.0," + tDtTime2.toDate().getTime()
+                "1000,1,1,1_item,5,1.0," + tDtTime1Str,
+                "1000,1,2,2_item,10,100.0," + tDtTime1Str,
+                "1000,1,3,3_item,3,200.0," + tDtTime1Str,
+                "1001,2,1,1_item,4,1.0," + tDtTime1Str,
+                "1001,2,2,2_item,11,100.0," + tDtTime1Str,
+                "1001,2,3,3_item,7,200.0," + tDtTime1Str,
+                "1002,3,1,1_item,4,1.0," + tDtTime1Str,
+                "1002,3,2,2_item,11,100.0," + tDtTime1Str,
+                "1002,3,3,3_item,7,200.0," + tDtTime1Str,
+                "1003,4,1,1_item,4,1.0," + tDtTime2Str,
+                "1003,4,2,2_item,11,100.0," + tDtTime2Str,
+                "1003,4,3,3_item,7,200.0," + tDtTime2Str,
+                "1004,5,1,1_item,4,1.0," + tDtTime2Str,
+                "1004,5,2,2_item,11,100.0," + tDtTime2Str,
+                "1004,5,3,3_item,7,200.0," + tDtTime2Str,
+                "1005,6,1,1_item,4,1.0," + tDtTime2Str,
+                "1005,6,2,2_item,11,100.0," + tDtTime2Str,
+                "1005,6,3,3_item,7,200.0," + tDtTime2Str,
+                "1006,7,1,1_item,4,1.0," + tDtTime2Str,
+                "1006,7,2,2_item,11,100.0," + tDtTime2Str,
+                "1006,7,3,3_item,7,200.0," + tDtTime2Str
         };
+
         MapOperatorLocalClient client = new MapOperatorLocalClient();
         client.usingTokenizeFollowedByTransformer(Arrays
                 .asList(transactionItemLines));
