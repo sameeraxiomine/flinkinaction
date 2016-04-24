@@ -67,14 +67,14 @@ The line which provides the Job Manager URL is
 JobManager Web Interface: http://ip-172-30-0-135.ec2.internal:20888/proxy/application_1461530866115_0004/
 ```
 
-Replace the `ip-172-30-0-135.ec2.internal` with the IP address you used to SSH into the master node (Ex. `52.90.222.64`) and you will be able to see the following screen-
+Replace the `ip-172-30-0-135.ec2.internal` with the IP address you used to SSH into the master node (Ex. In my EMR cluster the master node has the public ip address as `52.90.222.64`) and you will be able to see the following screen-
 ![](../images/EMR_InitialJobManagerInterface.png)
 
 Notice that we have 4 task managers and 20 slots available just like we configured.
 
 ## Run the WordCount application from the examples folder of the Flink installation
 
-Now that we have our Flink installation running, let us run a flink application in cluster mode. We will turn to the HelloWorld of Big Data applications, the WordCount application. The WordCount application is available in the following path
+Now that we have our Flink cluster running and we can execute a flink application in cluster mode. We will run the example WordCount application which is available in the following path
 
 `/home/hadoop/flink-1.0.1/examples/batch/WordCount.jar`
 
