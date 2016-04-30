@@ -15,7 +15,7 @@ import org.joda.time.DateTime;
 
 import com.manning.parsers.TransactionItemParser;
 import com.manning.transformation.ComputeTransactionValue;
-import com.manning.transformation.TokenizeAndComputeTransactionValue;
+import com.manning.transformation.MapTokenizeAndComputeTransactionValue;
 
 public class MapOperatorLocalClient {
 
@@ -62,7 +62,7 @@ public class MapOperatorLocalClient {
         ExecutionEnvironment execEnv = ExecutionEnvironment.getExecutionEnvironment();
         DataSet<String> source = execEnv.fromCollection(transactionItemLines);
         DataSet<Tuple5<Integer, Long, Integer, String, Double>> transformedTuples = source
-                .map(new TokenizeAndComputeTransactionValue());
+                .map(new MapTokenizeAndComputeTransactionValue());
         List<Tuple5<Integer, Long, Integer, String, Double>> output = transformedTuples
                 .collect();
         for (Tuple5<Integer, Long, Integer, String, Double> line : output) {
