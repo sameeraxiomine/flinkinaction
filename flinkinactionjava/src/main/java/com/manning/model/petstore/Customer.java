@@ -10,6 +10,9 @@ public class Customer {
         this.customerName = customerName;
         this.zipcode = zipcode;
     }
+    
+    public Customer(){}
+    
     @Override
     public int hashCode() {
         final int prime = 31;

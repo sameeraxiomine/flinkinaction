@@ -12,6 +12,9 @@ public class Transaction {
         this.customerId = customerId;
         this.time = time;
     }
+    
+    public Transaction(){}
+    
     @Override
     public int hashCode() {
         final int prime = 31;

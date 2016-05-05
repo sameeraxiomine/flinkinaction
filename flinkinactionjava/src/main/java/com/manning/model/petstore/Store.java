@@ -9,6 +9,8 @@ public class Store {
         this.zipcode = zipcode;
     }
   
+    public Store() {} 
+
     @Override
     public int hashCode() {
         final int prime = 31;

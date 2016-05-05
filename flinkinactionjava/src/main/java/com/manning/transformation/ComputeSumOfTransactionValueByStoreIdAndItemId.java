@@ -10,6 +10,6 @@ public final class ComputeSumOfTransactionValueByStoreIdAndItemId
     public Tuple3<Integer, Integer, Double> reduce(
             Tuple3<Integer, Integer, Double> value1,
             Tuple3<Integer, Integer, Double> value2) throws Exception {
-        return new Tuple3<Integer,Integer,Double>(value1.f0,value1.f1,value1.f2+value2.f2);        
+        return new Tuple3<>(value1.f0,value1.f1,value1.f2+value2.f2);        
     }
 }

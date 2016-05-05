@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 
 
-public class TransactionItem implements Comparator<TransactionItem>{
+public class TransactionItem {
     public int storeId;
     public long transactionId;
     public int itemId;
@@ -28,15 +28,8 @@ public class TransactionItem implements Comparator<TransactionItem>{
         this.time = time;
     }
 
-
-    @Override
-    public int compare(TransactionItem o1, TransactionItem o2) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-   
+    public TransactionItem(){}
+    
 
     @Override
     public int hashCode() {

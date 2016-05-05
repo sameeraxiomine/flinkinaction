@@ -9,11 +9,11 @@ import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.configuration.Configuration;
 
-import com.manning.parsers.TransactionItemParser;
 import com.manning.transformation.ComputeTransactionValue;
 import com.manning.transformation.FilterOnTransactionValue;
 import com.manning.transformation.RichFilterOnGlobalConfigTransactionValue;
 import com.manning.transformation.RichFilterOnTransactionValue;
+import com.manning.transformation.TransactionItemParser;
 
 public class FilterOperatorLocalClient {
 
