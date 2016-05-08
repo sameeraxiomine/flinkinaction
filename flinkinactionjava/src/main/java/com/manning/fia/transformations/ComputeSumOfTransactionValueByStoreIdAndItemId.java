@@ -1,8 +1,8 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
-public final class ComputeSumOfTransactionValueByStoreIdAndItemId
+public class ComputeSumOfTransactionValueByStoreIdAndItemId
         implements
         ReduceFunction<Tuple3<Integer,Integer, Double>> {
     

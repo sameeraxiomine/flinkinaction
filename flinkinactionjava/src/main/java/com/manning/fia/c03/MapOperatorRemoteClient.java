@@ -6,8 +6,8 @@ import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.api.java.utils.ParameterTool;
 
-import com.manning.transformation.ComputeTransactionValue;
-import com.manning.transformation.TransactionItemParser;
+import com.manning.fia.transformations.ComputeTransactionValue;
+import com.manning.fia.transformations.TransactionItemParser;
 
 public class MapOperatorRemoteClient {
    

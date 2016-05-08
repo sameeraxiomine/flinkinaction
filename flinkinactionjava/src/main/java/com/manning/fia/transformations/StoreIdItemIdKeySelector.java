@@ -1,9 +1,9 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 
-import com.manning.model.petstore.TransactionItem;
+import com.manning.fia.model.petstore.TransactionItem;
 
 public class StoreIdItemIdKeySelector implements KeySelector<TransactionItem, Tuple2<Integer,Integer>>{
     @Override

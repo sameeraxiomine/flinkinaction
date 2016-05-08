@@ -13,9 +13,9 @@ import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.joda.time.DateTime;
 
-import com.manning.transformation.ComputeTransactionValue;
-import com.manning.transformation.MapTokenizeAndComputeTransactionValue;
-import com.manning.transformation.TransactionItemParser;
+import com.manning.fia.transformations.ComputeTransactionValue;
+import com.manning.fia.transformations.MapTokenizeAndComputeTransactionValue;
+import com.manning.fia.transformations.TransactionItemParser;
 
 public class MapOperatorLocalClient {
 

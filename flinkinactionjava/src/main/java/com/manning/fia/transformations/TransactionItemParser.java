@@ -1,10 +1,10 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple7;
 
 @SuppressWarnings("serial")
-public final class TransactionItemParser
+public class TransactionItemParser
         implements
         MapFunction<String, Tuple7<Integer, Long, Integer, String, Integer, Double, Long>> {
     @Override
@@ -18,7 +18,7 @@ public final class TransactionItemParser
         int itemQty = Integer.parseInt(tokens[4]);
         double pricePerItem = Double.parseDouble(tokens[5]);
         long timestamp = Long.parseLong(tokens[6]);
-        return new Tuple7<>(storeId, transactionId, itemId, itemDesc,
-                itemQty, pricePerItem, timestamp);
+        return new Tuple7<>(storeId, transactionId, itemId, itemDesc, itemQty,
+                pricePerItem, timestamp);
     }
 }

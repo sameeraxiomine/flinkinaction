@@ -1,10 +1,11 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
-import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.configuration.Configuration;
-public final class RichFilterOnTransactionValue
+
+@SuppressWarnings("serial")
+public class RichFilterOnTransactionValue
         extends
         RichFilterFunction<Tuple5<Integer, Long, Integer, String, Double>> {
     private int criteria;

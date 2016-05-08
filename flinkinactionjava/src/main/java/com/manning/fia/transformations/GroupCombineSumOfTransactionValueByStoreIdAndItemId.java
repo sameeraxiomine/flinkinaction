@@ -1,18 +1,19 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
+import org.apache.flink.api.common.functions.GroupCombineFunction;
 import org.apache.flink.api.common.functions.GroupReduceFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.util.Collector;
 
-import com.manning.model.petstore.TransactionItem;
-public final class GroupReduceSumOfTransactionValueByStoreIdAndItemId
+import com.manning.fia.model.petstore.TransactionItem;
+public final class GroupCombineSumOfTransactionValueByStoreIdAndItemId
         implements
-        GroupReduceFunction<TransactionItem,Tuple3<Integer,Integer, Double>> {
+        GroupCombineFunction<TransactionItem,Tuple3<Integer,Integer, Double>> {
     
 
     @Override
-    public void reduce(Iterable<TransactionItem> values,
+    public void combine(Iterable<TransactionItem> values,
             Collector<Tuple3<Integer, Integer, Double>> out) throws Exception {
         int storeId=-1;
         int itemId=-1;

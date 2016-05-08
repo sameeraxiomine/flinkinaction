@@ -15,29 +15,29 @@ import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.api.java.tuple.Tuple9;
 
-import com.manning.model.petstore.TransactionItem;
-import com.manning.transformation.ComputeSumOfTransactionValueByStoreIdAndItemId;
-import com.manning.transformation.ComputeTransactionValue;
-import com.manning.transformation.DomainObjectBasedMap;
-import com.manning.transformation.FilterOnTransactionValue;
-import com.manning.transformation.FlatMapTokenizeAndComputeTransactionValue;
-import com.manning.transformation.GroupCombineSumOfTransactionValueByStoreIdAndItemId;
-import com.manning.transformation.GroupReduceSumOfTransactionValueByStoreIdAndItemId;
-import com.manning.transformation.ItemIdKeySelector;
-import com.manning.transformation.MapPartitionTokenizeAndComputeTransactionValue;
-import com.manning.transformation.MapTokenizeAndComputeTransactionValue;
-import com.manning.transformation.MapTokenizeAndComputeTransactionValue2;
-import com.manning.transformation.MapTokenizeCustomer;
-import com.manning.transformation.MapTokenizeStore;
-import com.manning.transformation.MapTokenizeTransaction;
-import com.manning.transformation.SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId;
-import com.manning.transformation.SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId2;
-import com.manning.transformation.StoreIdItemIdKeySelector3;
-import com.manning.transformation.StoreIdItemIdKeySelector;
-import com.manning.transformation.StoreIdKeySelector;
-import com.manning.transformation.TransactionItemParser;
+import com.manning.fia.model.petstore.TransactionItem;
+import com.manning.fia.transformations.ComputeSumOfTransactionValueByStoreIdAndItemId;
+import com.manning.fia.transformations.ComputeTransactionValue;
+import com.manning.fia.transformations.DomainObjectBasedTransactionParser;
+import com.manning.fia.transformations.FilterOnTransactionValue;
+import com.manning.fia.transformations.FlatMapTokenizeAndComputeTransactionValue;
+import com.manning.fia.transformations.GroupCombineSumOfTransactionValueByStoreIdAndItemId;
+import com.manning.fia.transformations.GroupReduceSumOfTransactionValueByStoreIdAndItemId;
+import com.manning.fia.transformations.ItemIdKeySelector;
+import com.manning.fia.transformations.MapPartitionTokenizeAndComputeTransactionValue;
+import com.manning.fia.transformations.MapTokenizeAndComputeTransactionValue;
+import com.manning.fia.transformations.MapTokenizeAndComputeTransactionValue2;
+import com.manning.fia.transformations.MapTokenizeCustomer;
+import com.manning.fia.transformations.MapTokenizeStore;
+import com.manning.fia.transformations.MapTokenizeTransaction;
+import com.manning.fia.transformations.SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId;
+import com.manning.fia.transformations.SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId2;
+import com.manning.fia.transformations.StoreIdItemIdKeySelector;
+import com.manning.fia.transformations.StoreIdItemIdKeySelector3;
+import com.manning.fia.transformations.StoreIdKeySelector;
+import com.manning.fia.transformations.TransactionItemParser;
 
-public class BasicTransformations {
+public class BatchTransformations {
     public static boolean RUN_LOCALLY = true;
     public static String HOST = "localhost";
     public static int PORT = 6123;
@@ -62,7 +62,7 @@ public class BasicTransformations {
      * 1. Map
      */
     public static void usingMap() throws Exception {
-        ExecutionEnvironment execEnv = getEnvironment(true);
+        ExecutionEnvironment execEnv = getEnvironment(true);        
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
         DataSet<Tuple7<Integer, Long, Integer, String, Integer, Double, Long>> tuples = source
@@ -79,9 +79,9 @@ public class BasicTransformations {
         ExecutionEnvironment execEnv = getEnvironment(true);
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
-        DataSet<TransactionItem> projectedTuples = source.map(
-                new DomainObjectBasedMap());
-        projectedTuples.print();
+        DataSet<TransactionItem> transactionItems = source.map(
+                new DomainObjectBasedTransactionParser());
+        transactionItems.print();
     }
 
     /*
@@ -187,7 +187,7 @@ public class BasicTransformations {
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
         DataSet<Tuple3<Integer, Integer, Double>> output = source
-                .map(new DomainObjectBasedMap())
+                .map(new DomainObjectBasedTransactionParser())
                 .groupBy(new StoreIdItemIdKeySelector())
                 .reduceGroup(
                         new GroupReduceSumOfTransactionValueByStoreIdAndItemId());
@@ -220,7 +220,7 @@ public class BasicTransformations {
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
         DataSet<Tuple3<Integer, Integer, Double>> output = source
-                .map(new DomainObjectBasedMap())
+                .map(new DomainObjectBasedTransactionParser())
                 .groupBy(new StoreIdKeySelector())
                 .sortGroup(new ItemIdKeySelector(), Order.ASCENDING)
                 .reduceGroup(
@@ -236,7 +236,7 @@ public class BasicTransformations {
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
         DataSet<Tuple3<Integer, Integer, Double>> combined = source
-                .map(new DomainObjectBasedMap())
+                .map(new DomainObjectBasedTransactionParser())
                 .groupBy(new StoreIdItemIdKeySelector())
                 .combineGroup(
                         new GroupCombineSumOfTransactionValueByStoreIdAndItemId());
@@ -249,7 +249,7 @@ public class BasicTransformations {
 
     /* Simple Aggregations Example. Point to Chapter 2 */
 
-    public static void usingAggreatations() throws Exception {
+    public static void usingAggregations() throws Exception {
         ExecutionEnvironment execEnv = getEnvironment(true);
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
@@ -261,7 +261,7 @@ public class BasicTransformations {
     }
 
     /* Multiple Aggregations Example. Point to Chapter 2 */
-    public static void usingMultipleAggreatations() throws Exception {
+    public static void usingMultipleAggregations() throws Exception {
         ExecutionEnvironment execEnv = getEnvironment(true);
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
@@ -362,17 +362,17 @@ public class BasicTransformations {
     }
 
     public static void main(String[] args) throws Exception {
-        BasicTransformations.usingDomainObjectsMap();
-        // BasicTransformations.usingReduce();
-        // BasicTransformations.usingKeySelectorBasedReduce();
-        // BasicTransformations.usingGroupReduce();
-        // BasicTransformations.usingGroupReduceSortedKeysUsingKeySelector();
-        // BasicTransformations.usingGroupCombine();
-        // BasicTransformations.usingAggreatations();
-        // BasicTransformations.usingMultipleAggreatations();
-        // BasicTransformations.joinTransactionWithStore();
-        // BasicTransformations.joinTransactionWithStoreAndCustomer();
-        // BasicTransformations.joinTransactionWithTransactionItems(JoinHint.REPARTITION_HASH_FIRST);
-        // BasicTransformations.joinTransactionWithTransactionItems(JoinHint.REPARTITION_SORT_MERGE);
+        //BatchTransformations.usingDomainObjectsMap();
+        // BatchTransformations.usingReduce();
+        // BatchTransformations.usingKeySelectorBasedReduce();
+        // BatchTransformations.usingGroupReduce();
+        // BatchTransformations.usingGroupReduceSortedKeysUsingKeySelector();
+        // BatchTransformations.usingGroupCombine();
+        // BatchTransformations.usingAggreatations();
+         BatchTransformations.usingMultipleAggregations();
+        //BatchTransformations.joinTransactionWithStore();
+        // BatchTransformations.joinTransactionWithStoreAndCustomer();
+        // BatchTransformations.joinTransactionWithTransactionItems(JoinHint.REPARTITION_HASH_FIRST);
+        // BatchTransformations.joinTransactionWithTransactionItems(JoinHint.REPARTITION_SORT_MERGE);
     }
 }

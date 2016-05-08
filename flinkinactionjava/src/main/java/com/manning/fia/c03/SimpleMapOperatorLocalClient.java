@@ -8,8 +8,8 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple7;
 
-import com.manning.transformation.ComputeTransactionValue;
-import com.manning.transformation.TransactionItemParser;
+import com.manning.fia.transformations.ComputeTransactionValue;
+import com.manning.fia.transformations.TransactionItemParser;
 
 public class SimpleMapOperatorLocalClient {
 

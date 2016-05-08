@@ -1,12 +1,12 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
 import org.apache.flink.api.common.functions.GroupReduceFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.util.Collector;
+import com.manning.fia.model.petstore.TransactionItem;
 
-import com.manning.model.petstore.TransactionItem;
-public final class SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId2
+@SuppressWarnings("serial")
+public class SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId2
         implements
         GroupReduceFunction<TransactionItem,Tuple3<Integer,Integer, Double>> {
     

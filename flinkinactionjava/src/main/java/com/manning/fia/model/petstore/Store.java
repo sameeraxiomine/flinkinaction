@@ -1,4 +1,4 @@
-package com.manning.model.petstore;
+package com.manning.fia.model.petstore;
 
 public class Store {
     public int storeId;

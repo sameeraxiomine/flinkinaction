@@ -1,12 +1,11 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
-import org.apache.flink.api.common.functions.GroupReduceFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
+
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.util.Collector;
+import org.apache.flink.api.common.functions.GroupReduceFunction;
 
-import com.manning.model.petstore.TransactionItem;
-public final class SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId
+public class SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId
         implements
         GroupReduceFunction<Tuple3<Integer, Integer, Double>,Tuple3<Integer,Integer, Double>> {
     
@@ -29,9 +28,6 @@ public final class SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId
                 total = total + value.f2;
             }   
         }
-        if(storeId>0 && itemId>0){//Collect the last value if valid store and item
-            out.collect(new Tuple3<Integer,Integer,Double>(storeId,itemId,total));
-        }
-             
+        out.collect(new Tuple3<Integer,Integer,Double>(storeId,itemId,total));
     }
 }

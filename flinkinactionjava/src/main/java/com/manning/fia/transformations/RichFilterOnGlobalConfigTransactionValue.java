@@ -1,4 +1,4 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.functions.RichFilterFunction;

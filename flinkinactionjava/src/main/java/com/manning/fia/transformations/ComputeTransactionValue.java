@@ -1,9 +1,10 @@
-package com.manning.transformation;
+package com.manning.fia.transformations;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple7;
-public final class ComputeTransactionValue
+@SuppressWarnings("serial")
+public class ComputeTransactionValue
         implements
         MapFunction<Tuple7<Integer, Long, Integer, String, Integer, Double, Long>, Tuple5<Integer, Long, Integer, String, Double>> {
     @Override

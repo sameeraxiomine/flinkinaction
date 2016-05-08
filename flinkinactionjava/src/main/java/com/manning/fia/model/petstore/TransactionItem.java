@@ -1,8 +1,4 @@
-package com.manning.model.petstore;
-
-import java.util.Comparator;
-
-
+package com.manning.fia.model.petstore;
 
 public class TransactionItem {
     public int storeId;
