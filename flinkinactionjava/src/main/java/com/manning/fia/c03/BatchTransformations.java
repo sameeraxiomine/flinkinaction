@@ -70,7 +70,7 @@ public class BatchTransformations {
         DataSet<Tuple5<Integer, Long, Integer, String, Double>> transformedTuples = tuples
                 .map(new ComputeTransactionValue());
         transformedTuples.print();
-        transformedTuples.o
+        
     }
 
     /*

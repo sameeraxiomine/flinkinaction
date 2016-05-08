@@ -22,7 +22,6 @@ public class SimpleBatchWordCount {
                                                                 .groupBy(0, 1)
                                                                 .sum(2);
 
-
         /*
         counts.writeAsCsv("c:/tmp/tmp.csv");
         String execPlan = execEnv.getExecutionPlan();
