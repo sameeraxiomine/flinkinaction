@@ -3,7 +3,8 @@ package com.manning.fia.transformations;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple6;
 
-public final class MapTokenizeAndComputeTransactionValue2 implements
+@SuppressWarnings("serial")
+public  class MapTokenizeAndComputeTransactionValue2 implements
         MapFunction<String, Tuple6<Integer, Long, Integer, Integer,Double,Double>> {
     @Override
     public Tuple6<Integer, Long, Integer, Integer,Double,Double> map(String value)

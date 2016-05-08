@@ -62,7 +62,7 @@ public class BatchTransformations {
      * 1. Map
      */
     public static void usingMap() throws Exception {
-        ExecutionEnvironment execEnv = getEnvironment(true);        
+        ExecutionEnvironment execEnv = getEnvironment(true);
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
         DataSet<Tuple7<Integer, Long, Integer, String, Integer, Double, Long>> tuples = source
@@ -70,6 +70,7 @@ public class BatchTransformations {
         DataSet<Tuple5<Integer, Long, Integer, String, Double>> transformedTuples = tuples
                 .map(new ComputeTransactionValue());
         transformedTuples.print();
+        transformedTuples.o
     }
 
     /*

@@ -6,6 +6,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 
 import com.manning.fia.model.petstore.TransactionItem;
 
+@SuppressWarnings("serial")
 public class ItemIdKeySelector implements KeySelector<TransactionItem, Tuple1<Integer>>{
     @Override
     public Tuple1<Integer> getKey(TransactionItem value) throws Exception {        

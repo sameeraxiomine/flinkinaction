@@ -2,7 +2,8 @@ package com.manning.fia.transformations;
 
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
-public final class FilterOnTransactionValue
+@SuppressWarnings("serial")
+public class FilterOnTransactionValue
         implements
         FilterFunction<Tuple5<Integer, Long, Integer, String, Double>> {
     @Override

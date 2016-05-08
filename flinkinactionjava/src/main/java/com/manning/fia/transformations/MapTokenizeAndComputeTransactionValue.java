@@ -4,7 +4,8 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple7;
 
-public final class MapTokenizeAndComputeTransactionValue implements
+@SuppressWarnings("serial")
+public class MapTokenizeAndComputeTransactionValue implements
         MapFunction<String, Tuple5<Integer, Long, Integer, String, Double>> {
     @Override
     public Tuple5<Integer, Long, Integer, String, Double> map(String value)
