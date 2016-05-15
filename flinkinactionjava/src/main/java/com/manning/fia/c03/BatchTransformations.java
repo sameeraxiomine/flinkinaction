@@ -275,7 +275,7 @@ public class BatchTransformations {
                 .map(new MapTokenizeAndComputeTransactionValue2())
                 .<Tuple4<Integer, Integer, Double, Double>> project(0, 3, 4, 5)
                 .groupBy(0).aggregate(Aggregations.MIN, 1)
-                .and(Aggregations.MAX, 2).and(Aggregations.SUM, 3);
+                .and(Aggregations.MAX, 2).and(Aggregations.SUM, 3);        
         output.print();
     }
 
