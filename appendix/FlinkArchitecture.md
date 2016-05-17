@@ -31,7 +31,7 @@ The key features of the above program are:
 
 We will assume the physical architecture shown in Figure 1.
 
-![](../images/Architecture-1.png)
+![](../images/A1.png)
 
 Figure 1: Physical Architecture of the Flink Cluster
 
@@ -61,7 +61,7 @@ The overall workflow for job submission is as follows:
 
 The Logical Architecture for each Task Manager is depicted in Figure 2. 
 
-![](../images/Architecture-2.png)
+![](../images/A2.png)
 
 Figure 2: Logical Architecture for a Task Manager 
 
@@ -89,7 +89,7 @@ Next we launch the [WordCount job](https://github.com/sameeraxiomine/flinkinacti
 
 Figure 3 shows how the Word Count program is configured for execution with this setting. Notice how the Job Manager evenly distributes the work load across all nodes.
 
-![](../images/Architecture-3.png)
+![](../images/A3.png)
 
 Figure 3: WordCount application executing with default parallelism=4 
 
@@ -105,7 +105,7 @@ The above set of lines will override the default parallelism set via `./bin/flin
 
 Figure 4 shows the physical execution plan for WordCount program. 
 
-![](../images/Architecture-4.png)
+![](../images/A4.png)
 
 Figure 4: Override default parallelism in code (maximize parallelism) 
 
@@ -123,7 +123,7 @@ counts.writeAsCsv(params.get("output"), "\n", " ").setParallelism(1);
 
 Thus all Reduce (sum) operators will stream their output to the single Sink as shown in Figure 5.
 
-![](../images/Architecture-5.png)
+![](../images/A5.png)
 
 Figure 5: Override parallelism for the Sink operator 
 
@@ -143,7 +143,7 @@ counts.writeAsCsv(params.get("output"), "\n", " ").setParallelism(1);
 
 Figure 6 shows the physical execution plan for this setup.
 
-![](../images/Architecture-6.png)
+![](../images/A6.png)
 
 Figure 6: Override parallelism for the Reduce and Sink operators 
 
