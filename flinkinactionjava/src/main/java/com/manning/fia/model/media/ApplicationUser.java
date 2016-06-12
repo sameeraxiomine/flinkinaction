@@ -10,6 +10,7 @@ public class ApplicationUser {
 
     private String ipAddress;
 
+
     public ApplicationUser() {
     }
 
@@ -67,5 +68,14 @@ public class ApplicationUser {
         result = 31 * result + (subscriberId != null ? subscriberId.hashCode() : 0);
         result = 31 * result + (ipAddress != null ? ipAddress.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationUser{" +
+                "uuid='" + uuid + '\'' +
+                ", subscriberId='" + subscriberId + '\'' +
+                ", ipAddress='" + ipAddress + '\'' +
+                '}';
     }
 }

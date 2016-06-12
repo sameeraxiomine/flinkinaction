@@ -8,19 +8,35 @@ public class CommentsPlatform {
     private long eventId;
 
     // pageId and pageTitle
-    private Tuple2<Long,String> page;
+    private Tuple2<Long, String> page;
 
     // the user commenting about the article
     private ApplicationUser applicationUser;
 
+    // startTimestamp,endTimeStamp
+    private Tuple2<Long, Long> timeStamp;
+
     private String comments;
 
 
-    public CommentsPlatform(long eventId, Tuple2<Long, String> page, ApplicationUser applicationUser, String comments) {
+    // sentimental Analysis score.
+    private float sentimentAnalysisScore;
+
+
+    public CommentsPlatform(long eventId, Tuple2<Long, String> page, ApplicationUser applicationUser, Tuple2<Long, Long> timeStamp, String comments) {
         this.eventId = eventId;
         this.page = page;
         this.applicationUser = applicationUser;
+        this.timeStamp = timeStamp;
         this.comments = comments;
+    }
+
+    public Tuple2<Long, Long> getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Tuple2<Long, Long> timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     public long getEventId() {
@@ -55,6 +71,14 @@ public class CommentsPlatform {
         this.comments = comments;
     }
 
+    public float getSentimentAnalysisScore() {
+        return sentimentAnalysisScore;
+    }
+
+    public void setSentimentAnalysisScore(float sentimentAnalysisScore) {
+        this.sentimentAnalysisScore = sentimentAnalysisScore;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,19 +87,32 @@ public class CommentsPlatform {
         CommentsPlatform that = (CommentsPlatform) o;
 
         if (eventId != that.eventId) return false;
-        if (page != null ? !page.equals(that.page) : that.page != null) return false;
-        if (applicationUser != null ? !applicationUser.equals(that.applicationUser) : that.applicationUser != null)
-            return false;
-        return comments != null ? comments.equals(that.comments) : that.comments == null;
+        if (!page.equals(that.page)) return false;
+        if (!applicationUser.equals(that.applicationUser)) return false;
+        if (!timeStamp.equals(that.timeStamp)) return false;
+        return comments.equals(that.comments);
 
     }
 
     @Override
     public int hashCode() {
         int result = (int) (eventId ^ (eventId >>> 32));
-        result = 31 * result + (page != null ? page.hashCode() : 0);
-        result = 31 * result + (applicationUser != null ? applicationUser.hashCode() : 0);
-        result = 31 * result + (comments != null ? comments.hashCode() : 0);
+        result = 31 * result + page.hashCode();
+        result = 31 * result + applicationUser.hashCode();
+        result = 31 * result + timeStamp.hashCode();
+        result = 31 * result + comments.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "CommentsPlatform{" +
+                "eventId=" + eventId +
+                ", page=" + page +
+                ", applicationUser=" + applicationUser +
+                ", timeStamp=" + timeStamp +
+                ", comments='" + comments + '\'' +
+                ", sentimentAnalysisScore=" + sentimentAnalysisScore +
+                '}';
     }
 }

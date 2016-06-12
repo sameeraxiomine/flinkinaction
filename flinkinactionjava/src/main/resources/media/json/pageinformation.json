@@ -1,0 +1,24 @@
+[
+  {
+    "id": 101,
+    "author": "Hari",
+    "url": "http://newsflink.com/20160101/101",
+    "description": "About 2016 Elections",
+    "contentType": "article",
+    "publishDate": 20160101,
+    "section": "Politics",
+    "subSection": "Elections",
+    "topic": "2016 Election"
+  },
+  {
+    "id": 102,
+    "author": "Sameer",
+    "url": "http://newsflink.com/20160101/102",
+    "description": "About 2016 NBA",
+    "contentType": "blog",
+    "publishDate": 20160101,
+    "section": "Sports",
+    "subSection": "Basketball",
+    "topic": "2016 NBA"
+  }
+]
