@@ -5,7 +5,10 @@ import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-public class TumblingWindowCountForMedia {
+/**
+ * Created by hari on 5/30/16.
+ */
+public class SlindingWindowCountForMedia {
 
     public void executeJob() {
         try {
@@ -13,10 +16,10 @@ public class TumblingWindowCountForMedia {
             final DataStream<String> socketStream = execEnv.socketTextStream("localhost", 9000);
 //            socketStream.map(new MapTokenizeNewsFeed())
 //                    .keyBy(0, 1)
-//                    .countWindow(3)
+//                    .countWindow(4,1)
 //                    .sum(2)
 //                    .print();
-            execEnv.execute("Tumbling Count Window");
+            execEnv.execute("Sliding Count Window");
 
         } catch (Exception ex) {
             Throwables.propagate(ex);
@@ -24,8 +27,9 @@ public class TumblingWindowCountForMedia {
     }
 
     public static void main(String[] args) throws Exception {
-        final TumblingWindowCountForMedia window = new TumblingWindowCountForMedia();
+        final SlindingWindowCountForMedia window = new SlindingWindowCountForMedia();
         window.executeJob();
 
     }
 }
+

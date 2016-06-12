@@ -4,8 +4,10 @@ import com.manning.fia.transformations.media.MapTokenizeNewsFeed;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.time.Time;
 
-public class TumblingWindowCountForMedia {
+public class TumblingWindowForMedia {
+
 
     public void executeJob() {
         try {
@@ -13,10 +15,11 @@ public class TumblingWindowCountForMedia {
             final DataStream<String> socketStream = execEnv.socketTextStream("localhost", 9000);
 //            socketStream.map(new MapTokenizeNewsFeed())
 //                    .keyBy(0, 1)
-//                    .countWindow(3)
+//                    .timeWindow(Time.seconds(30))
 //                    .sum(2)
 //                    .print();
-            execEnv.execute("Tumbling Count Window");
+
+            execEnv.execute("Tumbling Time Window");
 
         } catch (Exception ex) {
             Throwables.propagate(ex);
@@ -24,7 +27,7 @@ public class TumblingWindowCountForMedia {
     }
 
     public static void main(String[] args) throws Exception {
-        final TumblingWindowCountForMedia window = new TumblingWindowCountForMedia();
+        final TumblingWindowForMedia window = new TumblingWindowForMedia();
         window.executeJob();
 
     }
