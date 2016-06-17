@@ -7,19 +7,20 @@ import org.apache.flink.util.Collector;
 
 @SuppressWarnings("serial")
 public class MapPartitionTokenizeAndComputeTransactionValue implements
-        MapPartitionFunction<NewsFeed, Tuple4<String, String, String, Long>> {
+        MapPartitionFunction<String, Tuple4<String, String, String, Long>> {
 
     @Override
-    public void mapPartition(Iterable<NewsFeed> values,
+    public void mapPartition(Iterable<String> values,
                              Collector<Tuple4<String, String, String, Long>> out)
             throws Exception {
-        for (NewsFeed value : values) {
+        for (String value : values) {
             out.collect(map(value));
         }
     }
 
-    private Tuple4<String, String, String, Long> map(final NewsFeed newsFeed) throws Exception {
+    private Tuple4<String, String, String, Long> map(final String value) throws Exception {
 
+        final NewsFeed newsFeed=NewsFeedParser.mapRow(value);
         final long startTime = newsFeed.getStartTimeStamp();
         final long endTime = newsFeed.getEndTimeStamp();
         final long timeSpent = endTime - startTime;

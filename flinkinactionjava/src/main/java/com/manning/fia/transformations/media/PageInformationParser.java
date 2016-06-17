@@ -1,13 +1,8 @@
 package com.manning.fia.transformations.media;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.manning.fia.model.media.ApplicationUser;
 import com.manning.fia.model.media.PageInformation;
-import com.manning.fia.model.media.PageInformation;
-import sun.jvm.hotspot.debugger.Page;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -16,27 +11,20 @@ import java.util.Scanner;
 public class PageInformationParser {
 
 
-    public static List<PageInformation> parse(boolean isJSON) throws Exception {
-        if (isJSON) {
-            return parseJSON();
-        }
-        return parseCSV();
-    }
-
-    private static List<PageInformation> parseCSV() throws Exception {
-        final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream("/media/csv/PageInformation.csv"));
-        List<PageInformation> PageInformations = new ArrayList<>(0);
+    public static List<String> parseData() throws Exception {
+        final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream("/media/pipe/pageinformation"));
+        List<String> PageInformations = new ArrayList<>(0);
         while (scanner.hasNext()) {
             String value = scanner.nextLine();
-            PageInformations.add(mapCSVRow(value));
+            PageInformations.add(value);
         }
         return PageInformations;
     }
 
 
-    public static PageInformation mapCSVRow(String value) {
+    public static PageInformation mapRow(String value) {
 
-        final String[] tokens = value.toLowerCase().split(",");
+        final String[] tokens = value.toLowerCase().split("\\|");
 
         final long pageId = Long.valueOf(tokens[0]);
 
@@ -56,10 +44,5 @@ public class PageInformationParser {
 
     }
 
-    public static List<PageInformation> parseJSON() throws Exception {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        final PageInformation[] pageInformations = objectMapper.readValue(ClassLoader.class.getResourceAsStream
-                ("/media/json/pageinformation.json"), PageInformation[].class);
-        return Arrays.asList(pageInformations);
-    }
+
 }

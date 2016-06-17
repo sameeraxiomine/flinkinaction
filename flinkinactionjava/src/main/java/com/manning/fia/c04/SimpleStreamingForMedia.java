@@ -18,10 +18,10 @@ public class SimpleStreamingForMedia {
         try {
             final StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
             final DataStream<String> socketStream = execEnv.socketTextStream("localhost", 9000);
-//            socketStream.map(new MapTokenizeNewsFeed())
-//                    .keyBy(0, 1)
-//                    .sum(2)
-//                    .print();
+            socketStream.map(new MapTokenizeNewsFeed())
+                    .keyBy(0, 1)
+                    .sum(3)
+                    .print();
 
             execEnv.execute("Simple Streaming");
 

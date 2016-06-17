@@ -13,11 +13,11 @@ public class SlidingWindowForMedia {
         try {
             final StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
             final DataStream<String> socketStream = execEnv.socketTextStream("localhost", 9000);
-//            socketStream.map(new MapTokenizeNewsFeed())
-//                    .keyBy(0, 1)
-//                    .timeWindow(Time.seconds(30), Time.seconds(10))
-//                    .sum(2)
-//                    .print();
+            socketStream.map(new MapTokenizeNewsFeed())
+                    .keyBy(0, 1)
+                    .timeWindow(Time.seconds(15), Time.seconds(5))
+                    .sum(3)
+                    .print();
 
             execEnv.execute("Sliding Windows");
 

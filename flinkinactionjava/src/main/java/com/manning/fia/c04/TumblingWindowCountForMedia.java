@@ -11,11 +11,11 @@ public class TumblingWindowCountForMedia {
         try {
             final StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
             final DataStream<String> socketStream = execEnv.socketTextStream("localhost", 9000);
-//            socketStream.map(new MapTokenizeNewsFeed())
-//                    .keyBy(0, 1)
-//                    .countWindow(3)
-//                    .sum(2)
-//                    .print();
+            socketStream.map(new MapTokenizeNewsFeed())
+                    .keyBy(0, 1)
+                    .countWindow(3)
+                    .sum(2)
+                    .print();
             execEnv.execute("Tumbling Count Window");
 
         } catch (Exception ex) {
