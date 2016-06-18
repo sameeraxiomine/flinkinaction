@@ -1,6 +1,9 @@
 package com.manning.fia.model.media;
 
-public class ApplicationUser {
+import java.io.Serializable;
+
+@SuppressWarnings("serial")
+public class ApplicationUser implements Serializable{
 
     // uniqueidentifer based on cookie
     private String uuid;

@@ -1,9 +1,12 @@
 package com.manning.fia.model.media;
 
 
+import java.io.Serializable;
+
 import org.apache.flink.api.java.tuple.Tuple2;
 
-public class CommentsPlatform {
+@SuppressWarnings("serial")
+public class CommentsPlatform implements Serializable{
 
     private long eventId;
 

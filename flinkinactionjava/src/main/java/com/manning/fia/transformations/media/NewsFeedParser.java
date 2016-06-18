@@ -46,7 +46,7 @@ public class NewsFeedParser {
         final String ipAddress = tokens[12];
         final ApplicationUser applicationUser = new ApplicationUser(uuid, subscriberId, ipAddress);
         final NewsFeed newsFeed = new NewsFeed(eventId, pageId, referrer, section, subSection, topic, keywords,
-                startTimeStamp, endTimeStamp, type, applicationUser);
+                startTimeStamp, endTimeStamp, deviceType, applicationUser);
         return newsFeed;
     }
 

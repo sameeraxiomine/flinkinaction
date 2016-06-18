@@ -1,9 +1,12 @@
 package com.manning.fia.model.media;
 
+import java.io.Serializable;
+
 /**
  * Created by hari on 6/5/16.
  */
-public class PageInformation {
+@SuppressWarnings("serial")
+public class PageInformation implements Serializable{
 
     // pageId
     private long id;

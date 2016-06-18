@@ -1,8 +1,10 @@
 package com.manning.fia.model.media;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class NewsFeed {
+@SuppressWarnings("serial")
+public class NewsFeed implements Serializable{
 
     private long eventId;
 
