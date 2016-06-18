@@ -1,8 +1,11 @@
 package com.manning.fia.c03.media;
 
+import java.util.Arrays;
+
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.GroupCombineFunction;
 import org.apache.flink.api.common.functions.GroupReduceFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.common.operators.base.JoinOperatorBase;
@@ -10,22 +13,33 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.aggregation.Aggregations;
 import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.operators.JoinOperator.DefaultJoin;
+import org.apache.flink.api.java.operators.JoinOperator.ProjectJoin;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.util.Collector;
 
+import com.manning.fia.c03.SampleData;
 import com.manning.fia.model.media.NewsFeed;
-import com.manning.fia.model.media.PageInformation;
-import com.manning.fia.transformations.media.DomainObjectBasedNewsFeedParser;
+import com.manning.fia.model.media.Page;
+import com.manning.fia.transformations.MapTokenizeAndComputeTransactionValue2;
+import com.manning.fia.transformations.SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId;
+import com.manning.fia.transformations.media.ComputeTimeSpentPerSectionAndSubSection;
+import com.manning.fia.transformations.media.DomainObjectBasedNewsFeedMapper;
 import com.manning.fia.transformations.media.DomainObjectBasedPageInformationParser;
 import com.manning.fia.transformations.media.FilterOnTimeSpentPerPage;
+import com.manning.fia.transformations.media.GroupReduceComputeTimeSpentPerSectionAndSubSection;
 import com.manning.fia.transformations.media.MapPartitionNewsFeedMapper;
-import com.manning.fia.transformations.media.MapTokenizeNewsFeed;
-import com.manning.fia.transformations.media.MapTokenizePageInformation;
+import com.manning.fia.transformations.media.PageMapper;
 import com.manning.fia.transformations.media.NewsFeedMapper;
+import com.manning.fia.transformations.media.NewsFeedMapper2;
 import com.manning.fia.transformations.media.NewsFeedParser;
-import com.manning.fia.transformations.media.PageInformationParser;
+import com.manning.fia.transformations.media.PageParser;
+import com.manning.fia.transformations.media.SectionSubSectionKeySelector;
+import com.manning.fia.transformations.media.SortedGroupReduceComputeTimeSpentBySectionAndSubSection;
 
 public class MediaBatchTansformations {
 
@@ -87,8 +101,8 @@ public class MediaBatchTansformations {
         DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
         DataSet<Tuple5<Long, String, String, String, Long>> result = newsFeeds
-                                                                  .map(new NewsFeedMapper())
-                                                                  .filter(new FilterOnTimeSpentPerPage());
+                .map(new NewsFeedMapper()).filter(
+                        new FilterOnTimeSpentPerPage());
         result.print();
     }
 
@@ -117,22 +131,15 @@ public class MediaBatchTansformations {
      * Shuffle/Partition at this point.
      */
     public static void usingReduce() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
-        newsFeeds.map(new MapTokenizeNewsFeed())
-                .<Tuple3<String, String, Long>> project(0, 1, 3).groupBy(0, 1)
-                .reduce(new ReduceFunction<Tuple3<String, String, Long>>() {
-                    @Override
-                    public Tuple3<String, String, Long> reduce(
-                            Tuple3<String, String, Long> value1,
-                            Tuple3<String, String, Long> value2)
-                            throws Exception {
-                        return new Tuple3<>(value1.f0, value1.f1, value1.f2
-                                + value2.f2);
-                    }
-                }).print();
+        DataSet<Tuple3<String, String, Long>> result = newsFeeds
+                .map(new NewsFeedMapper())
+                .<Tuple3<String, String, Long>> project(1, 2, 4).groupBy(0, 1)
+                .reduce(new ComputeTimeSpentPerSectionAndSubSection());
+        result.print();
     }
 
     /*
@@ -140,13 +147,29 @@ public class MediaBatchTansformations {
      * 6.1. Reduce by introducing aggregations, same as Above
      */
     public static void usingAggregation() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
-                .parseData());
-        newsFeeds.map(new MapTokenizeNewsFeed()).project(0, 1, 3).groupBy(0, 1)
-                .aggregate(Aggregations.SUM, 2).print();
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+                .parseData());        
+        DataSet<Tuple3<String,String,Long>> result = newsFeeds.map(new NewsFeedMapper())
+                                                              .<Tuple3<String,String,Long>> project(1, 2, 4)
+                                                              .groupBy(0, 1)
+                                                              .aggregate(Aggregations.SUM, 2);
+        result.print();
 
+    }
+    
+    public static void usingMultipleAggregations() throws Exception {
+        ExecutionEnvironment execEnv = ExecutionEnvironment
+                .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+                .parseData());        
+        DataSet<Tuple5<String,String,Long,Long,Long>> result = newsFeeds.map(new NewsFeedMapper2())                                                              
+                                                              .groupBy(0, 1)
+                                                              .aggregate(Aggregations.MIN, 2)
+                                                              .and(Aggregations.MAX, 3)
+                                                              .and(Aggregations.SUM, 4);
+        result.print();
     }
 
     /*
@@ -158,7 +181,7 @@ public class MediaBatchTansformations {
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
         final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
-        newsFeeds.map(new MapTokenizeNewsFeed()).project(0, 1, 3).groupBy(0, 1)
+        newsFeeds.map(new NewsFeedMapper()).project(1, 2, 4).groupBy(0, 1)
                 .sum(2).print();
 
     }
@@ -169,45 +192,17 @@ public class MediaBatchTansformations {
      */
 
     public static void usingKeySelectorAndGroupReduce() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeedValues = execEnv
-                .fromCollection(NewsFeedParser.parseData());
-        final DataSet<NewsFeed> newsFeeds = newsFeedValues
-                .map(new DomainObjectBasedNewsFeedParser());
+        DataSet<String> newsFeedValues = execEnv.fromCollection(NewsFeedParser
+                .parseData());
+        DataSet<NewsFeed> newsFeeds = newsFeedValues
+                .map(new DomainObjectBasedNewsFeedMapper());
 
-        newsFeeds
-                .groupBy(new KeySelector<NewsFeed, Tuple2<String, String>>() {
-                    @Override
-                    public Tuple2<String, String> getKey(NewsFeed value)
-                            throws Exception {
-                        return new Tuple2<>(value.getSection(), value
-                                .getSubSection());
-                    }
-                })
-                .reduceGroup(
-                        new GroupReduceFunction<NewsFeed, Tuple3<String, String, Long>>() {
-                            private DateUtils dateUtils = new DateUtils();
-
-                            @Override
-                            public void reduce(Iterable<NewsFeed> newsFeeds,
-                                    Collector<Tuple3<String, String, Long>> out)
-                                    throws Exception {
-                                long total = 0l;
-                                String section = null;
-                                String subSection = null;
-                                for (NewsFeed feed : newsFeeds) {
-                                    section = feed.getSection();
-                                    subSection = feed.getSubSection();
-                                    final long timeSpent = dateUtils
-                                            .getTimeSpentOnPage(feed);
-                                    total = total + timeSpent;
-                                }
-                                out.collect(new Tuple3<>(section, subSection,
-                                        total));
-                            }
-
-                        }).print();
+        DataSet<Tuple3<String, String, Long>> result = newsFeeds.groupBy(
+                new SectionSubSectionKeySelector()).reduceGroup(
+                new GroupReduceComputeTimeSpentPerSectionAndSubSection());
+        result.print();
 
     }
 
@@ -217,33 +212,16 @@ public class MediaBatchTansformations {
     public static void usingGroupReduceSortedKeys() throws Exception {
         final ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
-        newsFeeds
-                .map(new MapTokenizeNewsFeed())
-                .<Tuple3<String, String, Long>> project(0, 1, 3)
-                .groupBy(0, 1)
-                .sortGroup(0, Order.DESCENDING)
+        DataSet<Tuple3<String, String, Long>> result = newsFeeds
+                .map(new NewsFeedMapper())
+                .<Tuple3<String, String, Long>> project(1, 2, 4)
+                .groupBy(0)
+                .sortGroup(1, Order.DESCENDING)
                 .reduceGroup(
-                        new GroupReduceFunction<Tuple3<String, String, Long>, Tuple3<String, String, Long>>() {
-                            @Override
-                            public void reduce(
-                                    Iterable<Tuple3<String, String, Long>> newsFeeds,
-                                    Collector<Tuple3<String, String, Long>> out)
-                                    throws Exception {
-                                long total = 0l;
-                                String section = null;
-                                String subSection = null;
-                                for (Tuple3<String, String, Long> feed : newsFeeds) {
-                                    section = feed.f0;
-                                    subSection = feed.f1;
-                                    long timeSpent = feed.f2;
-                                    total = total + timeSpent;
-                                }
-                                out.collect(new Tuple3<>(section, subSection,
-                                        total));
-                            }
-                        }).print();
+                        new SortedGroupReduceComputeTimeSpentBySectionAndSubSection());
+        result.print();
     }
 
     /*
@@ -258,20 +236,18 @@ public class MediaBatchTansformations {
         final DataSet<String> newsFeedValues = execEnv
                 .fromCollection(NewsFeedParser.parseData());
         final DataSet<NewsFeed> newsFeeds = newsFeedValues
-                .map(new DomainObjectBasedNewsFeedParser());
+                .map(new DomainObjectBasedNewsFeedMapper());
         newsFeeds
-                .groupBy(new KeySelector<NewsFeed, Tuple2<String, String>>() {
+                .groupBy(new KeySelector<NewsFeed, String>() {
                     @Override
-                    public Tuple2<String, String> getKey(NewsFeed value)
-                            throws Exception {
-                        return new Tuple2<>(value.getSection(), value
-                                .getSubSection());
+                    public String getKey(NewsFeed value) throws Exception {
+                        return value.getSection();
                     }
                 })
                 .sortGroup(new KeySelector<NewsFeed, String>() {
                     @Override
                     public String getKey(NewsFeed value) throws Exception {
-                        return value.getTopic();
+                        return value.getSubSection();
                     }
                 }, Order.ASCENDING)
                 .reduceGroup(
@@ -303,21 +279,14 @@ public class MediaBatchTansformations {
      * 10. Group Combine - Role of Combine (Point to MapReduce article)
      */
     public static void usingGroupCombine() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeedValues = execEnv
+        DataSet<String> newsFeedValues = execEnv
                 .fromCollection(NewsFeedParser.parseData());
-        final DataSet<NewsFeed> newsFeeds = newsFeedValues
-                .map(new DomainObjectBasedNewsFeedParser());
-        newsFeeds
-                .groupBy(new KeySelector<NewsFeed, Tuple2<String, String>>() {
-                    @Override
-                    public Tuple2<String, String> getKey(NewsFeed value)
-                            throws Exception {
-                        return new Tuple2<>(value.getSection(), value
-                                .getSubSection());
-                    }
-                })
+        DataSet<NewsFeed> newsFeeds = newsFeedValues
+               .map(new DomainObjectBasedNewsFeedMapper());
+        DataSet<Tuple3<String, String, Long>> combined = newsFeeds
+                .groupBy(0, 1)
                 .combineGroup(
                         new GroupCombineFunction<NewsFeed, Tuple3<String, String, Long>>() {
                             DateUtils dateUtils = new DateUtils();
@@ -339,8 +308,11 @@ public class MediaBatchTansformations {
                                 out.collect(new Tuple3<>(section, subSection,
                                         total));
                             }
-                        }).print();
-
+                        });
+        DataSet<Tuple3<String, String, Long>> output = 
+                 combined.groupBy(0, 1)
+                         .reduce(new ComputeTimeSpentPerSectionAndSubSection());
+        output.print();
     }
 
     /*
@@ -349,19 +321,17 @@ public class MediaBatchTansformations {
      */
 
     public static void usingBasicJoin() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeedValues = execEnv
+        DataSet<String> newsFeedValues = execEnv
                 .fromCollection(NewsFeedParser.parseData());
-        final DataSet<String> pageInformationValues = execEnv
-                .fromCollection(PageInformationParser.parseData());
-
-        final DataSet<NewsFeed> newsFeeds = newsFeedValues
-                .map(new DomainObjectBasedNewsFeedParser());
-        final DataSet<PageInformation> pageInformationDataSet = pageInformationValues
+        DataSet<String> pageInformationValues = execEnv
+                .fromCollection(PageParser.parseData());
+        DataSet<NewsFeed> newsFeeds = newsFeedValues
+                .map(new DomainObjectBasedNewsFeedMapper());
+        DataSet<Page> pageInformationDataSet = pageInformationValues
                 .map(new DomainObjectBasedPageInformationParser());
-
-        DataSet<Tuple2<NewsFeed, PageInformation>> joinDataSet = newsFeeds
+        DataSet<Tuple2<NewsFeed, Page>> joinDataSet = newsFeeds
                 .join(pageInformationDataSet).where("pageId").equalTo("id");
         joinDataSet.print();
     }
@@ -371,21 +341,20 @@ public class MediaBatchTansformations {
      */
 
     public static void usingBasicJoinWithTupleAndObject() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
-        final DataSet<String> pageInformationValues = execEnv
-                .fromCollection(PageInformationParser.parseData());
-
-        final DataSet<PageInformation> pageInformationDataSet = pageInformationValues
+        DataSet<String> pageInformationValues = execEnv
+                .fromCollection(PageParser.parseData());
+        DataSet<Page> pageInformationDataSet = pageInformationValues
                 .map(new DomainObjectBasedPageInformationParser());
-
-        final DataSet<Tuple5<String, String, String, Long, Long>> tuple5DataSet = newsFeeds
-                .map(new MapTokenizeNewsFeed());
-        tuple5DataSet.join(pageInformationDataSet).where("f4").equalTo("id")
-                .print();
+        DataSet<Tuple5<Long,String, String, String, Long>> tuple5DataSet = newsFeeds
+                .map(new NewsFeedMapper());
+        DataSet<Tuple2<Tuple5<Long, String, String, String, Long>, Page>> joinDataSet = 
+                tuple5DataSet.join(pageInformationDataSet)
+                             .where("f4").equalTo("id");
+        joinDataSet.print();
     }
 
     /*
@@ -393,18 +362,19 @@ public class MediaBatchTansformations {
      */
 
     public static void usingBasicJoinWithTupleAndTuple() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
-
-        final DataSet<String> pageInformationDataSet = execEnv
-                .fromCollection(PageInformationParser.parseData());
-        final DataSet<Tuple5<String, String, String, Long, Long>> tuple5DataSet = newsFeeds
-                .map(new MapTokenizeNewsFeed());
-        final DataSet<Tuple3<String, String, Long>> tuple3DataSet = pageInformationDataSet
-                .map(new MapTokenizePageInformation());
-        tuple5DataSet.join(tuple3DataSet).where("f4").equalTo("f2").print();
+        DataSet<String> pageInformationDataSet = execEnv
+                .fromCollection(PageParser.parseData());
+        DataSet<Tuple5<Long,String, String, String, Long>> tuple5DataSet = newsFeeds
+                .map(new NewsFeedMapper());
+        DataSet<Tuple3<String, String, Long>> tuple3DataSet = pageInformationDataSet
+                .map(new PageMapper());
+        DataSet<Tuple2<Tuple5<Long,String, String, String, Long>,Tuple3<String, String, Long>>> joinDataSet = 
+                tuple5DataSet.join(tuple3DataSet).where("f4").equalTo("f2");
+        joinDataSet.print();
     }
 
     /*
@@ -413,20 +383,20 @@ public class MediaBatchTansformations {
      */
 
     public static void usingJoinWithProjection() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
-
-        final DataSet<String> pageInformationDataSet = execEnv
-                .fromCollection(PageInformationParser.parseData());
-
-        final DataSet<Tuple5<String, String, String, Long, Long>> tuple5DataSet = newsFeeds
-                .map(new MapTokenizeNewsFeed());
-        final DataSet<Tuple3<String, String, Long>> tuple3DataSet = pageInformationDataSet
-                .map(new MapTokenizePageInformation());
-        tuple5DataSet.join(tuple3DataSet).where("4").equalTo("2")
-                .projectFirst(2, 3).projectSecond(0).print();
+        DataSet<String> pageInformationDataSet = execEnv
+                .fromCollection(PageParser.parseData());
+        DataSet<Tuple5<Long,String, String, String, Long>> tuple5DataSet = newsFeeds
+                .map(new NewsFeedMapper());
+        DataSet<Tuple3<String, String, Long>> tuple3DataSet = pageInformationDataSet
+                .map(new PageMapper());
+        DataSet<Tuple3<String, String,Long>> joinDataSet = tuple5DataSet.join(tuple3DataSet)
+                                                                        .where("4").equalTo("2")
+                                                                        .projectFirst(2, 3).projectSecond(0);
+        joinDataSet.print();
     }
 
     /*
@@ -434,18 +404,16 @@ public class MediaBatchTansformations {
      * on the other hand pageInformation is small
      */
     public static void usingJoinWithHint() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
-
-        final DataSet<String> pageInformationDataSet = execEnv
-                .fromCollection(PageInformationParser.parseData());
-
-        final DataSet<Tuple5<String, String, String, Long, Long>> largeDataSet = newsFeeds
-                .map(new MapTokenizeNewsFeed());
-        final DataSet<Tuple3<String, String, Long>> smallDataSet = pageInformationDataSet
-                .map(new MapTokenizePageInformation());
+        DataSet<String> pageInformationDataSet = execEnv
+                .fromCollection(PageParser.parseData());
+        DataSet<Tuple5<Long,String, String, String, Long>> largeDataSet = newsFeeds
+                .map(new NewsFeedMapper());
+        DataSet<Tuple3<String, String, Long>> smallDataSet = pageInformationDataSet
+                .map(new PageMapper());
         largeDataSet
                 .join(smallDataSet,
                         JoinOperatorBase.JoinHint.BROADCAST_HASH_SECOND)
@@ -462,18 +430,18 @@ public class MediaBatchTansformations {
      */
 
     public static void usingJoinWithHintUtility() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment
+        ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
-        final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData());
 
-        final DataSet<String> pageInformationDataSet = execEnv
-                .fromCollection(PageInformationParser.parseData());
+        DataSet<String> pageInformationDataSet = execEnv
+                .fromCollection(PageParser.parseData());
 
-        final DataSet<Tuple5<String, String, String, Long, Long>> largeDataSet = newsFeeds
-                .map(new MapTokenizeNewsFeed());
-        final DataSet<Tuple3<String, String, Long>> smallDataSet = pageInformationDataSet
-                .map(new MapTokenizePageInformation());
+        DataSet<Tuple5<Long,String, String, String, Long>> largeDataSet = newsFeeds
+                .map(new NewsFeedMapper());
+        DataSet<Tuple3<String, String, Long>> smallDataSet = pageInformationDataSet
+                .map(new PageMapper());
         largeDataSet.joinWithTiny(smallDataSet).where("4").equalTo("2").print();
         smallDataSet.joinWithHuge(largeDataSet).where("2").equalTo("4").print();
     }

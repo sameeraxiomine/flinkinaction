@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by hari on 6/5/16.
  */
 @SuppressWarnings("serial")
-public class PageInformation implements Serializable{
+public class Page implements Serializable{
 
     // pageId
     private long id;
@@ -17,8 +17,8 @@ public class PageInformation implements Serializable{
     // url of the page
     private String url;
 
-    // description of the page
-    private String description;
+    // title of the page
+    private String title;
 
     // content type .ie to see if it is article,blog etc.
     private String contentType;
@@ -36,15 +36,15 @@ public class PageInformation implements Serializable{
     private String topic;
 
 
-    public PageInformation() {
+    public Page() {
     }
 
 
-    public PageInformation(long id, String author, String url, String description, String contentType, long publishDate, String section, String subSection, String topic) {
+    public Page(long id, String author, String url, String description, String contentType, long publishDate, String section, String subSection, String topic) {
         this.id = id;
         this.author = author;
         this.url = url;
-        this.description = description;
+        this.title = description;
         this.contentType = contentType;
         this.publishDate = publishDate;
         this.section = section;
@@ -76,12 +76,12 @@ public class PageInformation implements Serializable{
         this.url = url;
     }
 
-    public String getDescription() {
-        return description;
+    public String getTitle() {
+        return title;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getContentType() {
@@ -127,15 +127,15 @@ public class PageInformation implements Serializable{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PageInformation)) return false;
+        if (!(o instanceof Page)) return false;
 
-        PageInformation that = (PageInformation) o;
+        Page that = (Page) o;
 
         if (id != that.id) return false;
         if (publishDate != that.publishDate) return false;
         if (author != null ? !author.equals(that.author) : that.author != null) return false;
         if (url != null ? !url.equals(that.url) : that.url != null) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null) return false;
+        if (title != null ? !title.equals(that.title) : that.title != null) return false;
         if (contentType != null ? !contentType.equals(that.contentType) : that.contentType != null) return false;
         if (section != null ? !section.equals(that.section) : that.section != null) return false;
         if (subSection != null ? !subSection.equals(that.subSection) : that.subSection != null) return false;
@@ -148,7 +148,7 @@ public class PageInformation implements Serializable{
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (author != null ? author.hashCode() : 0);
         result = 31 * result + (url != null ? url.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (title != null ? title.hashCode() : 0);
         result = 31 * result + (contentType != null ? contentType.hashCode() : 0);
         result = 31 * result + (int) (publishDate ^ (publishDate >>> 32));
         result = 31 * result + (section != null ? section.hashCode() : 0);
@@ -163,7 +163,7 @@ public class PageInformation implements Serializable{
                 "id=" + id +
                 ", author='" + author + '\'' +
                 ", url='" + url + '\'' +
-                ", description='" + description + '\'' +
+                ", description='" + title + '\'' +
                 ", contentType='" + contentType + '\'' +
                 ", publishDate=" + publishDate +
                 ", section='" + section + '\'' +

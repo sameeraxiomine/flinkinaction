@@ -1,16 +1,16 @@
 package com.manning.fia.transformations.media;
 
-import com.manning.fia.model.media.PageInformation;
+import com.manning.fia.model.media.Page;
 import org.apache.flink.api.common.functions.MapFunction;
 
 /**
  * Created by hari on 6/16/16.
  */
 public class DomainObjectBasedPageInformationParser implements
-        MapFunction<String, PageInformation> {
+        MapFunction<String, Page> {
     @Override
-    public PageInformation map(String value) throws Exception {
-        PageInformation pageInformation = PageInformationParser.mapRow(value);
+    public Page map(String value) throws Exception {
+        Page pageInformation = PageParser.mapRow(value);
         return pageInformation;
     }
 }

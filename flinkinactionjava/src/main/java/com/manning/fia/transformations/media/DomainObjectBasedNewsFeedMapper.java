@@ -6,7 +6,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 /**
  * Created by hari on 6/16/16.
  */
-public class DomainObjectBasedNewsFeedParser implements
+public class DomainObjectBasedNewsFeedMapper implements
         MapFunction<String,NewsFeed> {
     @Override
     public NewsFeed map(String value) throws Exception {

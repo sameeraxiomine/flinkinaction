@@ -1,6 +1,6 @@
 package com.manning.fia.transformations.media;
 
-import com.manning.fia.model.media.PageInformation;
+import com.manning.fia.model.media.Page;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 
 @SuppressWarnings("serial")
-public class PageInformationParser {
+public class PageParser {
 
 
     public static List<String> parseData() throws Exception {
@@ -22,7 +22,7 @@ public class PageInformationParser {
     }
 
 
-    public static PageInformation mapRow(String value) {
+    public static Page mapRow(String value) {
 
         final String[] tokens = value.toLowerCase().split("\\|");
 
@@ -38,7 +38,7 @@ public class PageInformationParser {
         final String section = tokens[6];
         final String subSection = tokens[7];
         final String topic = tokens[8];
-        final PageInformation pageInformation = new PageInformation(pageId, author, url, description, contentType,
+        final Page pageInformation = new Page(pageId, author, url, description, contentType,
                 publishDate, section, subSection, topic);
         return pageInformation;
 
