@@ -1,8 +1,5 @@
 package com.manning.fia.c03.media;
 
-import com.manning.fia.model.media.NewsFeed;
-import com.manning.fia.model.media.PageInformation;
-import com.manning.fia.transformations.media.*;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.GroupCombineFunction;
 import org.apache.flink.api.common.functions.GroupReduceFunction;
@@ -17,6 +14,16 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.util.Collector;
+import com.manning.fia.model.media.NewsFeed;
+import com.manning.fia.model.media.PageInformation;
+import com.manning.fia.transformations.media.DomainObjectBasedNewsFeedParser;
+import com.manning.fia.transformations.media.DomainObjectBasedPageInformationParser;
+import com.manning.fia.transformations.media.MapPartitionTokenizeAndComputeTransactionValue;
+import com.manning.fia.transformations.media.MapTokenizeNewsFeed;
+import com.manning.fia.transformations.media.MapTokenizePageInformation;
+import com.manning.fia.transformations.media.NewsFeedMapper;
+import com.manning.fia.transformations.media.NewsFeedParser;
+import com.manning.fia.transformations.media.PageInformationParser;
 
 public class MediaBatchTansformations {
 
@@ -30,9 +37,11 @@ public class MediaBatchTansformations {
     *
     */
     public static void usingMap() throws Exception {
-        final ExecutionEnvironment execEnv = ExecutionEnvironment.createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+        final ExecutionEnvironment execEnv = ExecutionEnvironment
+                                                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
         final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
-        newsFeeds.map(new MapTokenizeNewsFeed()).print();
+        DataSet<Tuple5<Long, String, String, String, Long>> result = newsFeeds.map(new NewsFeedMapper());
+        result.print();
     }
 
 
@@ -44,7 +53,7 @@ public class MediaBatchTansformations {
     public static void usingProject() throws Exception {
         final ExecutionEnvironment execEnv = ExecutionEnvironment.createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
         final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
-        newsFeeds.map(new MapTokenizeNewsFeed()).project(0, 1).distinct().print();
+        newsFeeds.map(new NewsFeedMapper()).project(0, 1).distinct().print();
 
     }
 
@@ -139,6 +148,7 @@ public class MediaBatchTansformations {
                 return new Tuple2<>(value.getSection(), value.getSubSection());
             }
         }).reduceGroup(new GroupReduceFunction<NewsFeed, Tuple3<String, String, Long>>() {
+            private DateUtils dateUtils = new DateUtils();
             @Override
             public void reduce(Iterable<NewsFeed> newsFeeds, Collector<Tuple3<String, String, Long>> out) throws
                     Exception {
@@ -148,11 +158,12 @@ public class MediaBatchTansformations {
                 for (NewsFeed feed : newsFeeds) {
                     section = feed.getSection();
                     subSection = feed.getSubSection();
-                    long timeSpent = feed.getEndTimeStamp() - feed.getStartTimeStamp();
+                    final long timeSpent = dateUtils.getTimeSpentOnPage(feed);
                     total = total + timeSpent;
                 }
                 out.collect(new Tuple3<>(section, subSection, total));
             }
+            
         }).print();
 
     }
@@ -208,6 +219,7 @@ public class MediaBatchTansformations {
                     }
                 }, Order.ASCENDING).
                 reduceGroup(new GroupReduceFunction<NewsFeed, Tuple3<String, String, Long>>() {
+                    private DateUtils dateUtils = new DateUtils();
                     @Override
                     public void reduce(Iterable<NewsFeed> newsFeeds, Collector<Tuple3<String, String, Long>> out) throws
                             Exception {
@@ -217,7 +229,7 @@ public class MediaBatchTansformations {
                         for (NewsFeed feed : newsFeeds) {
                             section = feed.getSection();
                             subSection = feed.getSubSection();
-                            final long timeSpent = feed.getEndTimeStamp() - feed.getStartTimeStamp();
+                            final long timeSpent = dateUtils.getTimeSpentOnPage(feed);
                             total = total + timeSpent;
                         }
                         out.collect(new Tuple3<>(section, subSection, total));
@@ -241,6 +253,7 @@ public class MediaBatchTansformations {
                 return new Tuple2<>(value.getSection(), value.getSubSection());
             }
         }).combineGroup(new GroupCombineFunction<NewsFeed, Tuple3<String, String, Long>>() {
+            DateUtils dateUtils = new DateUtils();
             @Override
             public void combine(Iterable<NewsFeed> values, Collector<Tuple3<String, String, Long>> out) throws
                     Exception {
@@ -250,7 +263,7 @@ public class MediaBatchTansformations {
                 for (NewsFeed feed : values) {
                     section = feed.getSection();
                     subSection = feed.getSubSection();
-                    final long timeSpent = feed.getEndTimeStamp() - feed.getStartTimeStamp();
+                    final long timeSpent = dateUtils.getTimeSpentOnPage(feed);
                     total = total + timeSpent;
                 }
                 out.collect(new Tuple3<>(section, subSection, total));

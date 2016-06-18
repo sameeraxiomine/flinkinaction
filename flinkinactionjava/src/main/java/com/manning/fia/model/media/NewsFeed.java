@@ -2,7 +2,6 @@ package com.manning.fia.model.media;
 
 import java.util.Arrays;
 
-
 public class NewsFeed {
 
     private long eventId;
@@ -12,24 +11,24 @@ public class NewsFeed {
 
     private String referrer;
 
-    //section
+    // section
     private String section;
 
-    //subsection
+    // subsection
     private String subSection;
 
-    //topic
+    // topic
     private String topic;
 
     private String[] keywords;
 
     // startTimestamp,endTimeStamp
-    private long startTimeStamp;
+    private String startTimeStamp;
 
-    private long endTimeStamp;
+    private String endTimeStamp;
 
-    //mobile,web,nativeapp
-    private String type;
+    // mobile,web,nativeapp
+    private String deviceType;
 
     // details about the user who has read the page.
     private ApplicationUser user;
@@ -37,7 +36,10 @@ public class NewsFeed {
     public NewsFeed() {
     }
 
-    public NewsFeed(long eventId, long pageId, String referrer, String section, String subSection, String topic, String[] keywords, long startTimeStamp, long endTimeStamp, String type, ApplicationUser user) {
+    public NewsFeed(long eventId, long pageId, String referrer, String section,
+            String subSection, String topic, String[] keywords,
+            String startTimeStamp, String endTimeStamp, String type,
+            ApplicationUser user) {
         this.eventId = eventId;
         this.pageId = pageId;
         this.referrer = referrer;
@@ -47,7 +49,7 @@ public class NewsFeed {
         this.keywords = keywords;
         this.startTimeStamp = startTimeStamp;
         this.endTimeStamp = endTimeStamp;
-        this.type = type;
+        this.deviceType = type;
         this.user = user;
     }
 
@@ -107,28 +109,28 @@ public class NewsFeed {
         this.keywords = keywords;
     }
 
-    public long getStartTimeStamp() {
+    public String getStartTimeStamp() {
         return startTimeStamp;
     }
 
-    public void setStartTimeStamp(long startTimeStamp) {
+    public void setStartTimeStamp(String startTimeStamp) {
         this.startTimeStamp = startTimeStamp;
     }
 
-    public long getEndTimeStamp() {
+    public String getEndTimeStamp() {
         return endTimeStamp;
     }
 
-    public void setEndTimeStamp(long endTimeStamp) {
+    public void setEndTimeStamp(String endTimeStamp) {
         this.endTimeStamp = endTimeStamp;
     }
 
-    public String getType() {
-        return type;
+    public String getDeviceType() {
+        return deviceType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     public ApplicationUser getUser() {
@@ -140,58 +142,36 @@ public class NewsFeed {
     }
 
     @Override
-    public boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (!(o instanceof NewsFeed)) return false;
-
-        NewsFeed that = (NewsFeed) o;
-
-        if (eventId != that.eventId) return false;
-        if (pageId != that.pageId) return false;
-        if (startTimeStamp != that.startTimeStamp) return false;
-        if (endTimeStamp != that.endTimeStamp) return false;
-        if (referrer != null ? !referrer.equals(that.referrer) : that.referrer != null) return false;
-        if (section != null ? !section.equals(that.section) : that.section != null) return false;
-        if (subSection != null ? !subSection.equals(that.subSection) : that.subSection != null) return false;
-        if (topic != null ? !topic.equals(that.topic) : that.topic != null) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(keywords, that.keywords)) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        return user != null ? user.equals(that.user) : that.user == null;
-
-    }
-
-    @Override
     public int hashCode() {
-        int result = (int) (eventId ^ (eventId >>> 32));
-        result = 31 * result + (int) (pageId ^ (pageId >>> 32));
-        result = 31 * result + (referrer != null ? referrer.hashCode() : 0);
-        result = 31 * result + (section != null ? section.hashCode() : 0);
-        result = 31 * result + (subSection != null ? subSection.hashCode() : 0);
-        result = 31 * result + (topic != null ? topic.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(keywords);
-        result = 31 * result + (int) (startTimeStamp ^ (startTimeStamp >>> 32));
-        result = 31 * result + (int) (endTimeStamp ^ (endTimeStamp >>> 32));
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (user != null ? user.hashCode() : 0);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (eventId ^ (eventId >>> 32));
         return result;
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        NewsFeed other = (NewsFeed) obj;
+        if (eventId != other.eventId)
+            return false;
+        return true;
+    }
+
+  
+    @Override
     public String toString() {
-        return "NewsFeed{" +
-                "eventId=" + eventId +
-                ", pageId=" + pageId +
-                ", referrer='" + referrer + '\'' +
-                ", section='" + section + '\'' +
-                ", subSection='" + subSection + '\'' +
-                ", topic='" + topic + '\'' +
-                ", keywords=" + Arrays.toString(keywords) +
-                ", startTimeStamp=" + startTimeStamp +
-                ", endTimeStamp=" + endTimeStamp +
-                ", type='" + type + '\'' +
-                ", user=" + user +
-                '}';
+        return "NewsFeed{" + "eventId=" + eventId + ", pageId=" + pageId
+                + ", referrer='" + referrer + '\'' + ", section='" + section
+                + '\'' + ", subSection='" + subSection + '\'' + ", topic='"
+                + topic + '\'' + ", keywords=" + Arrays.toString(keywords)
+                + ", startTimeStamp=" + startTimeStamp + ", endTimeStamp="
+                + endTimeStamp + ", type='" + deviceType + '\'' + ", user=" + user
+                + '}';
     }
 }

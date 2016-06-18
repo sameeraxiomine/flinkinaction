@@ -61,7 +61,7 @@ public class BatchTransformations {
     /*
      * 1. Map
      */
-    public static void usingMap() throws Exception {
+    public static void usingMap2() throws Exception {
         ExecutionEnvironment execEnv = getEnvironment(true);
         DataSet<String> source = execEnv.fromCollection(Arrays
                 .asList(SampleData.TRANSACTION_ITEMS));
@@ -71,6 +71,21 @@ public class BatchTransformations {
                 .map(new ComputeTransactionValue());
         transformedTuples.print();
         
+    }
+
+    /*
+ * 1. Map
+ */
+    public static void usingMap() throws Exception {
+        ExecutionEnvironment execEnv = getEnvironment(true);
+        DataSet<String> source = execEnv.fromCollection(Arrays
+                .asList(SampleMediaData.NEWS_FEED));
+        DataSet<Tuple7<Integer, Long, Integer, String, Integer, Double, Long>> tuples = source
+                .map(new TransactionItemParser());
+        DataSet<Tuple5<Integer, Long, Integer, String, Double>> transformedTuples = tuples
+                .map(new ComputeTransactionValue());
+        transformedTuples.print();
+
     }
 
     /*

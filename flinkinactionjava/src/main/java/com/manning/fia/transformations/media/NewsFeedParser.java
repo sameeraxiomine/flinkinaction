@@ -14,7 +14,7 @@ public class NewsFeedParser {
 
     public static List<String> parseData() throws Exception {
         final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream("/media/pipe/newsfeed"));
-        List<String> newsFeeds = new ArrayList<>(0);
+        List<String> newsFeeds = new ArrayList<>();
         while (scanner.hasNext()) {
             String value = scanner.nextLine();
             newsFeeds.add(value);
@@ -24,9 +24,8 @@ public class NewsFeedParser {
 
 
     public static NewsFeed mapRow(String value) {
-
         final String[] tokens = value.toLowerCase().split("\\|");
-
+        
         final long eventId = Long.valueOf(tokens[0]);
         final long pageId = Long.valueOf(tokens[1]);
 
@@ -38,16 +37,14 @@ public class NewsFeedParser {
         final String keywordString = tokens[6];
         final String[] keywords = keywordString.split(":");
 
-        final long startTimeStamp = Long.valueOf(tokens[7]);
-        final long endTimeStamp = Long.valueOf(tokens[8]);
-        final String type = tokens[9];
+        final String startTimeStamp = tokens[7];
+        final String endTimeStamp = tokens[8];
+        final String deviceType = tokens[9];
 
         final String uuid = tokens[10];
         final String subscriberId = tokens[11];
         final String ipAddress = tokens[12];
-
         final ApplicationUser applicationUser = new ApplicationUser(uuid, subscriberId, ipAddress);
-
         final NewsFeed newsFeed = new NewsFeed(eventId, pageId, referrer, section, subSection, topic, keywords,
                 startTimeStamp, endTimeStamp, type, applicationUser);
         return newsFeed;
