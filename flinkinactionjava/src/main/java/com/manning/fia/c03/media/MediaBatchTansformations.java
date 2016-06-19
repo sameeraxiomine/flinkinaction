@@ -1,42 +1,31 @@
 package com.manning.fia.c03.media;
 
-import java.util.Arrays;
-
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.GroupCombineFunction;
 import org.apache.flink.api.common.functions.GroupReduceFunction;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.common.operators.base.JoinOperatorBase;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.aggregation.Aggregations;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.operators.JoinOperator.DefaultJoin;
-import org.apache.flink.api.java.operators.JoinOperator.ProjectJoin;
-import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.util.Collector;
 
-import com.manning.fia.c03.SampleData;
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.model.media.Page;
-import com.manning.fia.transformations.MapTokenizeAndComputeTransactionValue2;
-import com.manning.fia.transformations.SortedGroupReduceSumOfTransactionValueByStoreIdAndItemId;
 import com.manning.fia.transformations.media.ComputeTimeSpentPerSectionAndSubSection;
 import com.manning.fia.transformations.media.DomainObjectBasedNewsFeedMapper;
-import com.manning.fia.transformations.media.DomainObjectBasedPageInformationParser;
+import com.manning.fia.transformations.media.DomainObjectBasedPageMapper;
 import com.manning.fia.transformations.media.FilterOnTimeSpentPerPage;
 import com.manning.fia.transformations.media.GroupReduceComputeTimeSpentPerSectionAndSubSection;
 import com.manning.fia.transformations.media.MapPartitionNewsFeedMapper;
-import com.manning.fia.transformations.media.PageMapper;
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import com.manning.fia.transformations.media.NewsFeedMapper2;
 import com.manning.fia.transformations.media.NewsFeedParser;
+import com.manning.fia.transformations.media.PageMapper;
 import com.manning.fia.transformations.media.PageParser;
 import com.manning.fia.transformations.media.SectionSubSectionKeySelector;
 import com.manning.fia.transformations.media.SortedGroupReduceComputeTimeSpentBySectionAndSubSection;
@@ -320,7 +309,7 @@ public class MediaBatchTansformations {
      * page
      */
 
-    public static void usingBasicJoin() throws Exception {
+    public static void usingBasicJoinWithObjectAndObject() throws Exception {
         ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
         DataSet<String> newsFeedValues = execEnv
@@ -330,7 +319,7 @@ public class MediaBatchTansformations {
         DataSet<NewsFeed> newsFeeds = newsFeedValues
                 .map(new DomainObjectBasedNewsFeedMapper());
         DataSet<Page> pageInformationDataSet = pageInformationValues
-                .map(new DomainObjectBasedPageInformationParser());
+                .map(new DomainObjectBasedPageMapper());
         DataSet<Tuple2<NewsFeed, Page>> joinDataSet = newsFeeds
                 .join(pageInformationDataSet).where("pageId").equalTo("id");
         joinDataSet.print();
@@ -347,13 +336,13 @@ public class MediaBatchTansformations {
                 .parseData());
         DataSet<String> pageInformationValues = execEnv
                 .fromCollection(PageParser.parseData());
-        DataSet<Page> pageInformationDataSet = pageInformationValues
-                .map(new DomainObjectBasedPageInformationParser());
         DataSet<Tuple5<Long,String, String, String, Long>> tuple5DataSet = newsFeeds
                 .map(new NewsFeedMapper());
+        DataSet<Page> pageInformationDataSet = pageInformationValues
+                .map(new DomainObjectBasedPageMapper());
         DataSet<Tuple2<Tuple5<Long, String, String, String, Long>, Page>> joinDataSet = 
                 tuple5DataSet.join(pageInformationDataSet)
-                             .where("f4").equalTo("id");
+                             .where("f0").equalTo("id");
         joinDataSet.print();
     }
 
@@ -372,8 +361,8 @@ public class MediaBatchTansformations {
                 .map(new NewsFeedMapper());
         DataSet<Tuple3<String, String, Long>> tuple3DataSet = pageInformationDataSet
                 .map(new PageMapper());
-        DataSet<Tuple2<Tuple5<Long,String, String, String, Long>,Tuple3<String, String, Long>>> joinDataSet = 
-                tuple5DataSet.join(tuple3DataSet).where("f4").equalTo("f2");
+        DataSet<Tuple2<Tuple5<Long,String, String, String, Long>,Tuple3<String, String,Long>>> joinDataSet = 
+                tuple5DataSet.join(tuple3DataSet).where("f0").equalTo("f2");
         joinDataSet.print();
     }
 
@@ -391,11 +380,11 @@ public class MediaBatchTansformations {
                 .fromCollection(PageParser.parseData());
         DataSet<Tuple5<Long,String, String, String, Long>> tuple5DataSet = newsFeeds
                 .map(new NewsFeedMapper());
-        DataSet<Tuple3<String, String, Long>> tuple3DataSet = pageInformationDataSet
+        DataSet<Tuple3<String,String, Long>> tuple3DataSet = pageInformationDataSet
                 .map(new PageMapper());
-        DataSet<Tuple3<String, String,Long>> joinDataSet = tuple5DataSet.join(tuple3DataSet)
-                                                                        .where("4").equalTo("2")
-                                                                        .projectFirst(2, 3).projectSecond(0);
+        DataSet<Tuple4<Long,String, String,String>> joinDataSet = tuple5DataSet.join(tuple3DataSet)
+                                                                        .where("f0").equalTo("f2")
+                                                                        .projectFirst(0,1, 2).projectSecond(2);
         joinDataSet.print();
     }
 
@@ -461,7 +450,7 @@ public class MediaBatchTansformations {
         MediaBatchTansformations.usingKeySelectorAndGroupReduce();
         MediaBatchTansformations.usingGroupReduceSortedKeysWithKeySelector();
         MediaBatchTansformations.usingGroupCombine();
-        MediaBatchTansformations.usingBasicJoin();
+        MediaBatchTansformations.usingBasicJoinWithObjectAndObject();
         MediaBatchTansformations.usingBasicJoinWithTupleAndObject();
         MediaBatchTansformations.usingBasicJoinWithTupleAndTuple();
         MediaBatchTansformations.usingJoinWithProjection();

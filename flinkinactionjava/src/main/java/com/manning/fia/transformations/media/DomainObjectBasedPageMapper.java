@@ -6,7 +6,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 /**
  * Created by hari on 6/16/16.
  */
-public class DomainObjectBasedPageInformationParser implements
+public class DomainObjectBasedPageMapper implements
         MapFunction<String, Page> {
     @Override
     public Page map(String value) throws Exception {
