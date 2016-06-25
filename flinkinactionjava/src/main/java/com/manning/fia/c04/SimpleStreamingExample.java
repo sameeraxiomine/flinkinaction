@@ -18,7 +18,7 @@ public class SimpleStreamingExample {
                     .createLocalEnvironment(1);
         DataStream<String> socketStream = execEnv.socketTextStream(
                     "localhost", 9000);
-        socketStream.map(new NewsFeedMapper()).keyBy(1, 2).sum(3).print();
+        socketStream.map(new NewsFeedMapper()).keyBy(1, 2).sum(4).print();
         execEnv.execute("Simple Streaming");
     }
 
