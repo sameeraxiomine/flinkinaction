@@ -11,7 +11,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  * of Windows as it is basically KeyedStream
  *
  */
-public class SimpleStreamingForMedia {
+public class SimpleStreamingExample {
 
     public void executeJob() throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
@@ -23,7 +23,7 @@ public class SimpleStreamingForMedia {
     }
 
     public static void main(String[] args) throws Exception {
-        final SimpleStreamingForMedia window = new SimpleStreamingForMedia();
+        final SimpleStreamingExample window = new SimpleStreamingExample();
         window.executeJob();
     }
 }
