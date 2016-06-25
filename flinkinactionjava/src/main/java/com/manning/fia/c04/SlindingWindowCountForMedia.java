@@ -1,6 +1,6 @@
 package com.manning.fia.c04;
 
-import com.manning.fia.transformations.media.MapTokenizeNewsFeed;
+import com.manning.fia.transformations.media.NewsFeedMapper;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -14,8 +14,8 @@ public class SlindingWindowCountForMedia {
         try {
             final StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
             final DataStream<String> socketStream = execEnv.socketTextStream("localhost", 9000);
-            socketStream.map(new MapTokenizeNewsFeed())
-                    .keyBy(0, 1)
+            socketStream.map(new NewsFeedMapper())
+                    .keyBy(1, 2)
                     .countWindow(4, 1)
                     .sum(2)
                     .print();
