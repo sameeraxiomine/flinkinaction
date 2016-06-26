@@ -14,6 +14,17 @@ import java.util.Scanner;
 public class NewsFeedSocket extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(NewsFeedSocket.class);
+    private static final String DEFAULT_FILE_NAME="/media/pipe/newsfeed";
+
+    private final String fileName;
+
+    NewsFeedSocket(){
+        this.fileName=DEFAULT_FILE_NAME;
+    }
+
+    NewsFeedSocket(String fileName){
+        this.fileName=fileName;
+    }
 
     @Override
     public void run() {
@@ -30,7 +41,7 @@ public class NewsFeedSocket extends Thread {
 
         final ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
         final Socket socket = serverSocket.accept();
-        final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream("/media/pipe/newsfeed"));
+        final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream(fileName));
         while (scanner.hasNext()) {
             final String value = scanner.nextLine() + '\n';
             IOUtils.write(value.getBytes(), socket.getOutputStream());
