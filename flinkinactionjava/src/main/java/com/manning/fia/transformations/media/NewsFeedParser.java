@@ -25,7 +25,6 @@ public class NewsFeedParser {
 
     public static NewsFeed mapRow(String value) {
         final String[] tokens = value.toLowerCase().split("\\|");
-        
         final long eventId = Long.valueOf(tokens[0]);
         final long pageId = Long.valueOf(tokens[1]);
 

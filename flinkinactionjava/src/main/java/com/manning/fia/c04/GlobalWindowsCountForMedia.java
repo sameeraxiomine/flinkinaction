@@ -30,7 +30,7 @@ public class GlobalWindowsCountForMedia {
                     .keyBy(0, 1)
                     .window(GlobalWindows.create()) //windows assigner
                     .trigger(CountTrigger.of(5)) //trigger if the keycombination count is more than 5
-                    .sum(2)
+                    .sum(4)
                     .print();
 
             execEnv.execute("Global Windows with Trigger");
@@ -41,6 +41,7 @@ public class GlobalWindowsCountForMedia {
     }
 
     public static void main(String[] args) throws Exception {
+        new NewsFeedSocket().start();
         final GlobalWindowsCountForMedia window = new GlobalWindowsCountForMedia();
         window.executeJob();
 

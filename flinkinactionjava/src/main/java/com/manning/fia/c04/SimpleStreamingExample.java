@@ -23,6 +23,7 @@ public class SimpleStreamingExample {
     }
 
     public static void main(String[] args) throws Exception {
+        new NewsFeedSocket().start();
         final SimpleStreamingExample window = new SimpleStreamingExample();
         window.executeJob();
     }

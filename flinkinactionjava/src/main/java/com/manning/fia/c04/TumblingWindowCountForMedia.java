@@ -14,7 +14,7 @@ public class TumblingWindowCountForMedia {
             socketStream.map(new NewsFeedMapper())
                     .keyBy(1, 2)
                     .countWindow(3)
-                    .sum(2)
+                    .sum(4)
                     .print();
             execEnv.execute("Tumbling Count Window");
 
@@ -24,8 +24,11 @@ public class TumblingWindowCountForMedia {
     }
 
     public static void main(String[] args) throws Exception {
+        NewsFeedSocket newsFeedSocket=new NewsFeedSocket();
+        newsFeedSocket.start();
         final TumblingWindowCountForMedia window = new TumblingWindowCountForMedia();
         window.executeJob();
+
 
     }
 }

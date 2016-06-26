@@ -16,7 +16,7 @@ public class TumblingWindowForMedia {
             socketStream.map(new NewsFeedMapper())
                     .keyBy(1, 2)
                     .timeWindow(Time.seconds(30))
-                    .sum(3)
+                    .sum(4)
                     .print();
 
             execEnv.execute("Tumbling Time Window");
@@ -27,6 +27,7 @@ public class TumblingWindowForMedia {
     }
 
     public static void main(String[] args) throws Exception {
+        new NewsFeedSocket().start();
         final TumblingWindowForMedia window = new TumblingWindowForMedia();
         window.executeJob();
 
