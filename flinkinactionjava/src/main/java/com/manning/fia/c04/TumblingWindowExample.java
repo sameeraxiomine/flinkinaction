@@ -9,10 +9,9 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-public class TumblingWindowForExample {
+public class TumblingWindowExample {
 
 
     public void executeJob() {
@@ -45,7 +44,7 @@ public class TumblingWindowForExample {
 
     public static void main(String[] args) throws Exception {
         new NewsFeedSocket().start();
-        TumblingWindowForExample window = new TumblingWindowForExample();
+        TumblingWindowExample window = new TumblingWindowExample();
         window.executeJob();
 
     }

@@ -4,8 +4,6 @@ import com.manning.fia.transformations.media.NewsFeedMapper;
 
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple5;
-import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
@@ -31,7 +29,7 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
  * .timeWindow(Time.Seconds(5)) interally window(TumblingProcessingTimeWindows)
  * is called , which has the ProcessingTimeTrigger
  */
-public class GlobalWindowsCountForExample {
+public class GlobalWindowsCountExample {
 
     public void executeJob() throws Exception {
          StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
@@ -63,7 +61,7 @@ public class GlobalWindowsCountForExample {
 
     public static void main(String[] args) throws Exception {
         new NewsFeedSocket("/media/pipe/newsfeed_for_count_windows").start();
-         GlobalWindowsCountForExample window = new GlobalWindowsCountForExample();
+         GlobalWindowsCountExample window = new GlobalWindowsCountExample();
         window.executeJob();
 
     }
