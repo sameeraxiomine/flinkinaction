@@ -10,7 +10,6 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 public class TumblingWindowForExample {
@@ -26,8 +25,9 @@ public class TumblingWindowForExample {
                     .timeWindow(Time.seconds(5));
             final DataStream<Tuple5<Long, String, String, String, Long>> result = windowedStream.
                     sum(4);
-            result.project(1, 2, 4).print();
-           execEnv.execute("Tumbling Time Window");
+            final DataStream<Tuple3<String, String, Long>> projectedResult = result.project(1, 2, 4);
+            projectedResult.print();
+            execEnv.execute("Tumbling Time Window");
 
         } catch (Exception ex) {
             Throwables.propagate(ex);
@@ -35,7 +35,7 @@ public class TumblingWindowForExample {
     }
 
     public static void main(String[] args) throws Exception {
-//        new NewsFeedSocket().start();
+        new NewsFeedSocket().start();
         final TumblingWindowForExample window = new TumblingWindowForExample();
         window.executeJob();
 
