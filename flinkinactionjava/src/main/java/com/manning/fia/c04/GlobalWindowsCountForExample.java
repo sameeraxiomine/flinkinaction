@@ -39,7 +39,7 @@ public class GlobalWindowsCountForExample {
             final WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
                     .window(GlobalWindows.create()); //windows assigner
 
-            windowedStream.trigger(CountTrigger.of(5));//trigger if the keycombination count is more than 5
+            windowedStream.trigger(CountTrigger.of(3));//trigger if the keycombination count is more than 3
 
             final DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
             result.print();
