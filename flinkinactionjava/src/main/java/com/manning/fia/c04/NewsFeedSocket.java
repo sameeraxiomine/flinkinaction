@@ -44,6 +44,7 @@ public class NewsFeedSocket extends Thread {
         final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream(fileName));
         while (scanner.hasNext()) {
             final String value = scanner.nextLine() + '\n';
+            System.err.println(value);
             IOUtils.write(value.getBytes(), socket.getOutputStream());
         }
 

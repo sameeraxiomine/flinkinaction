@@ -52,7 +52,7 @@ public class GlobalWindowsCountForExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket().start();
+        new NewsFeedSocket("/media/pipe/newsfeed_for_count_windows").start();
         final GlobalWindowsCountForExample window = new GlobalWindowsCountForExample();
         window.executeJob();
 
