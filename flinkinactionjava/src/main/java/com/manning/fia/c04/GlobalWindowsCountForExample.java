@@ -34,30 +34,36 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 public class GlobalWindowsCountForExample {
 
     public void executeJob() throws Exception {
-        final StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
+         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .createLocalEnvironment(1);
-        final DataStream<String> socketStream = execEnv.socketTextStream(
+
+         DataStream<String> socketStream = execEnv.socketTextStream(
                 "localhost", 9000);
-        final DataStream<Tuple3<String, String, Long>> selectDS = socketStream
+
+         DataStream<Tuple3<String, String, Long>> selectDS = socketStream
                 .map(new NewsFeedMapper()).project(1, 2, 4);
-        final KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
+
+         KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
                 .keyBy(0, 1);
-        final WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
+
+         WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
                 .window(GlobalWindows.create()); // windows assigner
 
         windowedStream.trigger(CountTrigger.of(2));// trigger if the
                                                    // keycombination count is
                                                    // more than 5
 
-        final DataStream<Tuple3<String, String, Long>> result = windowedStream
+         DataStream<Tuple3<String, String, Long>> result = windowedStream
                 .sum(2);
+
         result.print();
+
         execEnv.execute("Global Windows with Trigger");
     }
 
     public static void main(String[] args) throws Exception {
         new NewsFeedSocket("/media/pipe/newsfeed_for_count_windows").start();
-        final GlobalWindowsCountForExample window = new GlobalWindowsCountForExample();
+         GlobalWindowsCountForExample window = new GlobalWindowsCountForExample();
         window.executeJob();
 
     }

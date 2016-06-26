@@ -3,7 +3,6 @@ package com.manning.fia.c04;
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -18,16 +17,25 @@ public class SlidingWindowExample {
 
     public void executeJob() {
         try {
-            final StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
-            final DataStream<String> socketStream = execEnv.socketTextStream("localhost", 9000);
-            final DataStream<Tuple5<Long, String, String, String, Long>> selectDS = socketStream.map(new NewsFeedMapper());
-            final KeyedStream<Tuple5<Long, String, String, String, Long>, Tuple> keyedDS = selectDS.keyBy(1, 2);
-            final WindowedStream<Tuple5<Long, String, String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
-                    .timeWindow(Time.seconds(15), Time.seconds(5));
-            final DataStream<Tuple5<Long, String, String, String, Long>> result = windowedStream.
-                    sum(4);
-            final DataStream<Tuple3<String, String, Long>> projectedResult = result.project(1, 2, 4);
-            projectedResult.print();
+            StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
+                    .createLocalEnvironment(1);
+
+            DataStream<String> socketStream = execEnv.socketTextStream(
+                    "localhost", 9000);
+
+            DataStream<Tuple3<String, String, Long>> selectDS = socketStream
+                    .map(new NewsFeedMapper()).project(1, 2, 4);
+
+             KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.
+                     keyBy(1, 2);
+
+             WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
+                     .timeWindow(Time.seconds(15), Time.seconds(5));
+
+             DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+
+            result.print();
+
             execEnv.execute("Sliding Windows");
 
         } catch (Exception ex) {
@@ -37,7 +45,7 @@ public class SlidingWindowExample {
 
     public static void main(String[] args) throws Exception {
         new NewsFeedSocket().start();
-        final SlidingWindowExample window = new SlidingWindowExample();
+         SlidingWindowExample window = new SlidingWindowExample();
         window.executeJob();
 
     }
