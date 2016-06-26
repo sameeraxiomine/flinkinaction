@@ -25,7 +25,8 @@ public class TumblingWindowCountExample {
                     .countWindow(5);
             final DataStream<Tuple5<Long, String, String, String, Long>> result = windowedStream.
                     sum(4);
-            result.project(1, 2, 4).print();
+            final DataStream<Tuple3<String, String, Long>> projectedResult = result.project(1, 2, 4);
+            projectedResult.print();
             execEnv.execute("Tumbling Count Window");
 
         } catch (Exception ex) {

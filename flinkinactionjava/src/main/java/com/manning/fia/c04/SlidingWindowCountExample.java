@@ -9,9 +9,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 /**
  * Created by hari on 5/30/16.
@@ -28,7 +26,8 @@ public class SlidingWindowCountExample {
                     .countWindow(4, 1);
             final DataStream<Tuple5<Long, String, String, String, Long>> result = windowedStream.
                     sum(4);
-            result.project(1, 2, 4).print();
+            final DataStream<Tuple3<String, String, Long>> projectedResult = result.project(1, 2, 4);
+            projectedResult.print();
             execEnv.execute("Sliding Count Window");
 
         } catch (Exception ex) {

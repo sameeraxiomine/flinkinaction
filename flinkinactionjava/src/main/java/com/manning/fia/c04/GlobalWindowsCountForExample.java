@@ -39,7 +39,8 @@ public class GlobalWindowsCountForExample {
             windowedStream.trigger(CountTrigger.of(3));//trigger if the keycombination count is more than 5
             final DataStream<Tuple5<Long, String, String, String, Long>> result = windowedStream.
                     sum(4);
-            result.project(1, 2, 4).print();
+            final DataStream<Tuple3<String, String, Long>> projectedResult = result.project(1, 2, 4);
+            projectedResult.print();
             execEnv.execute("Global Windows with Trigger");
 
         } catch (Exception ex) {
