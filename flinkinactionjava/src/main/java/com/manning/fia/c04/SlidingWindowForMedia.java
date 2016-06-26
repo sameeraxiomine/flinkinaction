@@ -16,7 +16,7 @@ public class SlidingWindowForMedia {
             socketStream.map(new NewsFeedMapper())
                     .keyBy(1, 2)
                     .timeWindow(Time.seconds(15), Time.seconds(5))
-                    .sum(3)
+                    .sum(4)
                     .print();
 
             execEnv.execute("Sliding Windows");
@@ -27,6 +27,7 @@ public class SlidingWindowForMedia {
     }
 
     public static void main(String[] args) throws Exception {
+        new NewsFeedSocket().start();
         final SlidingWindowForMedia window = new SlidingWindowForMedia();
         window.executeJob();
 
