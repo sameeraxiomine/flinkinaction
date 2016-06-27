@@ -4,12 +4,15 @@ import com.manning.fia.transformations.media.NewsFeedMapper;
 
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.streaming.api.datastream.ConnectedStreams;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
 import org.apache.flink.streaming.api.windowing.triggers.CountTrigger;
+import org.apache.flink.streaming.api.windowing.triggers.PurgingTrigger;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 
 /**
@@ -46,8 +49,8 @@ public class GlobalWindowsCountExample {
 
          WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
                 .window(GlobalWindows.create()); // windows assigner
-
-        windowedStream.trigger(CountTrigger.of(2));// trigger if the
+         
+        windowedStream.trigger(PurgingTrigger.of(CountTrigger.of(3)));// trigger if the
                                                    // keycombination count is
                                                    // more than 5
 
