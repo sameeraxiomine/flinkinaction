@@ -13,8 +13,28 @@
 13|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.1.2
 14|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.1.1
 15|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.1.2
-16|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000013|Browser|uuid1|ssid1|10.200.1.1
-17|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000003|Browser|uuid1|ssid1|10.200.1.2
-18|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000013|Browser|uuid1|ssid1|10.200.1.1
-19|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000014|Browser|uuid1|ssid1|10.200.1.2
-20|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000014|Browser|uuid1|ssid1|10.200.1.1
+16|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000026|20160101000033|Browser|uuid1|ssid1|10.200.1.1
+17|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000063|Browser|uuid1|ssid1|10.200.1.2
+18|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000004|20160101000013|Browser|uuid1|ssid1|10.200.1.1
+19|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000009|20160101000014|Browser|uuid1|ssid1|10.200.1.2
+20|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000007|20160101000014|Browser|uuid1|ssid1|10.200.1.1
+21|001|Facebook|Politics|Elections|2016 Election1|Hillary:Win|20160101000001|20160101000005|Browser|uuid|ssid|10.200.1.1
+22|002|Home Page|Politics|Elections|2016 Election2|Trump:Win:|20160101000006|20160101000008|Mobile|uuid|ssid|10.200.1.1
+23|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000009|Browser|uuid1|ssid1|10.200.1.2
+24|103|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000009|Browser|uuid1|ssid1|10.200.1.1
+25|104|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000009|Browser|uuid1|ssid1|10.200.1.2
+26|105|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000010|Browser|uuid1|ssid1|10.200.1.1
+27|106|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000010|Browser|uuid1|ssid1|10.200.1.2
+28|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000010|Browser|uuid1|ssid1|10.200.1.1
+29|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000011|Browser|uuid1|ssid1|10.200.1.2
+30|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000011|Browser|uuid1|ssid1|10.200.1.1
+31|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000011|Browser|uuid1|ssid1|10.200.1.2
+32|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.1.1
+33|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.1.2
+34|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.1.1
+35|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.1.2
+36|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000026|20160101000033|Browser|uuid1|ssid1|10.200.1.1
+37|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000063|Browser|uuid1|ssid1|10.200.1.2
+38|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000004|20160101000013|Browser|uuid1|ssid1|10.200.1.1
+39|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000009|20160101000014|Browser|uuid1|ssid1|10.200.1.2
+40|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000007|20160101000014|Browser|uuid1|ssid1|10.200.1.1
