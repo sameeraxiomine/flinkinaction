@@ -1,6 +1,7 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
+
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
@@ -14,39 +15,36 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 public class TumblingWindowCountExample {
 
-    public void executeJob() {
-        try {
-            StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                    .createLocalEnvironment(1);
+    public void executeJob() throws Exception {
 
-            DataStream<String> socketStream = execEnv.socketTextStream(
-                    "localhost", 9000);
+        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
+                .createLocalEnvironment(1);
 
-            DataStream<Tuple3<String, String, Long>> selectDS = socketStream
-                    .map(new NewsFeedMapper()).project(1, 2, 4);
+        DataStream<String> socketStream = execEnv.socketTextStream("localhost",
+                9000);
 
-            KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.keyBy(1, 2);
+        DataStream<Tuple3<String, String, Long>> selectDS = socketStream.map(
+                new NewsFeedMapper()).project(1, 2, 4);
 
-            WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
-                    .countWindow(3);
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
+                .keyBy(0, 1);
 
-            DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
+                .countWindow(3);
 
-            result.print();
+        DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
 
-            execEnv.execute("Tumbling Count Window");
+        result.print();
 
-        } catch (Exception ex) {
-            Throwables.propagate(ex);
-        }
+        execEnv.execute("Tumbling Count Window");
+
     }
 
     public static void main(String[] args) throws Exception {
-        NewsFeedSocket newsFeedSocket = new NewsFeedSocket();
-        newsFeedSocket.start();
+        new NewsFeedSocket("/media/pipe/newsfeed_for_count_windows").start();
+
         TumblingWindowCountExample window = new TumblingWindowCountExample();
         window.executeJob();
-
 
     }
 }

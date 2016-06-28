@@ -43,20 +43,17 @@ public class GlobalWindowsCountExample {
 
          DataStream<Tuple3<String, String, Long>> selectDS = socketStream
                 .map(new NewsFeedMapper()).project(1, 2, 4);
-
+         
          KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
                 .keyBy(0, 1);
 
          WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
-                .window(GlobalWindows.create()); // windows assigner
+                .window(GlobalWindows.create()); 
          
-        windowedStream.trigger(PurgingTrigger.of(CountTrigger.of(3)));// trigger if the
-                                                   // keycombination count is
-                                                   // more than 5
+        windowedStream.trigger(PurgingTrigger.of(CountTrigger.of(3)));
 
          DataStream<Tuple3<String, String, Long>> result = windowedStream
                 .sum(2);
-
         result.print();
 
         execEnv.execute("Global Windows with Trigger");
