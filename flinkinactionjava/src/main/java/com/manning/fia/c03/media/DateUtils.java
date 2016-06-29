@@ -7,16 +7,23 @@ import java.util.Date;
 import org.apache.flink.hadoop.shaded.com.google.common.base.Throwables;
 
 import com.manning.fia.model.media.NewsFeed;
+import org.joda.time.format.DateTimeFormat;
 
-public class DateUtils implements Serializable{
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-    public long getTimeSpentOnPage(NewsFeed event){
+public class DateUtils implements Serializable {
+
+    public long getTimeSpentOnPage(NewsFeed event) {
         long timeSpent = 0;
-        try{
-            Date startTs = sdf.parse(event.getStartTimeStamp());
-            Date endTs = sdf.parse(event.getEndTimeStamp());
-            timeSpent = endTs.getTime()-startTs.getTime();
-        }catch(Exception ex){
+        try {
+            long startTs = DateTimeFormat.forPattern("yyyyMMddHHmmss")
+                                          .parseDateTime(event.getStartTimeStamp())
+                                          .getMillis();
+
+            long endTs = DateTimeFormat.forPattern("yyyyMMddHHmmss")
+                                        .parseDateTime(event.getEndTimeStamp())
+                                        .getMillis();
+
+            timeSpent = endTs - startTs;
+        } catch (Exception ex) {
             Throwables.propagate(ex);
         }
         return timeSpent;
