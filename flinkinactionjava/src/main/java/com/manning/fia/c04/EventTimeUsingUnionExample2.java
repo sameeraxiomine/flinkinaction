@@ -75,11 +75,16 @@ public class EventTimeUsingUnionExample2 {
         private static final long serialVersionUID = 1L;
 
         private long maxTimestamp=0;
-
+        private long priorTimestamp=0;
 
         @Override
         public Watermark getCurrentWatermark() {
             //System.out.println(new Date(maxTimestamp));
+            if(maxTimestamp==priorTimestamp){
+                maxTimestamp+=1000;
+            }
+            priorTimestamp=maxTimestamp;
+            
             return new Watermark(maxTimestamp);
         }
 
@@ -87,7 +92,7 @@ public class EventTimeUsingUnionExample2 {
         public long extractTimestamp(Tuple5<Long, String, String, String, String> element, long previousElementTimestamp) {
             long millis= DateTimeFormat.forPattern("yyyyMMddHHmmss")
             .parseDateTime(element.f3).getMillis();//Always delay watermarks by 5 seconds
-            maxTimestamp = Math.max(maxTimestamp, millis+3000);
+            maxTimestamp = Math.max(maxTimestamp, millis-3000);
             //System.out.println("DD=="+new Date(maxTimestamp));
             return Long.valueOf(millis);
         }
