@@ -14,16 +14,52 @@ import java.util.Scanner;
 public class NewsFeedSocket extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(NewsFeedSocket.class);
-    private static final String DEFAULT_FILE_NAME="/media/pipe/newsfeed";
+    private static final String DEFAULT_FILE_NAME = "/media/pipe/newsfeed";
+    private static final int SLEEP_INTERVAL = 0;
+    private static int PORT_NUMBER = 9000;
 
     private final String fileName;
 
-    NewsFeedSocket(){
-        this.fileName=DEFAULT_FILE_NAME;
+    private final int threadSleepInterval;
+
+    private final int portNumber;
+
+    NewsFeedSocket() {
+        this.fileName = DEFAULT_FILE_NAME;
+        this.threadSleepInterval = SLEEP_INTERVAL;
+        this.portNumber = PORT_NUMBER;
     }
 
-    NewsFeedSocket(String fileName){
-        this.fileName=fileName;
+    NewsFeedSocket(int threadSleepInterval) {
+        this.threadSleepInterval = threadSleepInterval;
+        this.fileName = DEFAULT_FILE_NAME;
+        this.portNumber = PORT_NUMBER;
+    }
+
+
+    NewsFeedSocket(int threadSleepInterval, int portNumber) {
+        this.threadSleepInterval = threadSleepInterval;
+        this.portNumber = portNumber;
+        this.fileName = DEFAULT_FILE_NAME;
+
+    }
+
+    NewsFeedSocket(String fileName) {
+        this.fileName = fileName;
+        this.portNumber = PORT_NUMBER;
+        this.threadSleepInterval = SLEEP_INTERVAL;
+    }
+
+    NewsFeedSocket(String fileName, int portNumber) {
+        this.fileName = fileName;
+        this.portNumber = portNumber;
+        this.threadSleepInterval = SLEEP_INTERVAL;
+    }
+
+    NewsFeedSocket(String fileName, int threadSleepInterval, int portNumber) {
+        this.fileName = fileName;
+        this.threadSleepInterval = threadSleepInterval;
+        this.portNumber = portNumber;
     }
 
     @Override
@@ -35,17 +71,16 @@ public class NewsFeedSocket extends Thread {
         }
     }
 
-    private static int PORT_NUMBER = 9000;
 
     public void write() throws Exception {
 
-        final ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
+        final ServerSocket serverSocket = new ServerSocket(portNumber);
         final Socket socket = serverSocket.accept();
         final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream(fileName));
         while (scanner.hasNext()) {
             final String value = scanner.nextLine() + '\n';
-            //System.err.println(value);
             IOUtils.write(value.getBytes(), socket.getOutputStream());
+            Thread.sleep(threadSleepInterval);
         }
 
     }

@@ -30,6 +30,7 @@ public class ApplyFunction implements WindowFunction<
             Exception {
 
         String section = ((Tuple2<String, String>) key).f0;
+
         String subSection = ((Tuple2<String, String>) key).f1;
         List<Long> eventIds = new ArrayList<Long>(0);
         List<Tuple5<Long, String, String, String, String>> list = IteratorUtils.toList(inputs.iterator());
