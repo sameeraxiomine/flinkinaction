@@ -76,15 +76,18 @@ public class EventTimeUsingUnionExample2 {
 
         private long maxTimestamp=0;
         private long priorTimestamp=0;
-
+        private long lastTimeOfWaterMarking=System.currentTimeMillis();
         @Override
         public Watermark getCurrentWatermark() {
             //System.out.println(new Date(maxTimestamp));
             if(maxTimestamp==priorTimestamp){
-                maxTimestamp+=1000;
+                long advance = (System.currentTimeMillis()-lastTimeOfWaterMarking);
+                //System.err.println("Advancing " + advance);
+                maxTimestamp+=maxTimestamp;//Start advancing
+                
             }
             priorTimestamp=maxTimestamp;
-            
+            lastTimeOfWaterMarking = System.currentTimeMillis();
             return new Watermark(maxTimestamp);
         }
 
@@ -92,22 +95,12 @@ public class EventTimeUsingUnionExample2 {
         public long extractTimestamp(Tuple5<Long, String, String, String, String> element, long previousElementTimestamp) {
             long millis= DateTimeFormat.forPattern("yyyyMMddHHmmss")
             .parseDateTime(element.f3).getMillis();//Always delay watermarks by 5 seconds
-            maxTimestamp = Math.max(maxTimestamp, millis-3000);
+            maxTimestamp = Math.max(maxTimestamp, millis-5000);
             //System.out.println("DD=="+new Date(maxTimestamp));
             return Long.valueOf(millis);
         }
     }
-    private static class NewsFeedTimeStamp2 extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>> {
-        private static final long serialVersionUID = 1L;
 
-        @Override
-        public long extractAscendingTimestamp(Tuple5<Long, String, String, String, String> element) {
-            
-            return Long.valueOf(DateTimeFormat.forPattern("yyyyMMddHHmmss")
-                    .parseDateTime(element.f3)
-                    .getMillis());
-        }
-    }
     public static void main(String[] args) throws Exception {
         new NewsFeedSocket("/media/pipe/newsfeed2",9000).start();
         new NewsFeedSocket("/media/pipe/newsfeed2",8000).start();

@@ -1,5 +1,6 @@
 package com.manning.fia.c04;
 
+
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper3;
 
@@ -36,24 +37,22 @@ public class EventTimeUsingUnionExample {
 
             execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-            DataStream<String> socketStream = execEnv.socketTextStream(
-                    "localhost", 9000);
+            DataStream<Tuple5<Long, String, String, String, String>>  socketStream = execEnv.socketTextStream(
+                    "localhost", 9000).map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-            DataStream<String> secondSocketStream = execEnv.socketTextStream(
-                    "localhost", 8000);
+            DataStream<Tuple5<Long, String, String, String, String>>  secondSocketStream = execEnv.socketTextStream(
+                    "localhost", 8000).map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
 
-            DataStream<String> unionSocketStream = socketStream.union(secondSocketStream);
+            DataStream<Tuple5<Long, String, String, String, String>> unionSocketStream = socketStream.union(secondSocketStream);
 
-            DataStream<Tuple5<Long, String, String, String, String>> selectDS = unionSocketStream
-                    .map(new NewsFeedMapper3());
+            
+                    
 
             //unionSocketStream.print();
 
-            DataStream<Tuple5<Long, String, String, String, String>> timestampsAndWatermarksDS = selectDS
-                    .assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-            KeyedStream<Tuple5<Long, String, String, String, String>, Tuple> keyedDS = timestampsAndWatermarksDS
+            KeyedStream<Tuple5<Long, String, String, String, String>, Tuple> keyedDS = unionSocketStream
                     .keyBy(1, 2);
 
 
@@ -61,7 +60,7 @@ public class EventTimeUsingUnionExample {
                     .timeWindow(Time.seconds(2));
 
 
-            DataStream<Tuple6<Long,Long, List<Long>,String, String, Long >> result = windowedStream
+            DataStream<Tuple6<Long, Long,List<Long>, String, String, Long>> result = windowedStream
                     .apply(new ApplyFunction());
 
             result.print();
@@ -86,7 +85,7 @@ public class EventTimeUsingUnionExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket().start();
+        new NewsFeedSocket("/media/pipe/newsfeed2",9000).start();
         new NewsFeedSocket("/media/pipe/newsfeed2",8000).start();
 
         EventTimeUsingUnionExample window = new EventTimeUsingUnionExample();
