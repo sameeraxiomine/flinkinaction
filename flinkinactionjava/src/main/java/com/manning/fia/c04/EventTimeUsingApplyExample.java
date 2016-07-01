@@ -2,6 +2,7 @@ package com.manning.fia.c04;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper3;
+
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
@@ -15,6 +16,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.joda.time.format.DateTimeFormat;
 
 import java.util.List;
 
@@ -65,7 +67,10 @@ public class EventTimeUsingApplyExample {
 
         @Override
         public long extractAscendingTimestamp(Tuple5<Long, String, String, String, String> element) {
-            return Long.valueOf(element.f3);
+            
+            return Long.valueOf(DateTimeFormat.forPattern("yyyyMMddHHmmss")
+                    .parseDateTime(element.f3)
+                    .getMillis());
         }
     }
 
