@@ -15,6 +15,8 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.AscendingTimestampExtractor;
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
+import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.joda.time.format.DateTimeFormat;
@@ -63,7 +65,7 @@ public class EventTimeUsingApplyExample {
         }
     }
 
-    private static class NewsFeedTimeStamp extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>> {
+    private static class NewsFeedTimeStamp2 extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>> {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -72,6 +74,32 @@ public class EventTimeUsingApplyExample {
             return Long.valueOf(DateTimeFormat.forPattern("yyyyMMddHHmmss")
                     .parseDateTime(element.f3)
                     .getMillis());
+        }
+    }
+    
+    private static class NewsFeedTimeStamp implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>> {
+        private static final long serialVersionUID = 1L;
+        private long maxTimestamp=0;
+        private long priorTimestamp=0;
+        private long lastTimeOfWaterMarking=System.currentTimeMillis();
+        @Override
+        public Watermark getCurrentWatermark() {
+            if(maxTimestamp==priorTimestamp){
+                long advance = (System.currentTimeMillis()-lastTimeOfWaterMarking);
+                maxTimestamp+=advance;//Start advancing                
+            }
+            priorTimestamp=maxTimestamp;
+            lastTimeOfWaterMarking = System.currentTimeMillis();
+            return new Watermark(maxTimestamp);
+        }
+
+        @Override
+        public long extractTimestamp(Tuple5<Long, String, String, String, String> element, long previousElementTimestamp) {
+            long millis= DateTimeFormat.forPattern("yyyyMMddHHmmss")
+            .parseDateTime(element.f3).getMillis();//Always delay watermarks by 5 seconds
+            maxTimestamp = Math.max(maxTimestamp, millis-5000);
+            //System.out.println("DD=="+new Date(maxTimestamp));
+            return Long.valueOf(millis);
         }
     }
 

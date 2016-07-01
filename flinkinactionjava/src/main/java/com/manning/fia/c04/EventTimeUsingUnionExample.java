@@ -72,7 +72,7 @@ public class EventTimeUsingUnionExample {
         }
     }
 
-    private static class NewsFeedTimeStamp extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>> {
+    private static class NewsFeedTimeStamp2 extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>> {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -83,10 +83,37 @@ public class EventTimeUsingUnionExample {
                     .getMillis());
         }
     }
+    
+    private static class NewsFeedTimeStamp implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>> {
+        private static final long serialVersionUID = 1L;
+        private long maxTimestamp=0;
+        private long priorTimestamp=0;
+        private long lastTimeOfWaterMarking=System.currentTimeMillis();
+        @Override
+        public Watermark getCurrentWatermark() {
+            if(maxTimestamp==priorTimestamp){
+                long advance = (System.currentTimeMillis()-lastTimeOfWaterMarking);
+                maxTimestamp+=advance;//Start advancing
+                
+            }
+            priorTimestamp=maxTimestamp;
+            lastTimeOfWaterMarking = System.currentTimeMillis();
+            return new Watermark(maxTimestamp);
+        }
+
+        @Override
+        public long extractTimestamp(Tuple5<Long, String, String, String, String> element, long previousElementTimestamp) {
+            long millis= DateTimeFormat.forPattern("yyyyMMddHHmmss")
+            .parseDateTime(element.f3).getMillis();//Always delay watermarks by 5 seconds
+            maxTimestamp = Math.max(maxTimestamp, millis-5000);
+            //System.out.println("DD=="+new Date(maxTimestamp));
+            return Long.valueOf(millis);
+        }
+    }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed2",9000).start();
-        new NewsFeedSocket("/media/pipe/newsfeed2",8000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed2",1000,9000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed2",4000,8000).start();
 
         EventTimeUsingUnionExample window = new EventTimeUsingUnionExample();
         window.executeJob();
