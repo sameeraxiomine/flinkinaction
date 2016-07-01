@@ -80,7 +80,7 @@ public class NewsFeedSocket extends Thread {
         while (scanner.hasNext()) {
             final String value = scanner.nextLine() + '\n';
             IOUtils.write(value.getBytes(), socket.getOutputStream());
-            Thread.sleep(threadSleepInterval);
+            Thread.currentThread().sleep(threadSleepInterval);
         }
 
     }
