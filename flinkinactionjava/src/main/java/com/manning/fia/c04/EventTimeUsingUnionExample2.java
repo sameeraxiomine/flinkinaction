@@ -20,12 +20,13 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.joda.time.format.DateTimeFormat;
 
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by hari on 6/26/16.
  */
-public class EventTimeUsingUnionExample {
+public class EventTimeUsingUnionExample2 {
 
     public void executeJob() {
         try {
@@ -36,24 +37,22 @@ public class EventTimeUsingUnionExample {
 
             execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-            DataStream<String> socketStream = execEnv.socketTextStream(
-                    "localhost", 9000);
+            DataStream<Tuple5<Long, String, String, String, String>>  socketStream = execEnv.socketTextStream(
+                    "localhost", 9000).map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-            DataStream<String> secondSocketStream = execEnv.socketTextStream(
-                    "localhost", 8000);
+            DataStream<Tuple5<Long, String, String, String, String>>  secondSocketStream = execEnv.socketTextStream(
+                    "localhost", 8000).map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
 
-            DataStream<String> unionSocketStream = socketStream.union(secondSocketStream);
+            DataStream<Tuple5<Long, String, String, String, String>> unionSocketStream = socketStream.union(secondSocketStream);
 
-            DataStream<Tuple5<Long, String, String, String, String>> selectDS = unionSocketStream
-                    .map(new NewsFeedMapper3());
+            
+                    
 
             //unionSocketStream.print();
 
-            DataStream<Tuple5<Long, String, String, String, String>> timestampsAndWatermarksDS = selectDS
-                    .assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-            KeyedStream<Tuple5<Long, String, String, String, String>, Tuple> keyedDS = timestampsAndWatermarksDS
+            KeyedStream<Tuple5<Long, String, String, String, String>, Tuple> keyedDS = unionSocketStream
                     .keyBy(1, 2);
 
 
@@ -61,7 +60,7 @@ public class EventTimeUsingUnionExample {
                     .timeWindow(Time.seconds(2));
 
 
-            DataStream<Tuple6<Long,Long, List<Long>,String, String, Long >> result = windowedStream
+            DataStream<Tuple6<Long, Long,List<Long>, String, String, Long>> result = windowedStream
                     .apply(new ApplyFunction());
 
             result.print();
@@ -72,8 +71,28 @@ public class EventTimeUsingUnionExample {
             Throwables.propagate(ex);
         }
     }
+    private static class NewsFeedTimeStamp implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>> {
+        private static final long serialVersionUID = 1L;
 
-    private static class NewsFeedTimeStamp extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>> {
+        private long maxTimestamp=0;
+
+
+        @Override
+        public Watermark getCurrentWatermark() {
+            //System.out.println(new Date(maxTimestamp));
+            return new Watermark(maxTimestamp);
+        }
+
+        @Override
+        public long extractTimestamp(Tuple5<Long, String, String, String, String> element, long previousElementTimestamp) {
+            long millis= DateTimeFormat.forPattern("yyyyMMddHHmmss")
+            .parseDateTime(element.f3).getMillis();//Always delay watermarks by 5 seconds
+            maxTimestamp = Math.max(maxTimestamp, millis+3000);
+            //System.out.println("DD=="+new Date(maxTimestamp));
+            return Long.valueOf(millis);
+        }
+    }
+    private static class NewsFeedTimeStamp2 extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>> {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -84,12 +103,11 @@ public class EventTimeUsingUnionExample {
                     .getMillis());
         }
     }
-
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket().start();
+        new NewsFeedSocket("/media/pipe/newsfeed2",9000).start();
         new NewsFeedSocket("/media/pipe/newsfeed2",8000).start();
 
-        EventTimeUsingUnionExample window = new EventTimeUsingUnionExample();
+        EventTimeUsingUnionExample2 window = new EventTimeUsingUnionExample2();
         window.executeJob();
 
     }

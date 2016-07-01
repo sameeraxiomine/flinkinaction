@@ -17,25 +17,25 @@ import java.util.List;
 /**
  * Created by hari on 6/26/16.
  */
+@SuppressWarnings("serial")
 public class ApplyFunction implements WindowFunction<
         Tuple5<Long, String, String, String, String>,
-        Tuple8<String, String, String, String, Long, Long, Long, List<Long>>,
+        Tuple6<Long, Long, List<Long>, String, String, Long>,
         Tuple,
         TimeWindow> {
     @Override
     public void apply(Tuple key,
                       TimeWindow window,
                       Iterable<Tuple5<Long, String, String, String, String>> inputs,
-                      Collector<Tuple8<String, String, String, String, Long, Long, Long, List<Long>>> out) throws
+                      Collector<Tuple6<Long, Long, List<Long>, String, String, Long>> out) throws
             Exception {
 
         String section = ((Tuple2<String, String>) key).f0;
-
         String subSection = ((Tuple2<String, String>) key).f1;
         List<Long> eventIds = new ArrayList<Long>(0);
         List<Tuple5<Long, String, String, String, String>> list = IteratorUtils.toList(inputs.iterator());
-        String firstEventStartTime = list.get(0).f3;
-        String lastEventStartTime = list.get(list.size() - 1).f3;
+        //String firstEventStartTime = list.get(0).f3;
+        //String lastEventStartTime = list.get(list.size() - 1).f3;
         long totalTimeSpent = 0;
         for (Tuple5<Long, String, String, String, String> input : list) {
             eventIds.add(input.f0);
@@ -43,18 +43,17 @@ public class ApplyFunction implements WindowFunction<
             long endTime = DateTimeFormat.forPattern("yyyyMMddHHmmss").parseDateTime(input.f4).getMillis();
             totalTimeSpent += endTime - startTime;
         }
-        long windowStart = window.getStart();
-        long windowEnd = window.getEnd();
+        long windowStart = Long.parseLong(DateTimeFormat.forPattern("yyyyMMddHHmmss").print(window.getStart()));
+        long windowEnd = Long.parseLong(DateTimeFormat.forPattern("yyyyMMddHHmmss").print(window.getEnd()));
 
 
-        out.collect(new Tuple8<>(
-                    section,
+        out.collect(new Tuple6<>(
+                   windowStart,
+                   windowEnd,
+                   eventIds,
+                   section,
                     subSection,
-                    firstEventStartTime,
-                    lastEventStartTime,
-                    windowStart,
-                    windowEnd,
-                    totalTimeSpent,
-                    eventIds));
+                    totalTimeSpent
+                    ));
     }
 }

@@ -6,6 +6,7 @@ import com.manning.fia.transformations.media.NewsFeedMapper3;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.tuple.Tuple8;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -50,7 +51,7 @@ public class EventTimeUsingApplyExample {
                     .timeWindow(Time.seconds(2), Time.seconds(1));
 
 
-            DataStream<Tuple8<String, String, String, String, Long, Long, Long, List<Long>>> result = windowedStream
+            DataStream<Tuple6<Long,Long, List<Long>,String, String, Long >> result = windowedStream
                     .apply(new ApplyFunction());
 
             result.print();
