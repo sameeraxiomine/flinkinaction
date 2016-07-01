@@ -100,7 +100,7 @@ public class EventTimeUsingUnionExample2 {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed2",1000,9000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed",1000,9000).start();
         new NewsFeedSocket("/media/pipe/newsfeed2",1000,8000).start();
 
         EventTimeUsingUnionExample2 window = new EventTimeUsingUnionExample2();

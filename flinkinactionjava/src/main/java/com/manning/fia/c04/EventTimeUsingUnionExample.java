@@ -83,7 +83,7 @@ public class EventTimeUsingUnionExample {
                     .getMillis());
         }
     }
-    
+
     private static class NewsFeedTimeStamp implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>> {
         private static final long serialVersionUID = 1L;
         private long maxTimestamp=0;
@@ -112,7 +112,7 @@ public class EventTimeUsingUnionExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed2",1000,9000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed",1000,9000).start();
         new NewsFeedSocket("/media/pipe/newsfeed2",4000,8000).start();
 
         EventTimeUsingUnionExample window = new EventTimeUsingUnionExample();
