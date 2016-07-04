@@ -24,38 +24,18 @@ public class NewsFeedSocket extends Thread {
 
     private final int portNumber;
     public static boolean stop = false;
+
     NewsFeedSocket() {
         this.fileName = DEFAULT_FILE_NAME;
         this.threadSleepInterval = SLEEP_INTERVAL;
         this.portNumber = PORT_NUMBER;
     }
 
-    NewsFeedSocket(int threadSleepInterval) {
-        this.threadSleepInterval = threadSleepInterval;
-        this.fileName = DEFAULT_FILE_NAME;
+    NewsFeedSocket(String fileName){
+        this.fileName = fileName;
+        this.threadSleepInterval = SLEEP_INTERVAL;
         this.portNumber = PORT_NUMBER;
     }
-
-
-    NewsFeedSocket(int threadSleepInterval, int portNumber) {
-        this.threadSleepInterval = threadSleepInterval;
-        this.portNumber = portNumber;
-        this.fileName = DEFAULT_FILE_NAME;
-
-    }
-
-    NewsFeedSocket(String fileName) {
-        this.fileName = fileName;
-        this.portNumber = PORT_NUMBER;
-        this.threadSleepInterval = SLEEP_INTERVAL;
-    }
-
-    NewsFeedSocket(String fileName, int portNumber) {
-        this.fileName = fileName;
-        this.portNumber = portNumber;
-        this.threadSleepInterval = SLEEP_INTERVAL;
-    }
-
     NewsFeedSocket(String fileName, int threadSleepInterval, int portNumber) {
         this.fileName = fileName;
         this.threadSleepInterval = threadSleepInterval;

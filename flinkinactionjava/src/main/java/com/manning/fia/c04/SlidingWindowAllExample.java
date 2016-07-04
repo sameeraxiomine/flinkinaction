@@ -3,15 +3,18 @@ package com.manning.fia.c04;
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.shaded.com.google.common.base.Throwables;
+import org.apache.flink.streaming.api.datastream.AllWindowedStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-public class TumblingWindowExample {
+import java.util.concurrent.TimeUnit;
+
+public class SlidingWindowAllExample {
     public void executeJob() throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .createLocalEnvironment(1);
@@ -25,20 +28,24 @@ public class TumblingWindowExample {
         KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
                 .keyBy(0, 1);
 
-        WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
-                .timeWindow(Time.seconds(5));
+        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = keyedDS
+               .timeWindowAll(Time.seconds(25),Time.seconds(5));
+
+        // Above code and the following  one are same.
+//        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = keyedDS
+//                .windowAll(SlidingProcessingTimeWindows.of(Time.seconds(25),Time.seconds(5)));
 
         DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
 
-        result.print();
+        result.project(2).print();
 
         execEnv.execute("Tumbling Time Window");
 
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed3", 1000, 9000).start();
-        TumblingWindowExample window = new TumblingWindowExample();
+        new NewsFeedSocket("/media/pipe/newsfeed3",1000,9000).start();
+        SlidingWindowAllExample window = new SlidingWindowAllExample();
         window.executeJob();
 
     }
