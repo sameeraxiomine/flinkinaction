@@ -41,7 +41,10 @@ public class NewsFeedSocket extends Thread {
         this.threadSleepInterval = threadSleepInterval;
         this.portNumber = portNumber;
     }
-
+    NewsFeedSocket(String fileName, int portNumber) {
+        this.fileName = fileName;
+        this.portNumber = portNumber;
+    }
     @Override
     public void run() {
         try {
