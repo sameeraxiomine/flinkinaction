@@ -91,7 +91,7 @@ public class TumblingEventTimeUsingApplyExample {
         System.out.println("Program Started at : "
                 + DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss")
                         .print(System.currentTimeMillis()));
-        new NewsFeedSocket("/media/pipe/newsfeed", 9000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed", 0,9000).start();
         TumblingEventTimeUsingApplyExample window = new TumblingEventTimeUsingApplyExample();
         window.executeJob();
     }

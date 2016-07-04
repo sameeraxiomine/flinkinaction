@@ -25,14 +25,12 @@ public class SlidingWindowAllExample {
         DataStream<Tuple3<String, String, Long>> selectDS = socketStream.map(
                 new NewsFeedMapper()).project(1, 2, 4);
 
-        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
-                .keyBy(0, 1);
 
-        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = keyedDS
+        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = selectDS
                .timeWindowAll(Time.seconds(25),Time.seconds(5));
 
         // Above code and the following  one are same.
-//        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = keyedDS
+//        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = selectDS
 //                .windowAll(SlidingProcessingTimeWindows.of(Time.seconds(25),Time.seconds(5)));
 
         DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
