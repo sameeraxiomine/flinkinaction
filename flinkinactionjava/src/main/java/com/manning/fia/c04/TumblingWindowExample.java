@@ -12,38 +12,32 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 public class TumblingWindowExample {
+    public void executeJob() throws Exception {
+        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
+                .createLocalEnvironment(1);
 
+        DataStream<String> socketStream = execEnv.socketTextStream("localhost",
+                9000);
 
-    public void executeJob() {
-        try {
-            StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                    .createLocalEnvironment(1);
+        DataStream<Tuple3<String, String, Long>> selectDS = socketStream.map(
+                new NewsFeedMapper()).project(1, 2, 4);
 
-            DataStream<String> socketStream = execEnv.socketTextStream(
-                    "localhost", 9000);
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
+                .keyBy(0, 1);
 
-            DataStream<Tuple3<String, String, Long>> selectDS = socketStream
-                    .map(new NewsFeedMapper()).project(1, 2, 4);
+        WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
+                .timeWindow(Time.seconds(4));
 
-            KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
-                    .keyBy(1, 2);
+        DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
 
-            WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
-                    .timeWindow(Time.seconds(5));
+        result.print();
 
-            DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+        execEnv.execute("Tumbling Time Window");
 
-            result.print();
-
-           execEnv.execute("Tumbling Time Window");
-
-        } catch (Exception ex) {
-            Throwables.propagate(ex);
-        }
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket().start();
+        new NewsFeedSocket("/media/pipe/newsfeed", 0, 9000).start();
         TumblingWindowExample window = new TumblingWindowExample();
         window.executeJob();
 

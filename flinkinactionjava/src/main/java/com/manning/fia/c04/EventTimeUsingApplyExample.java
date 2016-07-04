@@ -50,7 +50,7 @@ public class EventTimeUsingApplyExample {
                     .keyBy(1, 2);
 
             WindowedStream<Tuple5<Long, String, String, String, String>, Tuple, TimeWindow> windowedStream = keyedDS
-                    .timeWindow(Time.seconds(2), Time.seconds(1));
+                    .timeWindow(Time.seconds(20));
 
 
             DataStream<Tuple6<Long,Long, List<Long>,String, String, Long >> result = windowedStream
@@ -79,6 +79,7 @@ public class EventTimeUsingApplyExample {
     
     private static class NewsFeedTimeStamp implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>> {
         private static final long serialVersionUID = 1L;
+        public static int DELAY=5000;
         private long maxTimestamp=0;
         private long priorTimestamp=0;
         private long lastTimeOfWaterMarking=System.currentTimeMillis();
@@ -96,9 +97,8 @@ public class EventTimeUsingApplyExample {
         @Override
         public long extractTimestamp(Tuple5<Long, String, String, String, String> element, long previousElementTimestamp) {
             long millis= DateTimeFormat.forPattern("yyyyMMddHHmmss")
-            .parseDateTime(element.f3).getMillis();//Always delay watermarks by 5 seconds
-            maxTimestamp = Math.max(maxTimestamp, millis-5000);
-            //System.out.println("DD=="+new Date(maxTimestamp));
+            .parseDateTime(element.f3).getMillis();
+            maxTimestamp = Math.max(maxTimestamp, millis-DELAY);
             return Long.valueOf(millis);
         }
     }

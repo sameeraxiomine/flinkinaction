@@ -23,7 +23,7 @@ public class NewsFeedSocket extends Thread {
     private final int threadSleepInterval;
 
     private final int portNumber;
-
+    public static boolean stop = false;
     NewsFeedSocket() {
         this.fileName = DEFAULT_FILE_NAME;
         this.threadSleepInterval = SLEEP_INTERVAL;
@@ -82,7 +82,7 @@ public class NewsFeedSocket extends Thread {
             IOUtils.write(value.getBytes(), socket.getOutputStream());
             Thread.currentThread().sleep(threadSleepInterval);
         }
-
+        serverSocket.close();
     }
 
 
