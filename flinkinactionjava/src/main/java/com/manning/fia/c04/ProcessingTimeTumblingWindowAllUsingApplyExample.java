@@ -34,6 +34,7 @@ public class ProcessingTimeTumblingWindowAllUsingApplyExample {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .createLocalEnvironment(1);        
+        execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         DataStream<String> socketStream = execEnv.socketTextStream("localhost",
                 9000);
         DataStream<Tuple5<Long, String, String, String, String>> selectDS = socketStream

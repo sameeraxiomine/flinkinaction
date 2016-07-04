@@ -33,7 +33,8 @@ public class ProcessingTimeSlidingWindowAllUsingApplyExample {
     public void executeJob() throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .createLocalEnvironment(1);        
+                .createLocalEnvironment(1);
+        execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         DataStream<String> socketStream = execEnv.socketTextStream("localhost",
                 9000);
         DataStream<Tuple5<Long, String, String, String, String>> selectDS = socketStream
