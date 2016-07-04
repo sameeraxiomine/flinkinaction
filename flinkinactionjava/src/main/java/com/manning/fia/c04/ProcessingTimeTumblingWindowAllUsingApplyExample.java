@@ -29,26 +29,25 @@ import java.util.List;
 /**
  * Created by hari on 6/26/16.
  */
-public class WindowAllUsingApplyExample {
+public class ProcessingTimeTumblingWindowAllUsingApplyExample {
     public void executeJob() throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .createLocalEnvironment(1);
-        execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+                .createLocalEnvironment(1);        
         DataStream<String> socketStream = execEnv.socketTextStream("localhost",
                 9000);
         DataStream<Tuple5<Long, String, String, String, String>> selectDS = socketStream
                 .map(new NewsFeedMapper3());
         AllWindowedStream<Tuple5<Long, String, String, String, String>, TimeWindow> ws1=
-                selectDS.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(2)));
+                selectDS.timeWindowAll(Time.seconds(2));
         DataStream<Tuple4<Long, Long, List<Long>,  Long>> result1 = ws1.apply(new AllWindowApplyFunction());
         result1.print();
-        execEnv.execute("All Time Window Apply");
+        execEnv.execute("Processing Time Window All Apply");
     }
 
     public static void main(String[] args) throws Exception {
         new NewsFeedSocket("/media/pipe/newsfeed", 1000,9000).start();
-        WindowAllUsingApplyExample window = new WindowAllUsingApplyExample();
+        ProcessingTimeTumblingWindowAllUsingApplyExample window = new ProcessingTimeTumblingWindowAllUsingApplyExample();
         window.executeJob();
 
     }
