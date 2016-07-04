@@ -90,7 +90,7 @@ public class SlidingEventTimeUsingApplyExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed", 9000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed").start();
         SlidingEventTimeUsingApplyExample window = new SlidingEventTimeUsingApplyExample();
         window.executeJob();
 
