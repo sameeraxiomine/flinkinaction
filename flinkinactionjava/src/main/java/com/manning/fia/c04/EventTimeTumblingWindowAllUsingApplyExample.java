@@ -29,28 +29,58 @@ import java.util.List;
 /**
  * Created by hari on 6/26/16.
  */
-public class ProcessingTimeSlidingWindowAllUsingApplyExample {
+public class EventTimeTumblingWindowAllUsingApplyExample {
     public void executeJob() throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .createLocalEnvironment(1);
-        execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+                .createLocalEnvironment(1);        
+        execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         DataStream<String> socketStream = execEnv.socketTextStream("localhost",
                 9000);
         DataStream<Tuple5<Long, String, String, String, String>> selectDS = socketStream
-                .map(new NewsFeedMapper3());
+                .map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new TimestampAndWatermarkAssigner());
         AllWindowedStream<Tuple5<Long, String, String, String, String>, TimeWindow> ws1=
-                selectDS.timeWindowAll(Time.seconds(2),Time.seconds(1));
+                selectDS.timeWindowAll(Time.seconds(2));
         DataStream<Tuple4<Long, Long, List<Long>,  Long>> result1 = ws1.apply(new AllWindowApplyFunction());
-        
         result1.print();
         execEnv.execute("Processing Time Window All Apply");
     }
 
     public static void main(String[] args) throws Exception {
         new NewsFeedSocket("/media/pipe/newsfeed", 1000,9000).start();
-        ProcessingTimeSlidingWindowAllUsingApplyExample window = new ProcessingTimeSlidingWindowAllUsingApplyExample();
+        EventTimeTumblingWindowAllUsingApplyExample window = new EventTimeTumblingWindowAllUsingApplyExample();
         window.executeJob();
 
     }
+
+    private static class TimestampAndWatermarkAssigner
+            implements
+            AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>> {
+        private static final long serialVersionUID = 1L;
+        private long wmTime = 0;
+        private long priorWmTime = 0;
+        private long lastTimeOfWaterMarking = System.currentTimeMillis();
+
+        @Override
+        public Watermark getCurrentWatermark() {
+            if (wmTime == priorWmTime) {
+                long advance = (System.currentTimeMillis() - lastTimeOfWaterMarking);
+                wmTime += advance;// Start advancing
+            }
+            priorWmTime = wmTime;
+            lastTimeOfWaterMarking = System.currentTimeMillis();
+            return new Watermark(wmTime);
+        }
+
+        @Override
+        public long extractTimestamp(
+                Tuple5<Long, String, String, String, String> element,
+                long previousElementTimestamp) {
+            long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
+                    .parseDateTime(element.f3).getMillis();
+            wmTime = Math.max(wmTime, millis);
+            return Long.valueOf(millis);
+        }
+    }
+
 }
