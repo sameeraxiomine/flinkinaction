@@ -37,7 +37,7 @@ public class EventTimeUsingUnionExample {
 
             execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
             
-            execEnv.getConfig().setAutoWatermarkInterval(10000);
+            execEnv.getConfig().setAutoWatermarkInterval(10000);            
 
             DataStream<Tuple5<Long, String, String, String, String>>  socketStream = execEnv.socketTextStream(
                     "localhost", 9000).map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
