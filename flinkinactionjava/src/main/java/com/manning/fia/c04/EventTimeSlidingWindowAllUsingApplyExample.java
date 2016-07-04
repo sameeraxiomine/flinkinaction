@@ -41,7 +41,7 @@ public class EventTimeSlidingWindowAllUsingApplyExample {
                 .map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new TimestampAndWatermarkAssigner());
         AllWindowedStream<Tuple5<Long, String, String, String, String>, TimeWindow> ws1=
                 selectDS.timeWindowAll(Time.seconds(2),Time.seconds(1));
-        DataStream<Tuple4<Long, Long, List<Long>,  Long>> result1 = ws1.apply(new AllWindowApplyFunction());
+        DataStream<Tuple4<Long, Long, List<Long>,  Long>> result1 = ws1.apply(new AllApplyFunction());
         result1.print();
         execEnv.execute("Processing Time Window All Apply");
     }

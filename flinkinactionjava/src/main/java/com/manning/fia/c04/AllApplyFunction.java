@@ -22,11 +22,11 @@ import java.util.List;
 
 
 @SuppressWarnings("serial")
-public class AllWindowApplyFunction implements AllWindowFunction<
+public class AllApplyFunction implements AllWindowFunction<
         Tuple5<Long, String, String, String, String>,
         Tuple4<Long, Long, List<Long>,  Long>,        
         TimeWindow> {
-
+    
     @Override
     public void apply(TimeWindow window,
             Iterable<Tuple5<Long, String, String, String, String>> inputs,
