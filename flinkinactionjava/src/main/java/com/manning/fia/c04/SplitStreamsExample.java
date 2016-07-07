@@ -55,7 +55,7 @@ public class SplitStreamsExample {
 
         mobileSelectDS.print();
 
-        execEnv.execute("SplitStreamsExample");
+        execEnv.execute("Split Streams Example");
     }
 
     public static void main(String[] args) throws Exception {
@@ -64,31 +64,5 @@ public class SplitStreamsExample {
         window.executeJob();
     }
 
-    private static class Tuple7CoMapFunction implements CoMapFunction<Tuple7<Long, String, String, String, String, Long, Long>,
-            Tuple7<Long, String, String, String, String, Long, Long>, Object> {
 
-        @Override
-        public Tuple3<String, String, Long> map1(Tuple7<Long, String, String, String, String, Long, Long> value)
-                throws Exception {
-            return new Tuple3<>(value.f1, value.f2, value.f6 - value.f5);
-        }
-
-        @Override
-        public Tuple3<String, String, Long> map2(Tuple7<Long, String, String, String, String, Long, Long> value)
-                throws Exception {
-            return new Tuple3<>(value.f1, value.f2, value.f6 - value.f5);
-        }
-    }
-
-    private static class NewsFeedNewsFeedCoMapFunction implements CoMapFunction<NewsFeed, NewsFeed, Object> {
-        @Override
-        public NewsFeed map1(NewsFeed value) throws Exception {
-            return value;
-        }
-
-        @Override
-        public NewsFeed map2(NewsFeed value) throws Exception {
-            return value;
-        }
-    }
 }
