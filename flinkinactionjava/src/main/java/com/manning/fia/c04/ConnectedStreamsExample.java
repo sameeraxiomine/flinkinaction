@@ -4,6 +4,7 @@ import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper3;
 import com.manning.fia.transformations.media.NewsFeedMapper5;
 import com.manning.fia.transformations.media.NewsFeedMapper6;
+
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.*;
@@ -87,7 +88,7 @@ public class ConnectedStreamsExample {
 
         connectedStreams.map(new NewsFeedNewsFeedCoMapFunction()).print();
 
-
+        
         execEnv.execute("ConnectedStreamsExample");
     }
 
@@ -113,7 +114,7 @@ public class ConnectedStreamsExample {
         }
     }
 
-    private static class NewsFeedNewsFeedCoMapFunction implements CoMapFunction<NewsFeed, NewsFeed, Object> {
+    private static class NewsFeedNewsFeedCoMapFunction implements CoMapFunction<NewsFeed, NewsFeed, NewsFeed> {
         @Override
         public NewsFeed map1(NewsFeed value) throws Exception {
             return value;
