@@ -5,11 +5,11 @@
 	<parent>
         <artifactId>flinkinaction</artifactId>
         <groupId>com.manning</groupId>
-        <version>0.0.1-MEAP-RELEASE</version>
+        <version>0.1-RELEASE</version>
     </parent>
 	
 	<artifactId>flinkinactionjava</artifactId>
-	<version>0.0.1-MEAP-RELEASE</version>
+	<version>0.1-RELEASE</version>
 	<packaging>jar</packaging>
 
 	<name>Flink In Action Java</name>
