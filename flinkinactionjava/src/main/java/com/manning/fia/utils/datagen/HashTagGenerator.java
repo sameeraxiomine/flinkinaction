@@ -1,15 +1,11 @@
 package com.manning.fia.utils.datagen;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * This class generates data for word count application

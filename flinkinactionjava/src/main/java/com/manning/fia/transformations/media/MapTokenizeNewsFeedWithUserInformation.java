@@ -1,6 +1,5 @@
 package com.manning.fia.transformations.media;
 
-import com.manning.fia.model.media.NewsFeed;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple4;
 

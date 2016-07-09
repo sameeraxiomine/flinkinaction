@@ -1,9 +1,9 @@
 package com.manning.fia.transformations.media;
 
 
+import org.apache.flink.api.common.functions.GroupReduceFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.util.Collector;
-import org.apache.flink.api.common.functions.GroupReduceFunction;
 
 @SuppressWarnings("serial")
 public class SortedGroupReduceComputeTimeSpentBySectionAndSubSection
