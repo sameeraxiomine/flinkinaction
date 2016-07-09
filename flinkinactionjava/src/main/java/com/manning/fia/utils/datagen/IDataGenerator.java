@@ -6,5 +6,5 @@ public interface IDataGenerator<T> {
     void setData(List<T> data);
     List<T> getData();
     void generateData();    
-    void generateStreamingData(int hour, int min, int noOfMins);
+    void generateStreamingData(int hour,int min, int noOfMins);
 }

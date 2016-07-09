@@ -1,9 +1,10 @@
 package com.manning.fia.transformations.media;
 
-import com.manning.fia.utils.DateUtils;
-import com.manning.fia.model.media.NewsFeed;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
+
+import com.manning.fia.utils.DateUtils;
+import com.manning.fia.model.media.NewsFeed;
 
 @SuppressWarnings("serial")
 public class NewsFeedMapper implements MapFunction<String, Tuple5<Long, String, String,String, Long>> {
@@ -11,7 +12,7 @@ public class NewsFeedMapper implements MapFunction<String, Tuple5<Long, String, 
     @Override
     public Tuple5<Long, String, String, String, Long> map(String value)
             throws Exception {
-        final NewsFeed newsFeed= NewsFeedParser.mapRow(value);
+        final NewsFeed newsFeed=NewsFeedParser.mapRow(value);
         final long timeSpent = dateUtils.getTimeSpentOnPage(newsFeed);
         final Tuple5<Long, String, String, String, Long> tuple5 = new Tuple5<>(newsFeed.getPageId(),
                                                                                newsFeed.getSection(), 

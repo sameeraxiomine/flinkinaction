@@ -9,7 +9,6 @@ import org.apache.flink.api.table.Table;
 import java.util.Arrays;
 
 
-
 public class SimpleTableAPIBasedWordCount {
 
     public static void main(String[] args) throws Exception {

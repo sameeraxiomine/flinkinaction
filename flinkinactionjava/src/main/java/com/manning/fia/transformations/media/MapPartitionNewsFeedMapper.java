@@ -2,6 +2,7 @@ package com.manning.fia.transformations.media;
 
 import com.manning.fia.utils.DateUtils;
 import com.manning.fia.model.media.NewsFeed;
+
 import org.apache.flink.api.common.functions.MapPartitionFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.util.Collector;
