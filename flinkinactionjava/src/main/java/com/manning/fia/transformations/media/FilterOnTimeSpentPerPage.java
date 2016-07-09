@@ -2,7 +2,6 @@ package com.manning.fia.transformations.media;
 
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
-
 @SuppressWarnings("serial")
 public class FilterOnTimeSpentPerPage
         implements
@@ -11,6 +10,6 @@ public class FilterOnTimeSpentPerPage
     public boolean filter(
             Tuple5<Long,String, String, String, Long> tuple5)
             throws Exception {
-        return tuple5.f4 > 6000;
+        return tuple5.f4 > 60000;
     }
 }
