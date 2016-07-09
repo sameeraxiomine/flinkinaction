@@ -1,4 +1,4 @@
-package com.manning.fia.c03.media;
+package com.manning.fia.utils;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;

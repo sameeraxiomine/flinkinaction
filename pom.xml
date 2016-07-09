@@ -4,11 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.manning</groupId>
   <artifactId>flinkinaction</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>flinkinactionjava</module>
   </modules>
+
+  <name>Flink In Action</name>
 
   <prerequisites>
     <maven>3.3.3</maven>
@@ -28,15 +30,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <mscala.version>3.2.0</mscala.version>
   </properties>
-<!-- 
-  <repositories>
-    <repository>
-      <id>bintray-rnowling-bigpetstore</id>
-      <name>bintray</name>
-      <url>http://dl.bintray.com/rnowling/bigpetstore</url>
-    </repository>
-  </repositories>
- -->
+
   <dependencies>
     <dependency>
       <groupId>org.apache.flink</groupId>
@@ -89,21 +83,7 @@
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
-    <!-- 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jcl</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-     
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-    -->
+
     <dependency>
 	   <groupId>commons-lang</groupId>
 	   <artifactId>commons-lang</artifactId>
@@ -121,13 +101,6 @@
 	  <version>${joda.time.version}</version>
     </dependency>
      
-<!-- 
-    <dependency>
-      <groupId>com.github.rnowling.bigpetstore</groupId>
-      <artifactId>bigpetstore-data-generator</artifactId>
-      <version>0.2.1</version>
-    </dependency>
- -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

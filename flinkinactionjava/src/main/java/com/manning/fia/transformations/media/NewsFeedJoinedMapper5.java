@@ -1,6 +1,6 @@
 package com.manning.fia.transformations.media;
 
-import com.manning.fia.c03.media.DateUtils;
+import com.manning.fia.utils.DateUtils;
 import com.manning.fia.model.media.NewsFeed;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple6;
@@ -19,7 +19,7 @@ public class NewsFeedJoinedMapper5 implements
                 newsFeed.getEventId(),
                 newsFeed.getSection(),
                 newsFeed.getSubSection(),
-                newsFeed.getTopic(),
+                newsFeed.getDeviceType(),
                 DateTimeFormat.forPattern("yyyyMMddHHmmss")
                         .parseDateTime(newsFeed.getStartTimeStamp())
                         .getMillis(),

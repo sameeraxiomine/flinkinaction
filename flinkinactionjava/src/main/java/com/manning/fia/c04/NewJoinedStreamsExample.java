@@ -38,8 +38,6 @@ public class NewJoinedStreamsExample {
                 "localhost", 8000);
 
 
-
-
         DataStream<Tuple6<Long, String, String, String, Long, Long>> sectionSubsectionDS = dataStream
                 .map(new NewsFeedJoinedMapper5());
 
@@ -57,16 +55,24 @@ public class NewJoinedStreamsExample {
         timestampsAndWatermarksDS.join(timestampsAndWatermarksDS1)
                 .where(new Tuple6KeySelector())
                 .equalTo(new Tuple6KeySelector())
-                .window(TumblingEventTimeWindows.of(Time.milliseconds(200)))
-                .apply(new JoinFunction<Tuple6<Long,String,String,String,Long,Long>, Tuple6<Long,String,String,String,Long,Long>, Object>() {
+                .window(TumblingEventTimeWindows.of(Time.seconds(30)))
+                .apply(new JoinFunction<Tuple6<Long, String, String, String, Long, Long>, Tuple6<Long, String, String,
+                        String, Long, Long>, Tuple6<String, String, String, Long, String, Long>>() {
                     @Override
-                    public Object join(Tuple6<Long, String, String, String, Long, Long> first,
-                                       Tuple6<Long, String, String, String, Long, Long> second) throws Exception {
-                       return Long.parseLong(DateTimeFormat.forPattern("yyyyMMddHHmmss").print(first.f4))+
-                        "|"+ Long.parseLong(DateTimeFormat.forPattern("yyyyMMddHHmmss").print(second.f4));
+                    public Tuple6<String, String, String, Long, String, Long> join(Tuple6<Long, String, String, String,
+                            Long, Long> first, Tuple6<Long, String, String, String, Long, Long> second) throws Exception {
+
+                        String section = first.f1;
+                        String subSection = first.f2;
+                        String firstType = first.f3;
+                        String secondType = second.f3;
+                        long firsTimeStamp = first.f5 - first.f4;
+                        long secondTimeStamp = second.f5 - second.f4;
+                        return new Tuple6<>(section, subSection, firstType, firsTimeStamp, secondType, secondTimeStamp);
                     }
-                })
-                .print()
+                }).keyBy(0,1).sum(5).
+                print();
+
 
         ;
 
@@ -76,8 +82,8 @@ public class NewJoinedStreamsExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed5",1000,9000).start();
-        new NewsFeedSocket("/media/pipe/newsfeed6", 1000, 8000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed5", 0, 9000).start();
+        new NewsFeedSocket("/media/pipe/newsfeed6", 0, 8000).start();
         NewJoinedStreamsExample window = new NewJoinedStreamsExample();
         window.executeJob();
     }
@@ -126,7 +132,7 @@ public class NewJoinedStreamsExample {
         public Watermark getCurrentWatermark() {
             if (wmTime == priorWmTime) {
                 long advance = (System.currentTimeMillis() - lastTimeOfWaterMarking);
-                wmTime += advance;// Start advancing
+                wmTime += advance;// Start advancing`
             }
             priorWmTime = wmTime;
             lastTimeOfWaterMarking = System.currentTimeMillis();
@@ -147,15 +153,7 @@ public class NewJoinedStreamsExample {
     private static class Tuple6KeySelector implements KeySelector<Tuple6<Long, String, String, String, Long, Long>, String> {
         @Override
         public String getKey(Tuple6<Long, String, String, String, Long, Long> value) throws Exception {
-            return value.f2 + "|" + value.f3;
-        }
-    }
-
-    private static class Tuple7TopicKeySelector implements KeySelector<Tuple7<Long, String, String[], String,
-            ApplicationUser, Long, Long>, Long> {
-        @Override
-        public Long getKey(Tuple7<Long, String, String[], String, ApplicationUser, Long, Long> value) throws Exception {
-            return value.f0;
+            return value.f1 + "|" + value.f2;
         }
     }
 

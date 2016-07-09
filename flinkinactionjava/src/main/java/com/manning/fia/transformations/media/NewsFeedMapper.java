@@ -3,7 +3,7 @@ package com.manning.fia.transformations.media;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple5;
 
-import com.manning.fia.c03.media.DateUtils;
+import com.manning.fia.utils.DateUtils;
 import com.manning.fia.model.media.NewsFeed;
 
 @SuppressWarnings("serial")
