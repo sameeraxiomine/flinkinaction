@@ -10,7 +10,7 @@ public class DomainObjectBasedNewsFeedMapper implements
         MapFunction<String,NewsFeed> {
     @Override
     public NewsFeed map(String value) throws Exception {
-        NewsFeed newsFeed=NewsFeedParser.mapRow(value);
+        NewsFeed newsFeed= NewsFeedParser.mapRow(value);
         return newsFeed;
     }
 }

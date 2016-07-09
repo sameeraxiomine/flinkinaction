@@ -1,9 +1,8 @@
 package com.manning.fia.transformations.media;
 
+import com.manning.fia.model.media.NewsFeed;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
-
-import com.manning.fia.model.media.NewsFeed;
 
 @SuppressWarnings("serial")
 public class SectionSubSectionKeySelector implements KeySelector<NewsFeed, Tuple2<String, String>>{

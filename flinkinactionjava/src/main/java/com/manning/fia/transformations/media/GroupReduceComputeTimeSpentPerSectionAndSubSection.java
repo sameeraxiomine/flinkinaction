@@ -2,11 +2,9 @@ package com.manning.fia.transformations.media;
 
 import com.manning.fia.utils.DateUtils;
 import com.manning.fia.model.media.NewsFeed;
-
+import org.apache.flink.api.common.functions.GroupReduceFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.util.Collector;
-
-import org.apache.flink.api.common.functions.GroupReduceFunction;
 
 @SuppressWarnings("serial")
 public final class GroupReduceComputeTimeSpentPerSectionAndSubSection implements

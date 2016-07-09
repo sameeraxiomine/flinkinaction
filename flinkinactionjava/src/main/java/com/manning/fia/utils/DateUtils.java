@@ -1,14 +1,15 @@
 package com.manning.fia.utils;
 
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.apache.flink.hadoop.shaded.com.google.common.base.Throwables;
-
 import com.manning.fia.model.media.NewsFeed;
+import org.apache.flink.hadoop.shaded.com.google.common.base.Throwables;
 import org.joda.time.format.DateTimeFormat;
 
+import java.io.Serializable;
+
+/**
+ * util class to calculate time spent.
+ *
+ */
 public class DateUtils implements Serializable {
 
     public long getTimeSpentOnPage(NewsFeed event) {

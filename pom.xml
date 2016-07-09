@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.manning</groupId>
   <artifactId>flinkinaction</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.1-MEAP-RELEASE</version>
   <packaging>pom</packaging>
   <modules>
     <module>flinkinactionjava</module>
