@@ -37,8 +37,22 @@ programs are easily run using the Maven or throught your IDE.
 Several of the included Java main() programs may be launched 
 individually.  
 
+SimpleBatchWordCount=>Demonstrates a simple word count using DataSet API.
+mvn exec:java -Dexec.mainClass="com.manning.fia.c02.SimpleBatchWordCount" -Dexec.cleanupDaemonThreads=false
+ 
+SimpleStreamingWordCount=>Demonstrates a simple word count using Datastream API.
+mvn exec:java -Dexec.mainClass="com.manning.fia.c02.SimpleStreamingWordCount" -Dexec.cleanupDaemonThreads=false
 
 
+SimpleTableAPIBasedWordCount=>Demonstrates the use of Table.
+mvn exec:java -Dexec.mainClass="com.manning.fia.c02.SimpleTableAPIBasedWordCount" -Dexec.cleanupDaemonThreads=false
+
+
+StreamingWordCount=>Demonstrates a streaming word count example.
+mvn exec:java -Dexec.mainClass="com.manning.fia.c02.StreamingWordCount" -Dexec.cleanupDaemonThreads=false
+
+MediaBatchTansformations=>Demonstrates batch operators i.e DataSet API.
+mvn exec:java -Dexec.mainClass="com.manning.fia.c03.media.MediaBatchTansformations" -Dexec.cleanupDaemonThreads=false
 
 
 	
