@@ -41,7 +41,7 @@ public class SimpleBatchWordCount {
 
         //Alternative 3 to counts.collect()
 //        counts.writeAsCsv(filePath, "\n", ",");
-        execEnv.execute();
+//        execEnv.execute();
     }
 
     @SuppressWarnings("serial")

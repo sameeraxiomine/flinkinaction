@@ -3,6 +3,7 @@ package com.manning.fia.transformations.media;
 import com.manning.fia.model.media.ApplicationUser;
 import com.manning.fia.model.media.NewsFeed;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -13,7 +14,7 @@ public class NewsFeedParser {
 
 
     public static List<String> parseData() throws Exception {
-        final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream("/media/pipe/newsfeed"));
+        final Scanner scanner = new Scanner(NewsFeedParser.class.getResourceAsStream("/media/pipe/newsfeed"));
         List<String> newsFeeds = new ArrayList<>();
         while (scanner.hasNext()) {
             String value = scanner.nextLine();

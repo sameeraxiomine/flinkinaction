@@ -12,7 +12,7 @@ public class PageParser {
 
 
     public static List<String> parseData() throws Exception {
-        final Scanner scanner = new Scanner(ClassLoader.class.getResourceAsStream("/media/pipe/pageinformation"));
+        final Scanner scanner = new Scanner(PageParser.class.getResourceAsStream("/media/pipe/pageinformation"));
         List<String> PageInformations = new ArrayList<>(0);
         while (scanner.hasNext()) {
             String value = scanner.nextLine();
