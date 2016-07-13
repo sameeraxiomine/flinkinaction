@@ -1,29 +1,28 @@
 package com.manning.fia.transformations.media;
 
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.tuple.Tuple5;
-
-import com.manning.fia.utils.DateUtils;
 import com.manning.fia.model.media.NewsFeed;
+import com.manning.fia.utils.DateUtils;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.joda.time.format.DateTimeFormat;
 
 @SuppressWarnings("serial")
-public class NewsFeedMapper2 implements MapFunction<String, Tuple5<String, String, Long, Long, Long>> {
+public class NewsFeedMapper8 implements MapFunction<String, Tuple4<Long, Long, Long, String>> {
     private DateUtils dateUtils = new DateUtils();
 
     @Override
-    public Tuple5<String, String, Long, Long, Long> map(String value)
+    public Tuple4<Long, Long, Long, String> map(String value)
             throws Exception {
-        NewsFeed newsFeed = NewsFeedParser.mapRow(value);
-        long timeSpent = dateUtils.getTimeSpentOnPage(newsFeed);
-        Tuple5<String, String, Long, Long, Long> tuple5 = new Tuple5<>(newsFeed.getSection(),
-                newsFeed.getSubSection(),
+        final NewsFeed newsFeed = NewsFeedParser.mapRow(value);
+        final long timeSpent = dateUtils.getTimeSpentOnPage(newsFeed);
+        final Tuple4<Long, Long, Long, String> tuple4 = new Tuple4<>(newsFeed.getPageId(),
                 DateTimeFormat.forPattern("yyyyMMddHHmmss")
                         .parseDateTime(newsFeed.getStartTimeStamp()).getMillis(),
                 DateTimeFormat.forPattern("yyyyMMddHHmmss")
                         .parseDateTime(newsFeed.getEndTimeStamp()).getMillis(),
-                timeSpent);
-        return tuple5;
+                newsFeed.getUser().getUuid());
+        return tuple4;
     }
 }
 
