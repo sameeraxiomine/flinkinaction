@@ -1,4 +1,4 @@
-package com.manning.fia.c03.media;
+package com.manning.fia.c03;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.model.media.Page;
@@ -12,10 +12,11 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.aggregation.Aggregations;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.util.Collector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * base file for handling the batch use case.
@@ -189,15 +190,13 @@ public class MediaBatchTansformations {
         final ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
         DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
-                .parseData());
-        DataSet<Tuple3<String, String, Long>> result = newsFeeds
-                .map(new NewsFeedMapper())
-                .<Tuple3<String, String, Long>>project(1, 2, 4)
-                .groupBy(0)
+                .parseData("/media/pipe/newsfeed7"));
+        newsFeeds.map(new NewsFeedMapper8())
+                .groupBy(3)
                 .sortGroup(1, Order.DESCENDING)
-                .reduceGroup(
-                        new SortedGroupReduceComputeTimeSpentBySectionAndSubSection());
-        result.print();
+                .reduceGroup(new SortGroupReduceForPriorPageIds())
+                .print();
+
     }
 
     /*
@@ -264,7 +263,7 @@ public class MediaBatchTansformations {
                 .map(new DomainObjectBasedNewsFeedMapper());
 
         DataSet<Tuple3<String, String, Long>> combined = newsFeeds
-                .groupBy("section","subSection")
+                .groupBy("section", "subSection")
                 .combineGroup(
                         new GroupCombineFunction<NewsFeed, Tuple3<String, String, Long>>() {
                             DateUtils dateUtils = new DateUtils();
@@ -426,23 +425,24 @@ public class MediaBatchTansformations {
 
 
     public static void main(String[] args) throws Exception {
-        MediaBatchTansformations.usingMap();
-        MediaBatchTansformations.usingProject();
-        MediaBatchTansformations.usingFilter();
-        MediaBatchTansformations.usingMapPartition();
-        MediaBatchTansformations.usingReduce();
-        MediaBatchTansformations.usingAggregation();
+//        MediaBatchTansformations.usingMap();
+//        MediaBatchTansformations.usingProject();
+//        MediaBatchTansformations.usingFilter();
+//        MediaBatchTansformations.usingMapPartition();
+//        MediaBatchTansformations.usingReduce();
+//        MediaBatchTansformations.usingAggregation();
         MediaBatchTansformations.usingSum();
         MediaBatchTansformations.usingGroupReduceSortedKeys();
-        MediaBatchTansformations.usingKeySelectorAndGroupReduce();
-        MediaBatchTansformations.usingGroupReduceSortedKeysWithKeySelector();
-        MediaBatchTansformations.usingGroupCombine();
-        MediaBatchTansformations.usingBasicJoin();
-        MediaBatchTansformations.usingBasicJoinWithTupleAndObject();
-        MediaBatchTansformations.usingBasicJoinWithTupleAndTuple();
-        MediaBatchTansformations.usingJoinWithProjection();
-        MediaBatchTansformations.usingJoinWithHint();
-        MediaBatchTansformations.usingJoinWithHintUtility();
+//        MediaBatchTansformations.usingKeySelectorAndGroupReduce();
+//        MediaBatchTansformations.usingGroupReduceSortedKeysWithKeySelector();
+//        MediaBatchTansformations.usingGroupCombine();
+//        MediaBatchTansformations.usingBasicJoin();
+//        MediaBatchTansformations.usingBasicJoinWithTupleAndObject();
+//        MediaBatchTansformations.usingBasicJoinWithTupleAndTuple();
+//        MediaBatchTansformations.usingJoinWithProjection();
+//        MediaBatchTansformations.usingJoinWithHint();
+//        MediaBatchTansformations.usingJoinWithHintUtility();
     }
+
 }
 

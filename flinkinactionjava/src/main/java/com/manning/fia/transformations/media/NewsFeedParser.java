@@ -14,7 +14,11 @@ public class NewsFeedParser {
 
 
     public static List<String> parseData() throws Exception {
-        final Scanner scanner = new Scanner(NewsFeedParser.class.getResourceAsStream("/media/pipe/newsfeed"));
+        return parseData("/media/pipe/newsfeed");
+    }
+
+    public static List<String> parseData(String file) throws Exception {
+        final Scanner scanner = new Scanner(NewsFeedParser.class.getResourceAsStream(file));
         List<String> newsFeeds = new ArrayList<>();
         while (scanner.hasNext()) {
             String value = scanner.nextLine();
