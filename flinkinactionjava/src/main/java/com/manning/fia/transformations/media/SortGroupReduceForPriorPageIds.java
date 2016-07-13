@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * Created by hari on 7/13/16.
  */
+@SuppressWarnings("serial")
 public class SortGroupReduceForPriorPageIds implements GroupReduceFunction<Tuple4<Long, Long, Long,
         String>, Tuple4<String, Long, String, Long>> {
     @Override
@@ -20,17 +21,16 @@ public class SortGroupReduceForPriorPageIds implements GroupReduceFunction<Tuple
         
         Long startTimeStamp = null;
         String userId = null;
-        String ds = null;
-        Long parentPageId = 0l;
+        String startTsStr = null;
         Long priorPageId = 0l;
         for (Tuple4<Long, Long, Long, String> value : values) {
             if (userId == null) {
                 userId = value.f3;
             }
             startTimeStamp = value.f1;
-            ds = DateTimeFormat.forPattern("yyyyMMddHHmmss").print(startTimeStamp);
+            startTsStr = DateTimeFormat.forPattern("yyyyMMddHHmmss").print(startTimeStamp);
             long pageId = value.f0;
-            out.collect(new Tuple4<>(userId, parentPageId, ds, priorPageId));
+            out.collect(new Tuple4<>(userId, pageId, startTsStr, priorPageId));
             priorPageId = pageId;
         }        
     }
