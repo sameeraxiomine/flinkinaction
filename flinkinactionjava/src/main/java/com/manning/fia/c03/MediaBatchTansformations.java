@@ -192,11 +192,10 @@ public class MediaBatchTansformations {
         DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
                 .parseData("/media/pipe/newsfeed7"));
         newsFeeds.map(new NewsFeedMapper8())
-                .groupBy(3)
-                .sortGroup(1, Order.DESCENDING)
-                .reduceGroup(new SortGroupReduceForPriorPageIds())
+                .groupBy(0)
+                .sortGroup(2, Order.ASCENDING)
+                .reduceGroup(new SortGroupReduceForPriorPageId())
                 .print();
-
     }
 
     /*
