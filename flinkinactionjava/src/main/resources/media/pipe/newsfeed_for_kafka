@@ -1,0 +1,13 @@
+1|001|Facebook|Politics|Elections|2016 Election1|Hillary:Win|20160101000001|20160101000005|Browser|uuid|ssid|10.200.1.1
+2|002|Home Page|Politics|Elections|2016 Election2|Trump:Win:|20160101000006|20160101000008|Mobile|uuid|ssid|10.200.2.2
+3|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000009|Browser|uuid1|ssid1|10.200.3.3
+4|103|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000009|Browser|uuid1|ssid1|10.200.1.4
+5|104|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000009|Browser|uuid1|ssid1|10.200.4.5
+6|105|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000010|Browser|uuid1|ssid1|10.200.5.6
+7|106|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000010|Browser|uuid1|ssid1|10.200.6.7
+8|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000010|Browser|uuid1|ssid1|10.200.7.8
+9|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000011|Browser|uuid1|ssid1|10.200.8.9
+10|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000011|Browser|uuid1|ssid1|10.200.9.10
+11|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000011|Browser|uuid1|ssid1|10.200.3.2
+12|102|Google|Sports|BasketBall|2016 NBA2|Jimmy Butler:Pau Gasol|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.4.1
+13|102|Twitter|Sports|BasketBall|2016 NBA1|Lebron James|20160101000006|20160101000012|Browser|uuid1|ssid1|10.200.5.2
