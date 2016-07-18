@@ -1,15 +1,13 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
-
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.streaming.api.datastream.ConnectedStreams;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
 import org.apache.flink.streaming.api.windowing.triggers.CountTrigger;
 import org.apache.flink.streaming.api.windowing.triggers.PurgingTrigger;
@@ -31,28 +29,42 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
  * count of keys reaches 5. Infact fyi, this is what happens when somebody uses
  * .timeWindow(Time.Seconds(5)) interally window(TumblingProcessingTimeWindows)
  * is called , which has the ProcessingTimeTrigger
+ *
+ * * if it is kafka
+ * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
+ * localhost:2181 --group.id myconsumer --parallelism numberofpartions
+ * else
+ * don't need to send anything.
+ * one of the optional parameters for both the sections are
+ * --fileName /media/pipe/newsfeed_for_count_windows
  */
 public class GlobalWindowsCountExample {
 
-    public void executeJob() throws Exception {
-         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
+    public void executeJob(ParameterTool parameterTool) throws Exception {
+        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .createLocalEnvironment(1);
 
-         DataStream<String> socketStream = execEnv.socketTextStream(
-                "localhost", 9000);
+        final DataStream<String> dataStream;
+        boolean isKafka = parameterTool.getBoolean("isKafka", false);
+        if (isKafka) {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
+        } else {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool))
+                    .setParallelism(parameterTool.getInt("parallelism", 1));
+        }
 
-         DataStream<Tuple3<String, String, Long>> selectDS = socketStream
+        DataStream<Tuple3<String, String, Long>> selectDS = dataStream
                 .map(new NewsFeedMapper()).project(1, 2, 4);
-         
-         KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
+
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
                 .keyBy(0, 1);
 
-         WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
-                .window(GlobalWindows.create()); 
-         
+        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
+                .window(GlobalWindows.create());
+
         windowedStream.trigger(PurgingTrigger.of(CountTrigger.of(3)));
 
-         DataStream<Tuple3<String, String, Long>> result = windowedStream
+        DataStream<Tuple3<String, String, Long>> result = windowedStream
                 .sum(2);
         result.print();
 
@@ -60,9 +72,9 @@ public class GlobalWindowsCountExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed_for_count_windows").start();
-         GlobalWindowsCountExample window = new GlobalWindowsCountExample();
-        window.executeJob();
+        ParameterTool parameterTool = ParameterTool.fromArgs(args);
+        GlobalWindowsCountExample window = new GlobalWindowsCountExample();
+        window.executeJob(parameterTool);
 
     }
 }
