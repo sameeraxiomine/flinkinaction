@@ -1,4 +1,4 @@
-package com.manning.fia.c04;
+package com.manning.fia.c05;
 
 import com.manning.fia.model.media.ApplicationUser;
 import com.manning.fia.model.media.NewsFeed;

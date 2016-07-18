@@ -1,4 +1,4 @@
-package com.manning.fia.c04;
+package com.manning.fia.c05;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedJoinedMapper5;
