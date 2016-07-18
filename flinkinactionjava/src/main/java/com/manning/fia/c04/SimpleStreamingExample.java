@@ -27,13 +27,16 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 public class SimpleStreamingExample {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
-
-        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .getExecutionEnvironment();
+        StreamExecutionEnvironment execEnv;
+        DataStream<String> dataStream;
+        DataStream<Tuple3<String, String, Long>> selectDS;
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
+        DataStream<Tuple3<String, String, Long>> result ;
+        
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
         execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
 
-        final DataStream<String> dataStream;
         boolean isKafka = parameterTool.getBoolean("isKafka", false);
         if (isKafka) {
             dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
@@ -41,14 +44,12 @@ public class SimpleStreamingExample {
             dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
         }
 
-        DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(new NewsFeedMapper())
-                .project(1, 2, 4);
+        
+        selectDS = dataStream.map(new NewsFeedMapper()).project(1, 2, 4);
+        
+        keyedDS = selectDS.keyBy(0, 1);
+        result = keyedDS.sum(2);
         selectDS.print();
-        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.keyBy(0, 1);
-
-        DataStream<Tuple3<String, String, Long>> result = keyedDS.sum(2);
-
-
         execEnv.execute("Simple Streaming");
     }
 

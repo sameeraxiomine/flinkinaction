@@ -3,6 +3,7 @@ package com.manning.fia.c04;
 import com.manning.fia.transformations.media.ComputeTimeSpentPerSectionAndSubSection;
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import com.manning.fia.utils.NewsFeedDataSource;
+
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -26,11 +27,16 @@ public class SimpleStreamingExample2 {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
-        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                    .getExecutionEnvironment();
-        execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
+        StreamExecutionEnvironment execEnv;
+        DataStream<String> dataStream;
+        DataStream<Tuple3<String, String, Long>> selectDS;
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
+        DataStream<Tuple3<String, String, Long>> result ;
+        
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        final DataStream<String> dataStream;
+        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
+
         boolean isKafka = parameterTool.getBoolean("isKafka", false);
         if (isKafka) {
             dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
@@ -38,13 +44,12 @@ public class SimpleStreamingExample2 {
             dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
         }
 
-
-        DataStream<Tuple3<String,String,Long>> selectDS = dataStream.map(new NewsFeedMapper())
-                    .project(1,2,4);
-
-         KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.keyBy(0, 1);
-
-         DataStream<Tuple3<String, String, Long>> result = keyedDS.reduce(new ComputeTimeSpentPerSectionAndSubSection());
+        
+        selectDS = dataStream.map(new NewsFeedMapper()).project(1, 2, 4);
+        
+        keyedDS = selectDS.keyBy(0, 1);
+        
+        result = keyedDS.reduce(new ComputeTimeSpentPerSectionAndSubSection());
 
         result.print();
 
