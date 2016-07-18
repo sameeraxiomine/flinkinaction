@@ -43,14 +43,13 @@ public class GlobalWindowsCountExample {
     public void executeJob(ParameterTool parameterTool) throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .createLocalEnvironment(1);
-
+        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
         final DataStream<String> dataStream;
         boolean isKafka = parameterTool.getBoolean("isKafka", false);
         if (isKafka) {
             dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
         } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool))
-                    .setParallelism(parameterTool.getInt("parallelism", 1));
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
         }
 
         DataStream<Tuple3<String, String, Long>> selectDS = dataStream
