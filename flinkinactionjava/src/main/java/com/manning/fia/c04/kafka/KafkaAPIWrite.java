@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * Created by hari on 7/16/16.
- * --topic newsfeed
+ * --topic newsfeed1
  * --metadata.broker.list broker1:9092,broker2:9092
  * serializer.class:kafka.serializer.StringEncoder
  * --partitioner.class example.producer.SimplePartitioner
