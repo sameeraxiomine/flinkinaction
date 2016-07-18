@@ -1,4 +1,4 @@
-package com.manning.fia.c04.custom;
+package com.manning.fia.utils.custom;
 
 import com.manning.fia.transformations.media.NewsFeedParser;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -23,8 +23,10 @@ public class NewsFeedCustomDataSource implements SourceFunction<String>{
 
         final String fileName=parameterTool.get("fileName","/media/pipe/newsfeed");
         final List<String> newsFeeds = NewsFeedParser.parseData(fileName);
+        final int threadSleepInterval=parameterTool.getInt("threadSleepInterval",0);
         for (String newsFeed : newsFeeds) {
             sourceContext.collect(newsFeed);
+            Thread.currentThread().sleep(threadSleepInterval);
         }
     }
 

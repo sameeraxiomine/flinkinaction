@@ -1,18 +1,13 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
-import org.apache.flink.api.java.tuple.Tuple;
+import com.manning.fia.utils.NewsFeedSocket;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.AllWindowedStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-
-import java.util.concurrent.TimeUnit;
 
 public class SlidingWindowAllExample {
     public void executeJob() throws Exception {

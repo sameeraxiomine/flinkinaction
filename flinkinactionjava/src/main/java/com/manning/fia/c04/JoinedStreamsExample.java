@@ -4,12 +4,9 @@ import com.manning.fia.model.media.ApplicationUser;
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper5;
 import com.manning.fia.transformations.media.NewsFeedMapper7;
-import org.apache.flink.api.common.functions.FlatJoinFunction;
+import com.manning.fia.utils.NewsFeedSocket;
 import org.apache.flink.api.common.functions.JoinFunction;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple4;
-import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -18,10 +15,7 @@ import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.util.Collector;
 import org.joda.time.format.DateTimeFormat;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by hari on 7/05/16.

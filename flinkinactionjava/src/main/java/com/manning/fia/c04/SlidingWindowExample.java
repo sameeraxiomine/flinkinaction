@@ -1,6 +1,8 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
+import com.manning.fia.utils.NewsFeedDataSource;
+import com.manning.fia.utils.NewsFeedSocket;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -10,7 +12,6 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 public class SlidingWindowExample {

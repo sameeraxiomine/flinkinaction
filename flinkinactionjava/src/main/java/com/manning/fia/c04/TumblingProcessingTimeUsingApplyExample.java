@@ -2,8 +2,9 @@ package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper3;
 
+import com.manning.fia.utils.NewsFeedDataSource;
 import org.apache.flink.api.java.tuple.*;
-import org.apache.flink.shaded.com.google.common.base.Throwables;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -14,19 +15,33 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 import java.util.List;
 
+
 /**
  * Created by hari on 6/26/16.
+ * * * if it is kafka
+ * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
+ * localhost:2181 --group.id myconsumer --parallelism numberofpartions
+ * else
+ * don't need to send anything.
+ * one of the optional parameters for both the sections are
+ * --threadSleepInterval 3000
  */
 public class TumblingProcessingTimeUsingApplyExample {
 
-    public void executeJob() throws Exception{
+    public void executeJob(ParameterTool parameterTool) throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                   .createLocalEnvironment(1);
+                   .getExecutionEnvironment();
+        execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
         execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
-        DataStream<String> socketStream = execEnv.socketTextStream(
-                  "localhost", 9000);
+        final DataStream<String> dataStream;
+        boolean isKafka = parameterTool.getBoolean("isKafka", false);
+        if (isKafka) {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
+        } else {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
+        }
 
-        DataStream<Tuple5<Long, String, String, String, String>> selectDS = socketStream
+        DataStream<Tuple5<Long, String, String, String, String>> selectDS = dataStream
                  .map(new NewsFeedMapper3());
 
         KeyedStream<Tuple5<Long, String, String, String, String>, Tuple> keyedDS = selectDS
@@ -44,8 +59,8 @@ public class TumblingProcessingTimeUsingApplyExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed",3000,9000).start();
+        ParameterTool parameterTool = ParameterTool.fromArgs(args);
         TumblingProcessingTimeUsingApplyExample window = new TumblingProcessingTimeUsingApplyExample();
-        window.executeJob();
+        window.executeJob(parameterTool);
     }
 }

@@ -1,4 +1,4 @@
-package com.manning.fia.c04.kafka;
+package com.manning.fia.utils.kafka;
 
 import com.manning.fia.transformations.media.NewsFeedParser;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -8,7 +8,6 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer09;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

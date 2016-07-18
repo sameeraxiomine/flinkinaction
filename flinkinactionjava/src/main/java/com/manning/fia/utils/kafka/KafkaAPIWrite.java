@@ -1,4 +1,4 @@
-package com.manning.fia.c04.kafka;
+package com.manning.fia.utils.kafka;
 
 import com.manning.fia.transformations.media.NewsFeedParser;
 import kafka.javaapi.producer.Producer;
