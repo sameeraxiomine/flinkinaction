@@ -25,7 +25,7 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 
 public class SlidingCountWindowExample {
 
-    public void executeJob(ParameterTool parameterTool) throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .getExecutionEnvironment();

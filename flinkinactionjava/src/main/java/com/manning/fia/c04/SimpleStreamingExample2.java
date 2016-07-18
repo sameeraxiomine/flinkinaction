@@ -2,7 +2,6 @@ package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.ComputeTimeSpentPerSectionAndSubSection;
 import com.manning.fia.transformations.media.NewsFeedMapper;
-
 import com.manning.fia.utils.NewsFeedDataSource;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -25,7 +24,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  */
 public class SimpleStreamingExample2 {
 
-    public void executeJob(ParameterTool parameterTool) throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                     .getExecutionEnvironment();
@@ -54,7 +53,7 @@ public class SimpleStreamingExample2 {
 
     public static void main(String[] args) throws Exception {
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        SimpleStreamingExample window = new SimpleStreamingExample();
+        SimpleStreamingExample2 window = new SimpleStreamingExample2();
         window.executeJob(parameterTool);
     }
 }

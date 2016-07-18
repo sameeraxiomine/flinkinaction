@@ -26,7 +26,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  */
 public class SimpleStreamingExample {
 
-    public void executeJob(ParameterTool parameterTool) throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .getExecutionEnvironment();

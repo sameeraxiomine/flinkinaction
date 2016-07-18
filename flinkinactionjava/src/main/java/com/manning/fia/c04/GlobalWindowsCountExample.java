@@ -41,7 +41,7 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
  */
 public class GlobalWindowsCountExample {
 
-    public void executeJob(ParameterTool parameterTool) throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .createLocalEnvironment(1);
         execEnv.setParallelism(parameterTool.getInt("parallelism", 1));

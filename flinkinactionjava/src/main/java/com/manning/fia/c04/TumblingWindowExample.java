@@ -24,7 +24,7 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 
 public class TumblingWindowExample {
-    public void executeJob(ParameterTool parameterTool) throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .getExecutionEnvironment();
         execEnv.setParallelism(parameterTool.getInt("parallelism", 1));

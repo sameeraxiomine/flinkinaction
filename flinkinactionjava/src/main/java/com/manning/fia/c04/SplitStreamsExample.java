@@ -2,7 +2,8 @@ package com.manning.fia.c04;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper6;
-import com.manning.fia.utils.NewsFeedSocket;
+import com.manning.fia.utils.NewsFeedDataSource;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SplitStream;
@@ -13,18 +14,35 @@ import java.util.List;
 
 /**
  * Created by hari on 7/05/16.
+ /**
+ * * * if it is kafka
+ * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
+ * localhost:2181 --group.id myconsumer --parallelism numberofpartions
+ * else
+ * don't need to send anything.
+ * one of the optional parameters for both the sections are
+ * --fileName /media/pipe/newsfeed4 --threadSleepInterval 100
  */
+
+
 public class SplitStreamsExample {
 
-    public void executeJob() throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .createLocalEnvironment(1);
+                .getExecutionEnvironment();
+        execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
 
-        DataStream<String> browserStream = execEnv.socketTextStream(
-                "localhost", 9000);
+        final DataStream<String> dataStream;
+        boolean isKafka = parameterTool.getBoolean("isKafka", false);
+        if (isKafka) {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
+        } else {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
+        }
 
 
-        DataStream<NewsFeed> selectDS = browserStream
+
+        DataStream<NewsFeed> selectDS = dataStream
                 .map(new NewsFeedMapper6());
 
 
@@ -56,9 +74,9 @@ public class SplitStreamsExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed4", 100, 9000).start();
+        ParameterTool parameterTool = ParameterTool.fromArgs(args);
         SplitStreamsExample window = new SplitStreamsExample();
-        window.executeJob();
+        window.executeJob(parameterTool);
     }
 
 
