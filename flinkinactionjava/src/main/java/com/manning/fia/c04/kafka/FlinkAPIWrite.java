@@ -27,7 +27,6 @@ public class FlinkAPIWrite implements WriteToKafka {
     public void execute(final ParameterTool parameterTool) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        env.setParallelism(5);
 
         DataStream<String> messageStream = env.addSource(new SourceFunction<String>() {
             private static final long serialVersionUID = 673453424234324324l;
