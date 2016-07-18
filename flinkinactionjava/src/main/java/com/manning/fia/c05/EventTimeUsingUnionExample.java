@@ -1,13 +1,14 @@
-package com.manning.fia.c04;
+package com.manning.fia.c05;
 
 
+import com.manning.fia.c04.ApplyFunction;
+import com.manning.fia.utils.NewsFeedSocket;
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper3;
 
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
-import org.apache.flink.api.java.tuple.Tuple8;
 import org.apache.flink.shaded.com.google.common.base.Throwables;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;

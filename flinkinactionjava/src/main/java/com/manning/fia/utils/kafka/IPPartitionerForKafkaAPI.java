@@ -1,4 +1,4 @@
-package com.manning.fia.c04.kafka;
+package com.manning.fia.utils.kafka;
 
 import kafka.producer.Partitioner;
 import kafka.utils.VerifiableProperties;

@@ -1,20 +1,14 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.model.media.NewsFeed;
-import com.manning.fia.transformations.media.NewsFeedMapper3;
-import com.manning.fia.transformations.media.NewsFeedMapper5;
 import com.manning.fia.transformations.media.NewsFeedMapper6;
 
-import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.java.functions.KeySelector;
+import com.manning.fia.utils.NewsFeedSocket;
 import org.apache.flink.api.java.tuple.*;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.CoMapFunction;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 import java.util.ArrayList;
 import java.util.List;

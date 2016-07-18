@@ -1,4 +1,4 @@
-package com.manning.fia.c04;
+package com.manning.fia.utils;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -25,23 +25,23 @@ public class NewsFeedSocket extends Thread {
     private final int portNumber;
     public static boolean stop = false;
 
-    NewsFeedSocket() {
+    public NewsFeedSocket() {
         this.fileName = DEFAULT_FILE_NAME;
         this.threadSleepInterval = SLEEP_INTERVAL;
         this.portNumber = PORT_NUMBER;
     }
 
-    NewsFeedSocket(String fileName){
+    public NewsFeedSocket(String fileName){
         this.fileName = fileName;
         this.threadSleepInterval = SLEEP_INTERVAL;
         this.portNumber = PORT_NUMBER;
     }
-    NewsFeedSocket(String fileName, int threadSleepInterval, int portNumber) {
+    public NewsFeedSocket(String fileName, int threadSleepInterval, int portNumber) {
         this.fileName = fileName;
         this.threadSleepInterval = threadSleepInterval;
         this.portNumber = portNumber;
     }
-    NewsFeedSocket(String fileName, int portNumber) {
+    public NewsFeedSocket(String fileName, int portNumber) {
         this.fileName = fileName;
         this.portNumber = portNumber;
         this.threadSleepInterval = 0;

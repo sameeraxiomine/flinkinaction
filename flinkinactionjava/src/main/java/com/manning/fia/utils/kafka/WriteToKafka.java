@@ -1,4 +1,4 @@
-package com.manning.fia.c04.kafka;
+package com.manning.fia.utils.kafka;
 
 import org.apache.flink.api.java.utils.ParameterTool;
 
