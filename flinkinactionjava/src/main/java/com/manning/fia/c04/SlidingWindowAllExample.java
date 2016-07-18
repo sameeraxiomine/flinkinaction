@@ -1,23 +1,40 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedSocket;
+import com.manning.fia.utils.NewsFeedDataSource;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.AllWindowedStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
+/**
+ * Created by hari on 5/30/16.
+ * <p>
+ * * * if it is kafka
+ * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
+ * localhost:2181 --group.id myconsumer --parallelism numberofpartions
+ * else
+ * don't need to send anything.
+ * one of the optional parameters for both the sections are
+ * --fileName /media/pipe/newsfeed3 --threadSleepInterval 1000
+ */
 public class SlidingWindowAllExample {
-    public void executeJob() throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .createLocalEnvironment(1);
+                .getExecutionEnvironment();
+        execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
+        final DataStream<String> dataStream;
+        boolean isKafka = parameterTool.getBoolean("isKafka", false);
+        if (isKafka) {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
+        } else {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
+        }
 
-        DataStream<String> socketStream = execEnv.socketTextStream("localhost",
-                9000);
-
-        DataStream<Tuple3<String, String, Long>> selectDS = socketStream.map(
+        DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(
                 new NewsFeedMapper()).project(1, 2, 4);
 
 
@@ -37,9 +54,9 @@ public class SlidingWindowAllExample {
     }
 
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket("/media/pipe/newsfeed3",1000,9000).start();
+        ParameterTool parameterTool = ParameterTool.fromArgs(args);
         SlidingWindowAllExample window = new SlidingWindowAllExample();
-        window.executeJob();
+        window.executeJob(parameterTool);
 
     }
 }

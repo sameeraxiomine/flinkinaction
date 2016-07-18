@@ -1,9 +1,10 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper3;
-
 import com.manning.fia.utils.NewsFeedDataSource;
-import org.apache.flink.api.java.tuple.*;
+import org.apache.flink.api.java.tuple.Tuple;
+import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -27,7 +28,7 @@ import java.util.List;
 
 public class SlidingProcessingTimeUsingApplyExample {
 
-    public void executeJob(ParameterTool parameterTool) throws Exception{
+    private void executeJob(ParameterTool parameterTool) throws Exception{
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .getExecutionEnvironment();
         execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));

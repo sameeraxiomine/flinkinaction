@@ -2,7 +2,6 @@ package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import com.manning.fia.utils.NewsFeedDataSource;
-import com.manning.fia.utils.NewsFeedSocket;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -17,11 +16,11 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 public class SlidingWindowExample {
 
 
-    public void executeJob(ParameterTool parameterTool) {
+    private void executeJob(ParameterTool parameterTool) {
         try {
             StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                    .createLocalEnvironment(1);
-            execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
+                    .getExecutionEnvironment();
+            execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
 
             final DataStream<String> dataStream;
             boolean isKafka = parameterTool.getBoolean("isKafka", false);
@@ -32,17 +31,16 @@ public class SlidingWindowExample {
             }
 
 
-
             DataStream<Tuple3<String, String, Long>> selectDS = dataStream
                     .map(new NewsFeedMapper()).project(1, 2, 4);
 
-             KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.
-                     keyBy(1, 2);
+            KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.
+                    keyBy(1, 2);
 
-             WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
-                     .timeWindow(Time.seconds(15), Time.seconds(5));
+            WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
+                    .timeWindow(Time.seconds(15), Time.seconds(5));
 
-             DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+            DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
 
             result.print();
 
@@ -55,8 +53,7 @@ public class SlidingWindowExample {
 
     public static void main(String[] args) throws Exception {
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        new NewsFeedSocket().start();
-         SlidingWindowExample window = new SlidingWindowExample();
+        SlidingWindowExample window = new SlidingWindowExample();
         window.executeJob(parameterTool);
 
     }
