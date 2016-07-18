@@ -25,7 +25,9 @@ public class TumblingCountWindowExample {
     public void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .createLocalEnvironment(1);
+                .getExecutionEnvironment();
+
+        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
 
 
         final DataStream<String> dataStream;
@@ -33,8 +35,7 @@ public class TumblingCountWindowExample {
         if (isKafka) {
             dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
         } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool))
-                    .setParallelism(parameterTool.getInt("parallelism", 1));
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
         }
 
         DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(

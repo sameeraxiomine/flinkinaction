@@ -29,15 +29,15 @@ public class SimpleStreamingExample {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .getExecutionEnvironment();
-        execEnv.getConfig().disableSysoutLogging();
+
+        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
 
         final DataStream<String> dataStream;
         boolean isKafka = parameterTool.getBoolean("isKafka", false);
         if (isKafka) {
             dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
         } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool))
-                                 .setParallelism(1);
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
         }
 
         DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(new NewsFeedMapper())
