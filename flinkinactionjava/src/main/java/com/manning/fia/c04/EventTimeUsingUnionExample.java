@@ -42,6 +42,7 @@ public class EventTimeUsingUnionExample {
             DataStream<Tuple5<Long, String, String, String, String>>  socketStream = execEnv.socketTextStream(
                     "localhost", 9000).map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
+
             DataStream<Tuple5<Long, String, String, String, String>>  secondSocketStream = execEnv.socketTextStream(
                     "localhost", 8000).map(new NewsFeedMapper3()).assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 

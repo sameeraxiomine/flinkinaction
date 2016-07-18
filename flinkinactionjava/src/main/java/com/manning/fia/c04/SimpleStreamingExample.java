@@ -14,6 +14,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  * this example basically does a simple streaming i.e grouping the data keys and
  * doing a sum aggregation cummulatively as & when the data arrives. no concept
  * of Windows as it is basically KeyedStream
+ * --kafka tu
  *
  */
 public class SimpleStreamingExample {
@@ -22,6 +23,9 @@ public class SimpleStreamingExample {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                     .createLocalEnvironment(1);
+        if (true){
+
+        }
         DataStream<String> socketStream = execEnv.socketTextStream(
                     "localhost", 9000);
 
