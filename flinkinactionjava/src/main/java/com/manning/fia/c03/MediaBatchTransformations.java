@@ -2,7 +2,20 @@ package com.manning.fia.c03;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.model.media.Page;
-import com.manning.fia.transformations.media.*;
+import com.manning.fia.transformations.media.ComputeTimeSpentPerSectionAndSubSection;
+import com.manning.fia.transformations.media.DomainObjectBasedNewsFeedMapper;
+import com.manning.fia.transformations.media.DomainObjectBasedPageMapper;
+import com.manning.fia.transformations.media.FilterOnTimeSpentPerPage;
+import com.manning.fia.transformations.media.GroupReduceComputeTimeSpentPerSectionAndSubSection;
+import com.manning.fia.transformations.media.MapPartitionNewsFeedMapper;
+import com.manning.fia.transformations.media.NewsFeedMapper;
+import com.manning.fia.transformations.media.NewsFeedMapper2;
+import com.manning.fia.transformations.media.NewsFeedMapper8;
+import com.manning.fia.transformations.media.NewsFeedParser;
+import com.manning.fia.transformations.media.PageMapper;
+import com.manning.fia.transformations.media.PageParser;
+import com.manning.fia.transformations.media.SectionSubSectionKeySelector;
+import com.manning.fia.transformations.media.SortGroupReduceForPriorPageId;
 import com.manning.fia.utils.DateUtils;
 import org.apache.flink.api.common.functions.GroupCombineFunction;
 import org.apache.flink.api.common.functions.GroupReduceFunction;
@@ -12,16 +25,15 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.aggregation.Aggregations;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.*;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.util.Collector;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * base file for handling the batch use case.
  */
-public class MediaBatchTansformations {
+public class MediaBatchTransformations {
 
     private static int DEFAULT_LOCAL_PARALLELISM = 1;
 
@@ -73,7 +85,6 @@ public class MediaBatchTansformations {
      * section,subsection that has as a reading rate of more than 6 second.
      * Note here, we wrote a class that implements FilterFunction to implement this logic.
      */
-    @SuppressWarnings("serial")
     public static void usingFilter() throws Exception {
         ExecutionEnvironment execEnv = ExecutionEnvironment
                 .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
@@ -424,23 +435,23 @@ public class MediaBatchTansformations {
 
 
     public static void main(String[] args) throws Exception {
-//        MediaBatchTansformations.usingMap();
-//        MediaBatchTansformations.usingProject();
-//        MediaBatchTansformations.usingFilter();
-//        MediaBatchTansformations.usingMapPartition();
-//        MediaBatchTansformations.usingReduce();
-//        MediaBatchTansformations.usingAggregation();
-        MediaBatchTansformations.usingSum();
-        MediaBatchTansformations.usingGroupReduceSortedKeys();
-//        MediaBatchTansformations.usingKeySelectorAndGroupReduce();
-//        MediaBatchTansformations.usingGroupReduceSortedKeysWithKeySelector();
-//        MediaBatchTansformations.usingGroupCombine();
-//        MediaBatchTansformations.usingBasicJoin();
-//        MediaBatchTansformations.usingBasicJoinWithTupleAndObject();
-//        MediaBatchTansformations.usingBasicJoinWithTupleAndTuple();
-//        MediaBatchTansformations.usingJoinWithProjection();
-//        MediaBatchTansformations.usingJoinWithHint();
-//        MediaBatchTansformations.usingJoinWithHintUtility();
+        MediaBatchTransformations.usingMap();
+//        MediaBatchTransformations.usingProject();
+//        MediaBatchTransformations.usingFilter();
+//        MediaBatchTransformations.usingMapPartition();
+//        MediaBatchTransformations.usingReduce();
+//        MediaBatchTransformations.usingAggregation();
+//        MediaBatchTransformations.usingSum();
+//        MediaBatchTransformations.usingGroupReduceSortedKeys();
+//        MediaBatchTransformations.usingKeySelectorAndGroupReduce();
+//        MediaBatchTransformations.usingGroupReduceSortedKeysWithKeySelector();
+//        MediaBatchTransformations.usingGroupCombine();
+//        MediaBatchTransformations.usingBasicJoin();
+//        MediaBatchTransformations.usingBasicJoinWithTupleAndObject();
+//        MediaBatchTransformations.usingBasicJoinWithTupleAndTuple();
+//        MediaBatchTransformations.usingJoinWithProjection();
+//        MediaBatchTransformations.usingJoinWithHint();
+//        MediaBatchTransformations.usingJoinWithHintUtility();
     }
 
 }

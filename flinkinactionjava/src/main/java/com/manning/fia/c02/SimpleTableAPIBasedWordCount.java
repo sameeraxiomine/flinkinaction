@@ -4,6 +4,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.table.BatchTableEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.table.Row;
 import org.apache.flink.api.table.Table;
 import org.apache.flink.api.table.TableEnvironment;
 
@@ -27,23 +28,6 @@ public class SimpleTableAPIBasedWordCount {
         Table output = table.groupBy("datetime,word")
                 .select("datetime,word, index.sum as wrdCnt")
                 .filter("wrdCnt>1");
-        DataSet<Word> result = tblEnv.toDataSet(output, Word.class);
-        result.print();
-
-    }
-
-    public static class Word {
-        // empty constructor to satisfy POJO requirements
-        public Word() {
-        }
-
-        public String datetime;
-        public String word;
-        public int wrdCnt;
-        
-        @Override
-        public String toString() {
-            return datetime+","+word+","+wrdCnt;
-        }
+        tblEnv.toDataSet(output, Row.class).print();
     }
 }
