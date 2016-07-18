@@ -1,49 +1,61 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
-
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.shaded.com.google.common.base.Throwables;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
  * this example basically does a simple streaming i.e grouping the data keys and
  * doing a sum aggregation cummulatively as & when the data arrives. no concept
  * of Windows as it is basically KeyedStream
- * --kafka tu
- *
+ * <p>
+ * <p>
+ * if it is kafka
+ * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
+ * localhost:2181 --group.id myconsumer --parallelism numberofpartions
+ * else
+ * don't need to send anything.
+ * one of the optional parameters for both the sections are
+ * --fileName /media/pipe/newsfeed
+
  */
 public class SimpleStreamingExample {
 
-    public void executeJob() throws Exception {
+    public void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                    .createLocalEnvironment(1);
-        if (true){
+                .getExecutionEnvironment();
+        execEnv.getConfig().disableSysoutLogging();
 
+        final DataStream<String> dataStream;
+        boolean isKafka = parameterTool.getBoolean("isKafka", false);
+        if (isKafka) {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
+        } else {
+            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool))
+                                 .setParallelism(1);
         }
-        DataStream<String> socketStream = execEnv.socketTextStream(
-                    "localhost", 9000);
 
-        DataStream<Tuple3<String,String,Long>> selectDS = socketStream.map(new NewsFeedMapper())
-                    .project(1,2,4);
+        DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(new NewsFeedMapper())
+                .project(1, 2, 4);
+        selectDS.print();
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.keyBy(0, 1);
 
-         KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.keyBy(0, 1);
+        DataStream<Tuple3<String, String, Long>> result = keyedDS.sum(2);
 
-         DataStream<Tuple3<String, String, Long>> result = keyedDS.sum(2);
-
-        result.print();
 
         execEnv.execute("Simple Streaming");
     }
 
+
     public static void main(String[] args) throws Exception {
-        new NewsFeedSocket().start();
-         SimpleStreamingExample window = new SimpleStreamingExample();
-        window.executeJob();
+        ParameterTool parameterTool = ParameterTool.fromArgs(args);
+        SimpleStreamingExample window = new SimpleStreamingExample();
+        window.executeJob(parameterTool);
+
     }
 }

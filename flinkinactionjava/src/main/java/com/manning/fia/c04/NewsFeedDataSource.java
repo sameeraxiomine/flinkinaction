@@ -1,5 +1,6 @@
-package com.manning.fia.c04.kafka;
+package com.manning.fia.c04;
 
+import com.manning.fia.c04.custom.NewsFeedCustomDataSource;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
