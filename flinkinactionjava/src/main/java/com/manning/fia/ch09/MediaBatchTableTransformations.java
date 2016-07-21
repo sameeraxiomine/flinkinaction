@@ -1,7 +1,12 @@
 package com.manning.fia.ch09;
 
+import com.manning.fia.model.media.NewsFeed;
+import com.manning.fia.model.media.Page;
+import com.manning.fia.transformations.media.DomainObjectBasedNewsFeedMapper;
+import com.manning.fia.transformations.media.DomainObjectBasedPageMapper;
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import com.manning.fia.transformations.media.NewsFeedParser;
+import com.manning.fia.transformations.media.PageParser;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.table.BatchTableEnvironment;
@@ -25,9 +30,7 @@ public class MediaBatchTableTransformations {
 	   final DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
 		 DataSet<Tuple5<Long, String, String, String, Long>> result =
 			 newsFeeds.map(new NewsFeedMapper());
-		 Table table = tableEnv.fromDataSet(result, "page, section, subsection, topic, timespent");
-	   tableEnv.registerTable("NewsFeed", table);
-		 tableEnv.toDataSet(table, Row.class).print();
+	   tableEnv.registerDataSet("NewsFeed", result);
 	 }
 
  /*
@@ -83,8 +86,7 @@ public class MediaBatchTableTransformations {
 		final BatchTableEnvironment tableEnv =
 		BatchTableEnvironment.getTableEnvironment(execEnv);
 		DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
-		DataSet<Tuple5<Long, String, String, String, Long>> result = newsFeeds
-		.map(new NewsFeedMapper());
+		DataSet<Tuple5<Long, String, String, String, Long>> result = newsFeeds.map(new NewsFeedMapper());
 		Table table = tableEnv.fromDataSet(result, "page, section, subsection, topic, timespent");
 
 		Table output = table.groupBy("page, section, topic")
@@ -99,8 +101,8 @@ public class MediaBatchTableTransformations {
    *
    */
 	public static void usingGroupBySQL() throws Exception {
-		final ExecutionEnvironment execEnv = ExecutionEnvironment
-		.createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+		final ExecutionEnvironment execEnv =
+      ExecutionEnvironment.createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
 		final BatchTableEnvironment tableEnv =
 		BatchTableEnvironment.getTableEnvironment(execEnv);
 		DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
@@ -116,14 +118,112 @@ public class MediaBatchTableTransformations {
 		tableEnv.toDataSet(output, Row.class).print();
 	}
 
+	public static void usingJoin() throws Exception {
+     final ExecutionEnvironment execEnv = ExecutionEnvironment
+         .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+     final BatchTableEnvironment tableEnv =
+       BatchTableEnvironment.getTableEnvironment(execEnv);
 
+     DataSet<String> newsFeedValues = execEnv.fromCollection(NewsFeedParser.parseData());
+     DataSet<String> pageInformationValues = execEnv.fromCollection(PageParser.parseData());
+     DataSet<NewsFeed> newsFeeds = newsFeedValues.map(new DomainObjectBasedNewsFeedMapper());
+     DataSet<Page> pagesInfo = pageInformationValues.map(new DomainObjectBasedPageMapper());
+
+     tableEnv.registerDataSet("NewsFeed", newsFeeds);
+		 tableEnv.registerDataSet("Pages", pagesInfo);
+
+		 Table newsTable = tableEnv.scan("NewsFeed");
+		 Table pagesTable = tableEnv.scan("Pages");
+
+     Table output = newsTable.join(pagesTable).where("id === pageId");
+     tableEnv.toDataSet(output, Row.class).print();
+  }
+
+	public static void usingUnion() throws Exception {
+		final ExecutionEnvironment execEnv = ExecutionEnvironment
+		.createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+		final BatchTableEnvironment tableEnv =
+		BatchTableEnvironment.getTableEnvironment(execEnv);
+
+		DataSet<String> newsFeedValues = execEnv.fromCollection(NewsFeedParser.parseData());
+		DataSet<String> pageInformationValues = execEnv.fromCollection(PageParser.parseData());
+		DataSet<NewsFeed> newsFeeds = newsFeedValues.map(new DomainObjectBasedNewsFeedMapper());
+		DataSet<Page> pagesInfo = pageInformationValues.map(new DomainObjectBasedPageMapper());
+
+		tableEnv.registerDataSet("NewsFeed", newsFeeds);
+		tableEnv.registerDataSet("Pages", pagesInfo);
+
+		Table newsTable = tableEnv.scan("NewsFeed");
+		Table pagesTable = tableEnv.scan("Pages");
+
+		Table output = newsTable.union(pagesTable);
+		tableEnv.toDataSet(output, Row.class).print();
+	}
+
+//	public static void usingXY() throws Exception {
+//		List<Tuple3<Long, String, Integer>> input = new ArrayList<>();
+//		input.add(new Tuple3<>(3L,"test",1));
+//		input.add(new Tuple3<>(5L,"test2",2));
+//		StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironment(1);
+//		DataStream<Tuple3<Long, String, Integer>> ds = env.fromCollection(input);
+//
+//		StreamTableEnvironment tableEnv = TableEnvironment.getTableEnvironment(env);
+//
+//		tableEnv.registerDataStream("Words", ds, "frequency, word, pos");
+//		// run a SQL query on the Table and retrieve the result as a new Table
+//		Table result = tableEnv.sql(
+//		"SELECT STREAM word, pos FROM Words WHERE frequency > 2");
+//
+//		tableEnv.toDataStream(result, Row.class).writeAsText("home/smarthi/tmp");
+//
+//	}
+
+	public static void usingOrderBySQL() throws Exception {
+		final ExecutionEnvironment execEnv =
+		ExecutionEnvironment.createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+		final BatchTableEnvironment tableEnv =
+		BatchTableEnvironment.getTableEnvironment(execEnv);
+		DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
+		DataSet<Tuple5<Long, String, String, String, Long>> result = newsFeeds
+		.map(new NewsFeedMapper());
+		Table table = tableEnv.fromDataSet(result, "page, section, subsection, topic, timespent");
+		tableEnv.registerTable("NewsFeed", table);
+
+		Table output = tableEnv.sql(
+		"SELECT page, section, topic FROM NewsFeed ORDER BY topic");
+
+		tableEnv.toDataSet(output, Row.class).print();
+
+	}
+
+	public static void usingOrderBy() throws Exception {
+		final ExecutionEnvironment execEnv =
+		ExecutionEnvironment.createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+		final BatchTableEnvironment tableEnv =
+		BatchTableEnvironment.getTableEnvironment(execEnv);
+		DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
+		DataSet<Tuple5<Long, String, String, String, Long>> result = newsFeeds
+		.map(new NewsFeedMapper());
+		Table table = tableEnv.fromDataSet(result, "page, section, subsection, topic, timespent");
+		tableEnv.registerTable("NewsFeed", table);
+
+		Table output = table.select("page, section, topic").orderBy("topic");
+
+		tableEnv.toDataSet(output, Row.class).print();
+
+	}
 
  public static void main(String[] args) throws Exception {
-	 MediaBatchTableTransformations.registerDataSetAsATable();
-	 MediaBatchTableTransformations.usingFilter();
-	 MediaBatchTableTransformations.usingWhereSQL();
-	 MediaBatchTableTransformations.usingGroupBy();
-	 MediaBatchTableTransformations.usingGroupBySQL();
+//	 MediaBatchTableTransformations.registerDataSetAsATable();
+//	 MediaBatchTableTransformations.usingFilter();
+//	 MediaBatchTableTransformations.usingWhereSQL();
+//	 MediaBatchTableTransformations.usingGroupBy();
+//	 MediaBatchTableTransformations.usingGroupBySQL();
+//   MediaBatchTableTransformations.usingUnion();
+//	 MediaBatchTableTransformations.usingXY();
+	 MediaBatchTableTransformations.usingOrderBySQL();
+	 MediaBatchTableTransformations.usingOrderBy();
+
  }
 
 }
