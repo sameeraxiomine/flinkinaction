@@ -52,8 +52,28 @@ public class MediaBatchTableTransformations {
   }
 
   /*
-   * Illustration of Where, let us say if the news agency wants to see the
+   * Illustration of filter, let us say if the news agency wants to see the
    * section,subsection that has as a reading rate of more than 6 second.
+   *
+   */
+  private static void usingWhere() throws Exception {
+    final ExecutionEnvironment execEnv = ExecutionEnvironment
+        .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+    final BatchTableEnvironment tableEnv =
+        BatchTableEnvironment.getTableEnvironment(execEnv);
+    DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
+        .parseData());
+    DataSet<Tuple5<Long, String, String, String, Long>> result = newsFeeds
+        .map(new NewsFeedMapper());
+    Table table = tableEnv.fromDataSet(result, "page, section, subsection, topic, timespent");
+    Table output = table.select("page, section, timespent").where("timespent > 6000");
+
+    tableEnv.toDataSet(output, Row.class).print();
+  }
+
+  /*
+   * Illustration of Where, let us say if the news agency wants to see the
+   * section, subsection about politics
    *
    */
   private static void usingWhereSQL() throws Exception {
@@ -68,7 +88,7 @@ public class MediaBatchTableTransformations {
     Table table = tableEnv.fromDataSet(result, "page, section, subsection, topic, timespent");
 
     tableEnv.registerTable("NewsFeed", table);
-    Table output = tableEnv.sql("SELECT page, section, topic FROM NewsFeed WHERE timespent > 6000");
+    Table output = tableEnv.sql("SELECT page, section, topic FROM NewsFeed WHERE section LIKE 'po%'");
 
     tableEnv.toDataSet(output, Row.class).print();
   }
@@ -237,7 +257,7 @@ public class MediaBatchTableTransformations {
   }
 
   /**
-   * Illustrates an OrderBy SQL
+   * Illustrates an OrderBy
    *
    */
   private static void usingOrderBy() throws Exception {
@@ -256,6 +276,54 @@ public class MediaBatchTableTransformations {
     tableEnv.toDataSet(output, Row.class).print();
   }
 
+  /**
+   * Illustrates use of MINUS ALL clause, returns records that
+   * don't exist in the right table similar to SQL EXCEPT
+   */
+  private static void usingMinusAll() throws Exception {
+    final ExecutionEnvironment execEnv = ExecutionEnvironment
+        .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+    final BatchTableEnvironment tableEnv =
+        BatchTableEnvironment.getTableEnvironment(execEnv);
+
+    DataSet<String> newsFeed1 = execEnv.fromCollection(NewsFeedParser.parseData());
+    DataSet<String> newsFeed2 = execEnv.fromCollection(NewsFeedParser.parseData("/media/pipe/newsfeed2"));
+
+    DataSet<Tuple5<Long, String, String, String, Long>> newsFeedValues1 = newsFeed1.map(new NewsFeedMapper());
+    DataSet<Tuple5<Long, String, String, String, Long>> newsFeedValues2 = newsFeed2.map(new NewsFeedMapper());
+
+    Table table1 = tableEnv.fromDataSet(newsFeedValues1, "page, section, subsection, topic, timespent");
+    Table table2 = tableEnv.fromDataSet(newsFeedValues2, "page, section, subsection, topic, timespent");
+
+    Table output = table1.minusAll(table2);
+    tableEnv.toDataSet(output, Row.class).print();
+  }
+
+  /**
+   * Illustrates use of MINUS ALL SQL, returns records that
+   * don't exist in the right table
+   */
+  private static void usingMinusAllSQL() throws Exception {
+    final ExecutionEnvironment execEnv = ExecutionEnvironment
+        .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+    final BatchTableEnvironment tableEnv =
+        BatchTableEnvironment.getTableEnvironment(execEnv);
+
+    DataSet<String> newsFeed1 = execEnv.fromCollection(NewsFeedParser.parseData());
+    DataSet<String> newsFeed2 = execEnv.fromCollection(NewsFeedParser.parseData("/media/pipe/newsfeed2"));
+
+    DataSet<Tuple5<Long, String, String, String, Long>> newsFeedValues1 = newsFeed1.map(new NewsFeedMapper());
+    DataSet<Tuple5<Long, String, String, String, Long>> newsFeedValues2 = newsFeed2.map(new NewsFeedMapper());
+
+    Table table1 = tableEnv.fromDataSet(newsFeedValues1, "page, section, subsection, topic, timespent");
+    Table table2 = tableEnv.fromDataSet(newsFeedValues2, "page, section, subsection, topic, timespent");
+
+    tableEnv.registerTable("NewsFeed1", table1);
+    tableEnv.registerTable("NewsFeed2", table2);
+
+    Table output = tableEnv.sql("SELECT * from NewsFeed1 EXCEPT SELECT * from NewsFeed2");
+    tableEnv.toDataSet(output, Row.class).print();
+  }
 
   // Streaming SQL, presently supports SELECT, WHERE, FROM and UNION clauses
 
@@ -344,6 +412,7 @@ public class MediaBatchTableTransformations {
   public static void main(String[] args) throws Exception {
     MediaBatchTableTransformations.registerDataSetAsATable();
     MediaBatchTableTransformations.usingFilter();
+    MediaBatchTableTransformations.usingWhere();
     MediaBatchTableTransformations.usingWhereSQL();
     MediaBatchTableTransformations.usingGroupBy();
     MediaBatchTableTransformations.usingGroupBySQL();
@@ -353,6 +422,8 @@ public class MediaBatchTableTransformations {
     MediaBatchTableTransformations.usingUnionAllSQL();
     MediaBatchTableTransformations.usingOrderBySQL();
     MediaBatchTableTransformations.usingOrderBy();
+    MediaBatchTableTransformations.usingMinusAll();
+    MediaBatchTableTransformations.usingMinusAllSQL();
     MediaBatchTableTransformations.registerDataStreamAsTable();
     MediaBatchTableTransformations.usingStreamFilter();
     MediaBatchTableTransformations.usingStreamWhereSQL();
