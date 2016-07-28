@@ -1,7 +1,5 @@
 package com.manning.fia.c04;
 
-import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -11,44 +9,31 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 public class SlidingWindowExample {
 
 
-    private void executeJob(ParameterTool parameterTool) {
-        try {
-            StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                    .getExecutionEnvironment();
-            execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
+    private void executeJob(ParameterTool parameterTool) throws Exception {
 
-            final DataStream<String> dataStream;
-            boolean isKafka = parameterTool.getBoolean("isKafka", false);
-            if (isKafka) {
-                dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-            } else {
-                dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-            }
+        StreamExecutionEnvironment execEnv;
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
+        WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream;
+        DataStream<Tuple3<String, String, Long>> result;
 
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
-            DataStream<Tuple3<String, String, Long>> selectDS = dataStream
-                    .map(new NewsFeedMapper()).project(1, 2, 4);
+        keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
 
-            KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS.
-                    keyBy(1, 2);
+        windowedStream = keyedDS.timeWindow(Time.seconds(15), Time.seconds(5));
 
-            WindowedStream<Tuple3<String, String, Long>, Tuple, TimeWindow> windowedStream = keyedDS
-                    .timeWindow(Time.seconds(15), Time.seconds(5));
+        result = windowedStream.sum(2);
 
-            DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+        result.print();
 
-            result.print();
+        execEnv.execute("Sliding Windows");
 
-            execEnv.execute("Sliding Windows");
-
-        } catch (Exception ex) {
-            Throwables.propagate(ex);
-        }
     }
 
     public static void main(String[] args) throws Exception {

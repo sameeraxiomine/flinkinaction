@@ -10,8 +10,6 @@ package com.manning.fia.c04;
  * --fileName /media/pipe/newsfeed_for_count_windows
  */
 
-import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -25,30 +23,18 @@ public class TumblingCountWindowExample {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
-        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .getExecutionEnvironment();
+        StreamExecutionEnvironment execEnv;
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
+        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream;
+        DataStream<Tuple3<String, String, Long>> result;
 
-        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
 
-        final DataStream<String> dataStream;
-        boolean isKafka = parameterTool.getBoolean("isKafka", false);
-        if (isKafka) {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-        } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-        }
+        windowedStream = keyedDS.countWindow(3);
 
-        DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(
-                new NewsFeedMapper()).project(1, 2, 4);
-
-        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
-                .keyBy(0, 1);
-
-        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
-                .countWindow(3);
-
-        DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+        result = windowedStream.sum(2);
 
         result.print();
 

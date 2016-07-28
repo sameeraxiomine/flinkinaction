@@ -1,9 +1,9 @@
-package com.manning.fia.c04;
+package com.manning.fia.c05;
 
 import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple1;
-import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
@@ -19,32 +19,32 @@ import java.util.List;
 
 
 @SuppressWarnings("serial")
-public class ApplyFunction2 implements WindowFunction<
-        Tuple4<Long, String, String, String>,
-        Tuple5<Long, Long, List<Long>, String, Long>,
+public class ApplyFunction implements WindowFunction<
+        Tuple5<Long, String, String, String, String>,
+        Tuple6<Long, Long, List<Long>, String, String, Long>,
         Tuple,
         TimeWindow> {
     @Override
     public void apply(Tuple key,
                       TimeWindow window,
-                      Iterable<Tuple4<Long, String, String, String>> inputs,
-                      Collector<Tuple5<Long, Long, List<Long>, String, Long>> out) throws
+                      Iterable<Tuple5<Long, String, String, String, String>> inputs,
+                      Collector<Tuple6<Long, Long, List<Long>, String, String, Long>> out) throws
             Exception {
-        String topic = ((Tuple1<String>) key).f0;
-        
+        String section = ((Tuple2<String, String>) key).f0;
+        String subSection = ((Tuple2<String, String>) key).f1;
         List<Long> eventIds = new ArrayList<Long>(0);
         long totalTimeSpent = 0;
-        Iterator<Tuple4<Long, String, String, String>> iter = inputs.iterator();
+        Iterator<Tuple5<Long, String, String, String, String>> iter = inputs.iterator();
         while(iter.hasNext()){
-            Tuple4<Long, String, String, String> input =iter.next();
+            Tuple5<Long, String, String, String, String> input =iter.next();
             eventIds.add(input.f0);
-            long startTime = getTimeInMillis(input.f2);
-            long endTime = getTimeInMillis(input.f3);
+            long startTime = getTimeInMillis(input.f3);
+            long endTime = getTimeInMillis(input.f4);
             totalTimeSpent += (endTime - startTime);
         }
-        out.collect(new Tuple5<>(formatWindowTime(window.getStart()),formatWindowTime(window.getEnd()),
+        out.collect(new Tuple6<>(formatWindowTime(window.getStart()),formatWindowTime(window.getEnd()),
                    eventIds,
-                   topic,
+                   section,subSection,
                     totalTimeSpent
                    ));
     }

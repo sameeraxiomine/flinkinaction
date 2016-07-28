@@ -22,30 +22,26 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
  * --fileName /media/pipe/newsfeed3 --threadSleepInterval 1000
  */
 public class SlidingWindowAllExample {
+
     private void executeJob(ParameterTool parameterTool) throws Exception {
-        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .getExecutionEnvironment();
-        execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
-        final DataStream<String> dataStream;
-        boolean isKafka = parameterTool.getBoolean("isKafka", false);
-        if (isKafka) {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-        } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-        }
 
-        DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(
-                new NewsFeedMapper()).project(1, 2, 4);
+        StreamExecutionEnvironment execEnv;
+        DataStream<Tuple3<String, String, Long>> selectDS;
+        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream;
+        DataStream<Tuple3<String, String, Long>> result;
+
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        selectDS = DataStreamGenerator.getC04ProjectedDataStream(execEnv, parameterTool);
 
 
-        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = selectDS
-               .timeWindowAll(Time.seconds(25),Time.seconds(5));
+        windowedStream = selectDS.timeWindowAll(Time.seconds(25), Time.seconds(5));
 
         // Above code and the following  one are same.
 //        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = selectDS
 //                .windowAll(SlidingProcessingTimeWindows.of(Time.seconds(25),Time.seconds(5)));
 
-        DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+        result = windowedStream.sum(2);
 
         result.project(2).print();
 
