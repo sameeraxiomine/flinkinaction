@@ -9,6 +9,8 @@ import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 
+import com.manning.fia.transformations.media.NewsFeedMapper;
+
 /**
  * this example basically does a simple streaming i.e grouping the data keys and
  * doing a sum aggregation cummulatively as & when the data arrives. no concept
@@ -29,19 +31,18 @@ public class SimpleStreamingExample {
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv;
+        DataStream<String> dataStream;
+        DataStream<Tuple3<String, String, Long>> selectDS;       
         KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
-        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream;
         DataStream<Tuple3<String, String, Long>> result;
 
-        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
-
-        keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
-
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();        
+        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
+        dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
+        selectDS = dataStream.map(new NewsFeedMapper()).project(1, 2, 4);
+        keyedDS = selectDS.keyBy(0, 1);        
         result = keyedDS.sum(2);
-
         result.print();
-
-
         execEnv.execute("Simple Streaming");
     }
 
