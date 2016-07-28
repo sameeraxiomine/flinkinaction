@@ -1,7 +1,5 @@
 package com.manning.fia.c04;
 
-import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -30,7 +28,7 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
  * count of keys reaches 5. Infact fyi, this is what happens when somebody uses
  * .timeWindow(Time.Seconds(5)) interally window(TumblingProcessingTimeWindows)
  * is called , which has the ProcessingTimeTrigger
- *
+ * <p>
  * * if it is kafka
  * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
  * localhost:2181 --group.id myconsumer --parallelism numberofpartions
@@ -42,30 +40,21 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 public class GlobalWindowsCountExample {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
-        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .createLocalEnvironment(1);
-        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
-        final DataStream<String> dataStream;
-        boolean isKafka = parameterTool.getBoolean("isKafka", false);
-        if (isKafka) {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-        } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-        }
+        StreamExecutionEnvironment execEnv;
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
+        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream;
+        DataStream<Tuple3<String, String, Long>> result;
 
-        DataStream<Tuple3<String, String, Long>> selectDS = dataStream
-                .map(new NewsFeedMapper()).project(1, 2, 4);
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
-                .keyBy(0, 1);
+        keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
 
-        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
-                .window(GlobalWindows.create());
+        windowedStream = keyedDS.window(GlobalWindows.create());
 
         windowedStream.trigger(PurgingTrigger.of(CountTrigger.of(3)));
 
-        DataStream<Tuple3<String, String, Long>> result = windowedStream
-                .sum(2);
+        result = windowedStream.sum(2);
+
         result.print();
 
         execEnv.execute("Global Windows with Trigger");

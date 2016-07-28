@@ -1,15 +1,15 @@
 package com.manning.fia.c04;
 
 import com.manning.fia.transformations.media.ComputeTimeSpentPerSectionAndSubSection;
-import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
 
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 
 /**
  * this example basically does a simple streaming i.e grouping the data keys and
@@ -28,32 +28,19 @@ public class SimpleStreamingExample2 {
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv;
-        DataStream<String> dataStream;
-        DataStream<Tuple3<String, String, Long>> selectDS;
         KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
-        DataStream<Tuple3<String, String, Long>> result ;
-        
+        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream;
+        DataStream<Tuple3<String, String, Long>> result;
+
         execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
+        keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
 
-        boolean isKafka = parameterTool.getBoolean("isKafka", false);
-        if (isKafka) {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-        } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-        }
-
-        
-        selectDS = dataStream.map(new NewsFeedMapper()).project(1, 2, 4);
-        
-        keyedDS = selectDS.keyBy(0, 1);
-        
         result = keyedDS.reduce(new ComputeTimeSpentPerSectionAndSubSection());
 
         result.print();
 
-        execEnv.execute("Simple Streaming");
+        execEnv.execute("Simple Streaming 2");
     }
 
     public static void main(String[] args) throws Exception {

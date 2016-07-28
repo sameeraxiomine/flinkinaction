@@ -1,7 +1,6 @@
 package com.manning.fia.c05;
 
 
-import com.manning.fia.c04.ApplyFunction;
 import com.manning.fia.utils.NewsFeedSocket;
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper3;

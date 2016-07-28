@@ -1,7 +1,5 @@
 package com.manning.fia.c04;
 
-import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -13,7 +11,7 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 
 /**
  * Created by hari on 5/30/16.
- *
+ * <p>
  * * * if it is kafka
  * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
  * localhost:2181 --group.id myconsumer --parallelism numberofpartions
@@ -27,31 +25,23 @@ public class SlidingCountWindowExample {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
-        StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-                .getExecutionEnvironment();
-        execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
-        final DataStream<String> dataStream;
-        boolean isKafka = parameterTool.getBoolean("isKafka", false);
-        if (isKafka) {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-        } else {
-            dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-        }
-
-        DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(
-                new NewsFeedMapper()).project(1, 2, 4);
-
-
-        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS = selectDS
-                .keyBy(0, 1);
+        StreamExecutionEnvironment execEnv;
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
+        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream;
+        DataStream<Tuple3<String, String, Long>> result;
         int size = 3;
         int slide = 2;
-        WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream = keyedDS
-                .countWindow(size, slide);
 
-        DataStream<Tuple3<String, String, Long>> result = windowedStream.sum(2);
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
+
+        windowedStream = keyedDS.countWindow(size, slide);
+
+        result = windowedStream.sum(2);
 
         result.print();
+
         execEnv.execute("Sliding Count Window");
 
     }
