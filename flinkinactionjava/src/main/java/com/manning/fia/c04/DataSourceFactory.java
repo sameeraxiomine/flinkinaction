@@ -11,7 +11,7 @@ import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
  */
 public class DataSourceFactory {
 
-    static SourceFunction<String> getDataSource(ParameterTool parameterTool) {
+    public static SourceFunction<String> getDataSource(ParameterTool parameterTool) {
         if (parameterTool.getBoolean("isKafka")) {
             return new FlinkKafkaConsumer09<String>(
                     parameterTool.getRequired("topic"),
