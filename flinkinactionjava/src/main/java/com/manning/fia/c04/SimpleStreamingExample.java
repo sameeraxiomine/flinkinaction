@@ -1,5 +1,6 @@
 package com.manning.fia.c04;
 
+import com.manning.fia.utils.DataSourceFactory;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;

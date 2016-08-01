@@ -1,4 +1,4 @@
-package com.manning.fia.c04;
+package com.manning.fia.utils;
 
 import com.manning.fia.utils.custom.NewsFeedCustomDataSource;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -11,8 +11,8 @@ import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
  */
 public class DataSourceFactory {
 
-    static SourceFunction<String> getDataSource(ParameterTool parameterTool) {
-        if (parameterTool.getBoolean("isKafka")) {
+    public static SourceFunction<String> getDataSource(ParameterTool parameterTool) {
+        if (parameterTool.getBoolean("isKafka",false)) {
             return new FlinkKafkaConsumer09<String>(
                     parameterTool.getRequired("topic"),
                     new SimpleStringSchema(),
