@@ -13,6 +13,7 @@ package com.manning.fia.c04;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
@@ -22,7 +23,7 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
 
-public class TumblingWindowExample {
+public class TimeWindowExample {
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv;
@@ -31,22 +32,28 @@ public class TumblingWindowExample {
         DataStream<Tuple3<String, String, Long>> result;
 
         execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
-
+        execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
-
-        windowedStream = keyedDS.timeWindow(Time.seconds(5));
+        
+        int tumblingInterval = parameterTool.getInt("tumbleInterval",3);
+        int slidingInterval = parameterTool.getInt("slideInterval",0);
+        if(slidingInterval>0){
+        	windowedStream = keyedDS.timeWindow(Time.seconds(tumblingInterval),Time.seconds(slidingInterval));	
+        }else{
+        	windowedStream = keyedDS.timeWindow(Time.seconds(tumblingInterval));
+        }        
 
         result = windowedStream.sum(2);
 
         result.print();
 
-        execEnv.execute("Tumbling Time Window");
+        execEnv.execute("Processing Time Window");
 
     }
 
     public static void main(String[] args) throws Exception {
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        TumblingWindowExample window = new TumblingWindowExample();
+        TimeWindowExample window = new TimeWindowExample();
         window.executeJob(parameterTool);
 
     }

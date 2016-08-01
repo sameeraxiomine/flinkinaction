@@ -33,7 +33,7 @@ public class TumblingCountWindowExample {
         keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
 
         windowedStream = keyedDS.countWindow(3);
-
+        
         result = windowedStream.sum(2);
 
         result.print();

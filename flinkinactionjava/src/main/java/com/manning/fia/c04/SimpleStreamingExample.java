@@ -32,16 +32,10 @@ public class SimpleStreamingExample {
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv;
-        DataStream<String> dataStream;
-        DataStream<Tuple3<String, String, Long>> selectDS;       
-        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
+        KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;        
         DataStream<Tuple3<String, String, Long>> result;
-
-        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();        
-        execEnv.setParallelism(parameterTool.getInt("parallelism", 1));
-        dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
-        selectDS = dataStream.map(new NewsFeedMapper()).project(1, 2, 4);
-        keyedDS = selectDS.keyBy(0, 1);        
+        execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+        keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
         result = keyedDS.sum(2);
         result.print();
         execEnv.execute("Simple Streaming");

@@ -39,7 +39,7 @@ Next we start Flink in the detached mode. In this mode the Flink cluster is star
 The command to start Flink on YARN in the detached mode is
 
 ```
-HADOOP_CONF_DIR=/etc/hadoop/conf flink-1.0.1/bin/yarn-session.sh -n 4 -jm 1024 -s 5 -tm 10240 -d
+HADOOP_CONF_DIR=/etc/hadoop/conf flink-1.0.1/bin/yarn-session.sh -n 4 -jm 1024 -s 5 -tm 5120 -d
 ```
 
 We need to tell Flink where the YARN configuration files are. Hence we need to explicitly pass the `HADOOP_CONF_DIR` to the command `flink-1.0.1/bin/yarn-session.sh` in the Flink installation. The -d option tells YARN to start Flink in the detached mode. This starts up Flink on YARN and leaves it running. This allows us to use Flink like we had setup Flink in a cluster mode on a set of servers.
