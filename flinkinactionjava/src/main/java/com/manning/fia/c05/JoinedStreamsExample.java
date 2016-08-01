@@ -148,9 +148,9 @@ public class JoinedStreamsExample {
         public NewsFeed join(Tuple7<Long, Long, String, String, String, Long, Long> first, Tuple7<Long, String,
                 String[], String, ApplicationUser, Long, Long> second) throws Exception {
             return new NewsFeed(
-                    first.f0, first.f1, first.f2, first.f3, first.f4, second.f1,
+                    first.f0,  DateTimeFormat.forPattern("yyyyMMddHHmmss").print(second.f5),first.f1, first.f2, first
+                    .f3, first.f4, second.f1,
                     second.f2,
-                    DateTimeFormat.forPattern("yyyyMMddHHmmss").print(second.f5),
                     DateTimeFormat.forPattern("yyyyMMddHHmmss").print(second.f6),
                     second.f3, second.f4);
         }
