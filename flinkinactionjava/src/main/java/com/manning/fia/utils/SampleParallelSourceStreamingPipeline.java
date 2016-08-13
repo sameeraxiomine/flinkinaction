@@ -24,22 +24,18 @@ import com.manning.fia.utils.SampleRichParallelSource;
  */
 public class SampleParallelSourceStreamingPipeline {
 
-    public void executeJob() throws Exception {
-    	int parallelism = 5;
-    	
+    public void executeJob(int parallelism, int noOfEvents,long standardDelayInSeconds, long anamolousDelayInSeconds, int watermarkEveryNInterval) throws Exception {
     	Map<Integer,List<Event>> data = new HashMap<>();
     	Map<Integer,Long> delay = new HashMap<>();
-    	delay.put(0, 1l);
-    	delay.put(1, 1l);
-    	delay.put(2, 1l);
-    	delay.put(3, 1l);
-    	delay.put(4, 1l);
-    	
+    	for(int i=0;i<(parallelism-1);i++){
+        	delay.put(i, standardDelayInSeconds);
+    	}
+    	delay.put((parallelism-1), anamolousDelayInSeconds);
     	for(int i=0;i<parallelism;i++){
     		data.put(i,new ArrayList<Event>());
     	}
-    	for(int i=0;i<100;i++){
-    		data.get(i%parallelism).add(new Event(i*1000,Tuple2.of(i%parallelism,i%parallelism+1)));
+    	for(int i=0;i<noOfEvents;i++){
+    		data.get(i%parallelism).add(new Event(i*1000+1,Tuple2.of(i%parallelism,i%parallelism+1)));
     	}
     	
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
@@ -47,11 +43,13 @@ public class SampleParallelSourceStreamingPipeline {
 
         execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        DataStream<Event> eventStream = execEnv.addSource(new SampleRichParallelSource(data,delay,5));
+        DataStream<Event> eventStream = execEnv.addSource(new SampleRichParallelSource(data,delay,watermarkEveryNInterval));
 
         DataStream<Tuple2<Integer,Integer>> selectDS = eventStream.map(new SimpleMapper());
-                
-        selectDS.keyBy(0).timeWindow(Time.seconds(5)).sum(1).printToErr();
+        
+        int windowInterval = 20;
+        System.out.println("Window Interval " + windowInterval);
+        selectDS.keyBy(0).timeWindow(Time.seconds(windowInterval)).sum(1).printToErr();
 
         execEnv.execute("Sample Event Time Pipeline");
     }
@@ -59,7 +57,7 @@ public class SampleParallelSourceStreamingPipeline {
 
     public static void main(String[] args) throws Exception {        
         SampleParallelSourceStreamingPipeline window = new SampleParallelSourceStreamingPipeline();
-        window.executeJob();
+        window.executeJob(5,100,1l,1l,2);
 
     }
     
