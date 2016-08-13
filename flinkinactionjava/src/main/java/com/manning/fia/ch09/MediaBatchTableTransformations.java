@@ -409,6 +409,25 @@ public class MediaBatchTableTransformations {
     tableEnv.toDataStream(output, Row.class).print();
   }
 
+  private static void usingStreamGroupBySQL() throws Exception {
+    final StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
+        .createLocalEnvironment(DEFAULT_LOCAL_PARALLELISM);
+    final StreamTableEnvironment tableEnv =
+        StreamTableEnvironment.getTableEnvironment(execEnv);
+
+    DataStream<String> newsFeed1 = execEnv.fromCollection(NewsFeedParser.parseData());
+
+    DataStream<Tuple5<Long, String, String, String, Long>> newsFeedValues1 = newsFeed1.map(new NewsFeedMapper());
+
+    Table table1 = tableEnv.fromDataStream(newsFeedValues1, "page, section, subsection, topic, timespent");
+
+    tableEnv.registerTable("NewsFeed1", table1);
+
+    Table output = tableEnv.sql("SELECT STREAM page, section, topic, SUM(timespent) as time_spent from NewsFeed1" +
+        " GROUP BY page, section, topic");
+    tableEnv.toDataStream(output, Row.class).print();
+  }
+
   public static void main(String[] args) throws Exception {
     MediaBatchTableTransformations.registerDataSetAsATable();
     MediaBatchTableTransformations.usingFilter();
@@ -428,6 +447,7 @@ public class MediaBatchTableTransformations {
     MediaBatchTableTransformations.usingStreamFilter();
     MediaBatchTableTransformations.usingStreamWhereSQL();
     MediaBatchTableTransformations.usingStreamUnionAllSQL();
+    MediaBatchTableTransformations.usingStreamGroupBySQL();
   }
 
 }
