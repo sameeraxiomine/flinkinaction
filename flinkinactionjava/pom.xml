@@ -27,11 +27,10 @@
 			<releases>
 				<enabled>false</enabled>
 			</releases>
-			<snapshots>
-			</snapshots>
+			<snapshots/>
 		</repository>
 	</repositories>
-	
+
 
 	<profiles>
 		<profile>
@@ -70,6 +69,11 @@
 					<version>${flink.version}</version>
 					<scope>provided</scope>
 				</dependency>
+				<dependency>
+					<groupId>org.apache.flink</groupId>
+					<artifactId>flink-cep_2.10</artifactId>
+					<version>${flink.version}</version>
+				</dependency>
 				<!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
 				<!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka_2.10 -->
 				<dependency>
@@ -78,8 +82,6 @@
 					<version>0.9.0.0</version>
 					<scope>provided</scope>
 				</dependency>
-
-
 
 				<dependency>
 					<groupId>org.apache.flink</groupId>
