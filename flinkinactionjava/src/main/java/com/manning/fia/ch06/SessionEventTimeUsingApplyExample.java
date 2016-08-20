@@ -1,11 +1,8 @@
 package com.manning.fia.ch06;
 
-import java.util.List;
-
-import com.manning.fia.c05.ApplyFunction;
-import com.manning.fia.transformations.media.NewsFeedMapper3;
 import com.manning.fia.utils.NewsFeedDataSource;
-import org.apache.flink.api.java.tuple.Tuple;
+import java.util.List;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -41,17 +38,26 @@ public class SessionEventTimeUsingApplyExample {
       dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
     }
 
-    DataStream<Tuple5<Long, String, String, String, String>> selectDS = dataStream
-        .map(new NewsFeedMapper3());
+    DataStream<Tuple6<String, Long, String, String, String, String>> selectDS = dataStream
+        .map(new NewsFeedSubscriberMapper());
 
-    KeyedStream<Tuple5<Long, String, String, String, String>, Tuple> keyedDS = selectDS
-        .keyBy(1, 2);
+    DataStream<Tuple6<String, Long, String, String, String, String>> timestampsAndWatermarksDS =
+      selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-    WindowedStream<Tuple5<Long, String, String, String, String>, Tuple, TimeWindow> windowedStream = keyedDS
-        .window(EventTimeSessionWindows.withGap(Time.seconds(10)));
+    KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS = timestampsAndWatermarksDS
+        .keyBy(
+          new KeySelector<Tuple6<String, Long, String, String, String, String>, String>() {
+            @Override
+            public String getKey(Tuple6<String, Long, String, String, String, String> tuple6) throws Exception {
+              return tuple6.f0;
+            }
+          });
 
-    DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result = windowedStream
-        .apply(new ApplyFunction());
+    WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream = keyedDS
+        .window(EventTimeSessionWindows.withGap(Time.seconds(2)));
+
+    DataStream<Tuple5<String, List<Long>, Long, Long, Long>> result = windowedStream
+        .apply(new ApplySessionWindowFunction());
 
     result.print();
 
@@ -59,7 +65,7 @@ public class SessionEventTimeUsingApplyExample {
   }
 
   private static class NewsFeedTimeStamp implements
-      AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>> {
+      AssignerWithPeriodicWatermarks<Tuple6<String, Long, String, String, String, String>> {
     private static final long serialVersionUID = 1L;
     private long maxTimestamp = 0;
     private long priorTimestamp = 0;
@@ -78,10 +84,10 @@ public class SessionEventTimeUsingApplyExample {
 
     @Override
     public long extractTimestamp(
-        Tuple5<Long, String, String, String, String> element,
+      Tuple6<String, Long, String, String, String, String> element,
         long previousElementTimestamp) {
       long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
-          .parseDateTime(element.f3).getMillis();
+          .parseDateTime(element.f4).getMillis();
       maxTimestamp = Math.max(maxTimestamp, millis);
       return millis;
     }
