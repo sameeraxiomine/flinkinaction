@@ -11,14 +11,14 @@ public class NewsFeedMapper3 implements MapFunction<String, Tuple5<Long, String,
             throws Exception {
         NewsFeed newsFeed = NewsFeedParser.mapRow(value);
 
-        Tuple5<Long, String, String, String, String> tuple6 = new Tuple5<>(
+        Tuple5<Long, String, String, String, String> tuple5 = new Tuple5<>(
                                                                         newsFeed.getEventId(),
                                                                         newsFeed.getSection(),
                                                                         newsFeed.getSubSection(),
                                                                         newsFeed.getStartTimeStamp(),
                                                                         newsFeed.getEndTimeStamp()
         );
-        return tuple6;
+        return tuple5;
     }
 }
 
