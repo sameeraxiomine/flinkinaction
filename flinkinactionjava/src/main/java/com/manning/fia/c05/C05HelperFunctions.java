@@ -7,13 +7,40 @@ import java.util.List;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
-public class LateArrivalHelperFunctions {
-	public static class MyWaterMarkAssigner implements AssignerWithPeriodicWatermarks<Tuple4<Integer,Integer,Integer,Long>> {
+import com.manning.fia.utils.Event;
+
+public class C05HelperFunctions {
+	public static class MyBoundedOutOfOrderedness extends BoundedOutOfOrdernessTimestampExtractor<Tuple4<Integer,Integer,Integer,Long>> {
+
+		public MyBoundedOutOfOrderedness(Time maxOutOfOrderness) {
+			super(maxOutOfOrderness);
+		}
+		/*
+		@Override
+		public final Watermark getCurrentWatermark() {
+			// this guarantees that the watermark never goes backwards.
+			long potentialWM = currentMaxTimestamp - maxOutOfOrderness;
+			if(potentialWM >= lastEmittedWatermark) {
+				lastEmittedWatermark = potentialWM;
+			}
+			return new Watermark(lastEmittedWatermark);
+		}
+		*/
+		@Override
+		public long extractTimestamp(Tuple4<Integer,Integer,Integer,Long> element) {
+			return element.f3;
+		}
+
+	}
+	
+	public static class BasicWaterMarkAssigner implements AssignerWithPeriodicWatermarks<Tuple4<Integer,Integer,Integer,Long>> {
 		private static final long serialVersionUID = 1L;
 		private long maxTimestamp = 0;
 		private long priorTimestamp = 0;
@@ -34,7 +61,7 @@ public class LateArrivalHelperFunctions {
 		}
 	}
 	@SuppressWarnings("serial")
-	public static class SampleApplyFunction implements
+	public static class BasicApplyFunction implements
 			WindowFunction<Tuple4<Integer,Integer, Integer,Long>, Tuple4<Long, Long, List<Integer>, Integer>, Tuple, TimeWindow> {
 		@Override
 		public void apply(Tuple key, TimeWindow window, Iterable<Tuple4<Integer,Integer, Integer,Long>> inputs,

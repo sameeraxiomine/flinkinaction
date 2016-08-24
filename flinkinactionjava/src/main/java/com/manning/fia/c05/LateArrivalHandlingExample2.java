@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
 import com.manning.fia.utils.SampleSource;
-import com.manning.fia.c05.LateArrivalHelperFunctions.SampleApplyFunction;
+import com.manning.fia.c05.C05HelperFunctions.BasicApplyFunction;
 
 public class LateArrivalHandlingExample2 {
 	public static void main(String[] args) throws Exception{
@@ -23,10 +23,10 @@ public class LateArrivalHandlingExample2 {
 		//data.add(Tuple4.of(0,1, 1,6999l));//All lost
 		data.add(Tuple4.of(0,12, 1,6999l));
 		data.add(Tuple4.of(0,11, 1,6998l));
-		data.add(Tuple4.of(0,2, 1,4999l));
+		data.add(Tuple4.of(0,4, 1,4999l));
 		data.add(Tuple4.of(0,3, 1,3999l));		
-		data.add(Tuple4.of(0,4, 1,2999l));		
-		data.add(Tuple4.of(0,5, 1,1999l));
+		data.add(Tuple4.of(0,2, 1,2999l));		
+		data.add(Tuple4.of(0,1, 1,1999l));
 
 
 		StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
@@ -34,9 +34,9 @@ public class LateArrivalHandlingExample2 {
 		execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
 		DataStream<Tuple4<Integer,Integer,Integer,Long>> eventStream = execEnv.addSource(new SampleSource(data,1000)).setParallelism(1)
-				.assignTimestampsAndWatermarks(new LateArrivalHelperFunctions.MyWaterMarkAssigner());
+				.assignTimestampsAndWatermarks(new C05HelperFunctions.BasicWaterMarkAssigner());
 		DataStream<Tuple4<Integer, Integer,Integer,Long>> selectDS = eventStream.project(0,1,2,3);
-		selectDS.keyBy(0).timeWindow(Time.seconds(5)).allowedLateness(Time.milliseconds(2000)).apply(new SampleApplyFunction()).printToErr();
+		selectDS.keyBy(0).timeWindow(Time.seconds(5)).allowedLateness(Time.milliseconds(2000)).apply(new BasicApplyFunction()).printToErr();
 		execEnv.execute("Late Events Lost");
 	}
 	
