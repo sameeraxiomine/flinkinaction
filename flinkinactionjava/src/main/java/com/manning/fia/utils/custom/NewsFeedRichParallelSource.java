@@ -1,4 +1,4 @@
-package com.manning.fia.utils;
+package com.manning.fia.utils.custom;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedParser;
@@ -15,7 +15,7 @@ import java.util.Map;
  * This class will poll a folder every 5 seconds
  */
 
-public class NewsFlinkRichParallelSource extends RichParallelSourceFunction<NewsFeed> {
+public class NewsFeedRichParallelSource extends RichParallelSourceFunction<NewsFeed> {
 
     private Map<Integer, List<NewsFeed>> data;
     private Map<Integer, Long> delaysBetweenEvents;
@@ -24,7 +24,7 @@ public class NewsFlinkRichParallelSource extends RichParallelSourceFunction<News
     private int watermarkEventNEvents = 5;
 
 
-    public NewsFlinkRichParallelSource(Map<Integer, List<NewsFeed>> data, ParameterTool parameterTool) {
+    public NewsFeedRichParallelSource(Map<Integer, List<NewsFeed>> data, ParameterTool parameterTool) {
         this.data = data;
         this.threadSleepInterval = parameterTool.getInt("threadSleepInterval", 0);
     }

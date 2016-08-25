@@ -6,7 +6,6 @@ import java.util.Arrays;
 public class NewsFeed extends BaseNewsFeed {
 
 
-
     // pageId
     private long pageId;
 
@@ -157,5 +156,21 @@ public class NewsFeed extends BaseNewsFeed {
         result = 31 * result + (deviceType != null ? deviceType.hashCode() : 0);
         result = 31 * result + (user != null ? user.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "NewsFeed{" +
+                "pageId=" + pageId +
+                ", referrer='" + referrer + '\'' +
+                ", section='" + section + '\'' +
+                ", subSection='" + subSection + '\'' +
+                ", topic='" + topic + '\'' +
+                ", keywords=" + Arrays.toString(keywords) +
+                ", endTimeStamp='" + endTimeStamp + '\'' +
+                ", deviceType='" + deviceType + '\'' +
+                ", user=" + user +
+                super.toString() +
+                '}';
     }
 }
