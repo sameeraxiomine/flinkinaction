@@ -35,8 +35,6 @@ public class TumblingEventTimeUsingPeriodicWM {
 
         execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        execEnv.registerType(BaseNewsFeed.class);
-
         execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
         dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));

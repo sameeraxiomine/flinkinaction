@@ -49,8 +49,6 @@ public class C05HelperFunctions {
 		public long extractTimestamp(Tuple4<Integer, Integer, Integer, Long> element, long previousElementTimestamp) {
 			long millis = element.f3;
 			maxTimestamp = Math.max(maxTimestamp, millis);
-			// Date m = new Date(millis);
-
 			return Long.valueOf(millis);
 		}
 	}

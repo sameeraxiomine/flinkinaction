@@ -50,7 +50,7 @@ public class TumblingEventTimeUsingAscendingWM {
         result = windowedStream.apply(new ApplyFunction());
 
         result.print();
-        execEnv.execute("Tumbling Event Time Window Using Ascending Apply");
+        execEnv.execute("Tumbling Event Time");
     }  
     
     public static void main(String[] args) throws Exception {

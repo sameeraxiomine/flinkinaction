@@ -19,6 +19,6 @@ public class PeriodicTimestampAndWatermarkAssigner implements AssignerWithPeriod
 
 	@Override
 	public Watermark getCurrentWatermark() {		
-		return new Watermark(this.maxTimestamp);
+		return new Watermark(this.maxTimestamp-1);
 	}
 }

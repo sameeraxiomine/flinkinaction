@@ -33,25 +33,20 @@ public class ApplyFunctionWithDomainObject implements WindowFunction<
         String section = ((Tuple2<String, String>) key).f0;
         String subSection = ((Tuple2<String, String>) key).f1;
         List<Long> eventIds = new ArrayList<Long>(0);
-
         long totalTimeSpent = 0;
         Iterator<NewsFeed> iter = inputs.iterator();
         while (iter.hasNext()) {
             NewsFeed input = iter.next();
-
             eventIds.add(input.getEventId());
             long startTime = getTimeInMillis(input.getStartTimeStamp());
             long endTime = getTimeInMillis(((NewsFeed) input).getEndTimeStamp());
             totalTimeSpent += (endTime - startTime);
-
-
         }
         if (!section.isEmpty()) {
             out.collect(new Tuple6<>(formatWindowTime(window.getStart()), formatWindowTime(window.getEnd()),
                     eventIds,
                     section, subSection,
                     totalTimeSpent
-
             ));
         }
 

@@ -100,7 +100,7 @@ public class NewsFeedParser {
     public static NewsFeed mapRowForNewsFeedWithWM(String value) {
         final NewsFeed newsFeed;
         final String[] tokens = StringUtils.splitPreserveAllTokens(value, "|");
-
+        
 
         final long eventId = Long.valueOf(tokens[0]);
         final long pageId = Long.valueOf(tokens[1]);
@@ -126,7 +126,7 @@ public class NewsFeedParser {
             newsFeed = new NewsFeed(eventId, startTimeStamp, pageId, referrer, section, subSection, topic, keywords,
                     endTimeStamp, deviceType, applicationUser);
         } else {
-            newsFeed = new WaterMarksNewsFeed(eventId, startTimeStamp, pageId, referrer, section, subSection, topic, keywords,
+            newsFeed = new WaterMarkedNewsFeed(eventId, startTimeStamp, pageId, referrer, section, subSection, topic, keywords,
                     endTimeStamp, deviceType, applicationUser);
         }
 

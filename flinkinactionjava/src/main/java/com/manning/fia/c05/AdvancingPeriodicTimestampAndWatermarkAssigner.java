@@ -7,19 +7,19 @@ import org.joda.time.format.DateTimeFormat;
 
 public class AdvancingPeriodicTimestampAndWatermarkAssigner implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>>{
    private static final long serialVersionUID = 1L;
-   private long maxTimestamp = 0;
-   private long priorTimestamp = 0;
-   private long lastTimeOfWaterMarking = 0l;
+   private long maxTimestamp = 0;           //#A
+   private long priorMaxTimestamp = 0;      //#B
+   private long lastTimeOfWaterMarking = 0l; //#C
 
    @Override
    public Watermark getCurrentWatermark() {
-       if (maxTimestamp == priorTimestamp) {
-           long advance = (System.currentTimeMillis() - lastTimeOfWaterMarking);
-           maxTimestamp += advance;// Start advancing
+       if (maxTimestamp == priorMaxTimestamp) {
+           long advance = (System.currentTimeMillis() - lastTimeOfWaterMarking); //#D
+           maxTimestamp += advance;                                                      //#D
        }
-       priorTimestamp = maxTimestamp;
+       priorMaxTimestamp = maxTimestamp;                                                         //#E
        lastTimeOfWaterMarking = System.currentTimeMillis();
-       return new Watermark(maxTimestamp);
+       return new Watermark(maxTimestamp-1);
    }
 
    @Override
@@ -27,8 +27,8 @@ public class AdvancingPeriodicTimestampAndWatermarkAssigner implements AssignerW
            Tuple5<Long, String, String, String, String> element,
            long previousElementTimestamp) {
        long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
-               .parseDateTime(element.f3).getMillis();
-       maxTimestamp = Math.max(maxTimestamp, millis);
+               .parseDateTime(element.f3).getMillis();                         //#B
+       maxTimestamp = Math.max(maxTimestamp, millis);                                          //#C
        return Long.valueOf(millis);
    }
 }
