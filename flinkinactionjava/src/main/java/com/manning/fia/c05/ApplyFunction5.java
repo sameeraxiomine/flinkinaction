@@ -18,14 +18,14 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class ApplyFunction5 implements WindowFunction<
-        NewsFeed,
+        Tuple3<List<Long>, String, Long>,
         Tuple5<Long, Long, List<Long>,  String, Long>,
         Tuple,
         TimeWindow> {
     @Override
     public void apply(Tuple key,
                       TimeWindow window,
-                      Iterable<NewsFeed> inputs,
+                      Iterable<Tuple3<List<Long>, String, Long>> inputs,
                       Collector<Tuple5<Long, Long, List<Long>, String, Long>> out) throws
             Exception {
         String section = ((Tuple1<String>) key).f0;
@@ -33,14 +33,12 @@ public class ApplyFunction5 implements WindowFunction<
         List<Long> eventIds = new ArrayList<Long>(0);
 
         long totalTimeSpent = 0;
-        Iterator<NewsFeed> iter = inputs.iterator();
+        Iterator<Tuple3<List<Long>, String, Long>> iter = inputs.iterator();
         while (iter.hasNext()) {
-            NewsFeed input = iter.next();
+            Tuple3<List<Long>, String, Long> input = iter.next();
 
-            eventIds.add(input.getEventId());
-            long startTime = getTimeInMillis(input.getStartTimeStamp());
-            long endTime = getTimeInMillis(((NewsFeed) input).getEndTimeStamp());
-            totalTimeSpent += (endTime - startTime);
+            eventIds.addAll(input.f0);
+            totalTimeSpent += input.f2;
 
 
         }
