@@ -19,7 +19,7 @@ import java.util.List;
 
 
 @SuppressWarnings("serial")
-public class ApplyFunction4 implements WindowFunction<
+public class ApplyFunctionWithDomainObject implements WindowFunction<
         NewsFeed,
         Tuple6<Long, Long, List<Long>, String, String, Long>,
         Tuple,

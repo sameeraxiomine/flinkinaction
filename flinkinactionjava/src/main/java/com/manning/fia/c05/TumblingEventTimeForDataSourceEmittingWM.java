@@ -1,9 +1,7 @@
 package com.manning.fia.c05;
 
-import com.manning.fia.model.media.NewsFeed;
-import com.manning.fia.utils.custom.NewsFeedCustomDataSourceEmittingWM;
-import com.manning.fia.utils.custom.NewsFeedCustomParallelDataSource;
-import com.manning.fia.utils.custom.NewsFeedRichParallelSource;
+import java.util.List;
+
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -15,8 +13,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-import java.util.List;
-import java.util.Map;
+import com.manning.fia.model.media.NewsFeed;
+import com.manning.fia.utils.custom.NewsFeedCustomDataSourceEmittingWM;
 
 /**
  * Created by hari on 6/26/16.
@@ -40,7 +38,7 @@ public class TumblingEventTimeForDataSourceEmittingWM {
         keyedDS = eventStream.keyBy("section","subSection");
         windowedStream = keyedDS.timeWindow(Time.seconds(5));
 
-        result = windowedStream.apply(new ApplyFunction4());
+        result = windowedStream.apply(new ApplyFunctionWithDomainObject());
 
 
         result.print();

@@ -27,7 +27,7 @@ public class TumblingEventTimeUsingApplyForParallelDataSource {
         final Map<Integer, List<NewsFeed>> data;
         final DataStream<NewsFeed> eventStream;
         final StreamExecutionEnvironment execEnv;
-        final int parallelism = parameterTool.getInt("parallelism", 5);
+        final int parallelism = parameterTool.getInt("parallelism", 1);
         final KeyedStream<NewsFeed, Tuple> keyedDS;
         final WindowedStream<NewsFeed, Tuple, TimeWindow> windowedStream;
         final DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
@@ -40,7 +40,7 @@ public class TumblingEventTimeUsingApplyForParallelDataSource {
         keyedDS = eventStream.keyBy("section","subSection");
         windowedStream = keyedDS.timeWindow(Time.seconds(5));
 
-        result = windowedStream.apply(new ApplyFunction4());
+        result = windowedStream.apply(new ApplyFunctionWithDomainObject());
 
 
         result.print();

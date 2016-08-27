@@ -17,33 +17,20 @@ import java.util.Map;
  */
 
 public class NewsFeedCustomDataSourceEmittingWM implements SourceFunction<NewsFeed> {
-
-
-    @Override
-    public void cancel() {
-
-    }
-
-
     private ParameterTool parameterTool;
-
     public NewsFeedCustomDataSourceEmittingWM(ParameterTool parameterTool) {
         this.parameterTool = parameterTool;
     }
 
     @Override
     public void run(SourceContext<NewsFeed> ctx) throws Exception {
-
         final String fileName = parameterTool.get("fileName");
-        final long threadSleepInterval= parameterTool.getLong("threadSleepInterval",0);
-
         final List<String> newsFeeds = NewsFeedParser.parseData(fileName);
         int i = 1;
         NewsFeed newsFeed = null;
         long startTs = 0;
         for (String newsFeedString : newsFeeds) {
             newsFeed = NewsFeedParser.mapRow(newsFeedString);
-            ctx.collect(newsFeed);
             startTs = DateTimeFormat.forPattern("yyyyMMddHHmmss")
                     .parseDateTime(newsFeed.getStartTimeStamp())
                     .getMillis();
@@ -52,14 +39,14 @@ public class NewsFeedCustomDataSourceEmittingWM implements SourceFunction<NewsFe
                 ctx.emitWatermark(new Watermark(startTs));
             }
             i++;
-            Thread.currentThread().sleep(threadSleepInterval);
         }
         //for the last element
         if (newsFeed != null) {
             ctx.emitWatermark(new Watermark(startTs));
         }
-
-
     }
-
+    
+    @Override
+    public void cancel() {
+    }
 }
