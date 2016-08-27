@@ -27,51 +27,33 @@ import java.util.Map;
 public class TumblingIngestionimeUsingApplyForParallelDataSource {
 
     public void executeJob(ParameterTool parameterTool) throws Exception {
-        final DataStream<NewsFeed> eventStream;
-        final StreamExecutionEnvironment execEnv;
-        final int parallelism = parameterTool.getInt("parallelism", 5);
-        final KeyedStream<NewsFeed, Tuple> keyedDS;
-        final KeyedStream<Tuple3<List<Long>, String, Long>, Tuple> sectionKeyedDS;
+       final Map<Integer, List<NewsFeed>> data;
+       final DataStream<NewsFeed> eventStream;
+       final StreamExecutionEnvironment execEnv;
+       final int parallelism = parameterTool.getInt("parallelism", 5);
+       final KeyedStream<NewsFeed, Tuple> keyedDS;
+       final DataStream<Tuple3<List<Long>,String,Long>> projectedDataStream;
+       final KeyedStream<Tuple3<List<Long>,String,Long>, Tuple> sectionKeyedDS;
+       final WindowedStream<NewsFeed, Tuple, TimeWindow> windowedStream;
+       final WindowedStream<Tuple3<List<Long>,String,Long>, Tuple, TimeWindow> sectionWindowedStream;
+       final DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
+       final DataStream<Tuple5<Long, Long, List<Long>,  String, Long>> sectionResult;
 
+       execEnv = StreamExecutionEnvironment.createLocalEnvironment(parallelism);
+       execEnv.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
 
-        final WindowedStream<NewsFeed, Tuple, TimeWindow> windowedStream;
-        final WindowedStream<Tuple3<List<Long>, String, Long>, Tuple, TimeWindow> sectionWindowedStream;
-        final DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
-
-        final DataStream<Tuple3<List<Long>, String, Long>> projectedResult;
-
-        final DataStream<Tuple5<Long, Long, List<Long>, String, Long>> sectionResult;
-
-        execEnv = StreamExecutionEnvironment.createLocalEnvironment(parallelism);
-        execEnv.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
-
-        eventStream = execEnv.addSource(new NewsFeedCustomDataSourceEmittingWM(parameterTool));
-
-        keyedDS = eventStream.keyBy("section", "subSection");
-        windowedStream = keyedDS.timeWindow(Time.seconds(5));
-
-
-<<<<<<< HEAD
-        result = windowedStream.apply(new ApplyFunction4());
-
-
-        projectedResult = result.project(2, 3, 5);
-
-
-        sectionKeyedDS = projectedResult.keyBy(0);
-
-
-        sectionWindowedStream = sectionKeyedDS.timeWindow(Time.seconds(5));
-
-        sectionResult = sectionWindowedStream.apply(new ApplyFunction5());
-=======
-        result = windowedStream.apply(new ApplyFunctionWithDomainObject());
-        sectionResult=sectionWindowedStream.apply(new ApplyFunction5());
->>>>>>> 93dd74f78d6ede54308d2d5393331e576ebab096
-
-        result.print();
-        sectionResult.print();
-
+       data= NewsFeedCustomParallelDataSource.createCustomPartitionData(parameterTool);
+       eventStream = execEnv.addSource(new NewsFeedCustomDataSourceEmittingWM(parameterTool));
+       keyedDS = eventStream.keyBy("section","subSection");
+       windowedStream = keyedDS.timeWindow(Time.seconds(5));
+       result = windowedStream.apply(new ApplyFunctionWithDomainObject());
+       result.print();
+       
+       projectedDataStream=result.project(2,3,5);
+       sectionKeyedDS = projectedDataStream.keyBy(1);
+       sectionWindowedStream=sectionKeyedDS.timeWindow((Time.seconds(5)));        
+       sectionResult=sectionWindowedStream.apply(new SectionAggregator());        
+       sectionResult.print();
         execEnv.execute("NewsFlink Ingestion Time");
     }
 

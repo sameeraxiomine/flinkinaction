@@ -4,6 +4,7 @@ import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.utils.custom.NewsFeedCustomParallelDataSource;
 import com.manning.fia.utils.custom.NewsFeedRichParallelSource;
 import org.apache.flink.api.java.tuple.Tuple;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -31,9 +32,10 @@ public class TumblingIngestionimeUsingApplyExample {
         final StreamExecutionEnvironment execEnv;
         final int parallelism = parameterTool.getInt("parallelism", 5);
         final KeyedStream<NewsFeed, Tuple> keyedDS;
-        final KeyedStream<NewsFeed, Tuple> sectionKeyedDS;
+        final DataStream<Tuple3<List<Long>,String,Long>> projectedDataStream;
+        final KeyedStream<Tuple3<List<Long>,String,Long>, Tuple> sectionKeyedDS;
         final WindowedStream<NewsFeed, Tuple, TimeWindow> windowedStream;
-        final WindowedStream<NewsFeed, Tuple, TimeWindow> sectionWindowedStream;
+        final WindowedStream<Tuple3<List<Long>,String,Long>, Tuple, TimeWindow> sectionWindowedStream;
         final DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
         final DataStream<Tuple5<Long, Long, List<Long>,  String, Long>> sectionResult;
 
@@ -43,15 +45,14 @@ public class TumblingIngestionimeUsingApplyExample {
         data= NewsFeedCustomParallelDataSource.createCustomPartitionData(parameterTool);
         eventStream = execEnv.addSource(new NewsFeedRichParallelSource(data, parameterTool));
         keyedDS = eventStream.keyBy("section","subSection");
-        windowedStream = keyedDS.timeWindow(Time.seconds(20));
-
-        sectionKeyedDS=keyedDS.keyBy("section");
-        sectionWindowedStream=sectionKeyedDS.timeWindow((Time.seconds(10)));
-
-        result = windowedStream.apply(new ApplyFunction4());
-        sectionResult=sectionWindowedStream.apply(new ApplyFunction5());
-
+        windowedStream = keyedDS.timeWindow(Time.seconds(5));
+        result = windowedStream.apply(new ApplyFunctionWithDomainObject());
         result.print();
+        
+        projectedDataStream=result.project(2,3,5);
+        sectionKeyedDS = projectedDataStream.keyBy(1);
+        sectionWindowedStream=sectionKeyedDS.timeWindow((Time.seconds(5)));        
+        sectionResult=sectionWindowedStream.apply(new SectionAggregator());        
         sectionResult.print();
 
         execEnv.execute("NewsFlink Ingestion Time Pipeline");
