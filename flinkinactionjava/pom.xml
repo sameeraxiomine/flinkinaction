@@ -16,7 +16,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>1.1-Snapshot</flink.version>
+		<flink.version>1.2-Snapshot</flink.version>
 	</properties>
 
 	<repositories>
