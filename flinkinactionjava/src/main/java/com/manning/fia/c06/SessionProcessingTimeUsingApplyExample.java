@@ -1,4 +1,4 @@
-package com.manning.fia.ch06;
+package com.manning.fia.c06;
 
 import com.manning.fia.utils.NewsFeedDataSource;
 import java.util.List;

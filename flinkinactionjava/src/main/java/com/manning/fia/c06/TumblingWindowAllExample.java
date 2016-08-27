@@ -1,7 +1,6 @@
-package com.manning.fia.c04;
+package com.manning.fia.c06;
 
-import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
+import com.manning.fia.c04.DataStreamGenerator;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.AllWindowedStream;
@@ -15,15 +14,15 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
  * <p>
  * * * if it is kafka
  * --isKafka true --topic newsfeed --bootstrap.servers localhost:9092 --num-partions 10 --zookeeper.connect
- * localhost:2181 --group.id myconsumer --parallelism numberofpartions
+ * localhost:2181 --group.id myconsumer --parallelism numberofpartitions
  * else
  * don't need to send anything.
  * one of the optional parameters for both the sections are
  * --fileName /media/pipe/newsfeed3 --threadSleepInterval 1000
  */
-public class SlidingWindowAllExample {
 
-    private void executeJob(ParameterTool parameterTool) throws Exception {
+public class TumblingWindowAllExample {
+    public void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv;
         DataStream<Tuple3<String, String, Long>> selectDS;
@@ -34,12 +33,11 @@ public class SlidingWindowAllExample {
 
         selectDS = DataStreamGenerator.getC04ProjectedDataStream(execEnv, parameterTool);
 
-
-        windowedStream = selectDS.timeWindowAll(Time.seconds(25), Time.seconds(5));
+        windowedStream = selectDS.timeWindowAll(Time.seconds(5));
 
         // Above code and the following  one are same.
 //        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = selectDS
-//                .windowAll(SlidingProcessingTimeWindows.of(Time.seconds(25),Time.seconds(5)));
+//                .windowAll(TumblingProcessingTimeWindows.of(Time.of(5, TimeUnit.SECONDS)));
 
         result = windowedStream.sum(2);
 
@@ -51,7 +49,7 @@ public class SlidingWindowAllExample {
 
     public static void main(String[] args) throws Exception {
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        SlidingWindowAllExample window = new SlidingWindowAllExample();
+        TumblingWindowAllExample window = new TumblingWindowAllExample();
         window.executeJob(parameterTool);
 
     }

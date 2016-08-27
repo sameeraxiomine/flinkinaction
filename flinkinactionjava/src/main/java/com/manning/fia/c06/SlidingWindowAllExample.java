@@ -1,14 +1,10 @@
-package com.manning.fia.c04;
+package com.manning.fia.c06;
 
-import com.manning.fia.transformations.media.NewsFeedMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
-import org.apache.flink.api.java.tuple.Tuple;
+import com.manning.fia.c04.DataStreamGenerator;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.AllWindowedStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -24,9 +20,9 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
  * one of the optional parameters for both the sections are
  * --fileName /media/pipe/newsfeed3 --threadSleepInterval 1000
  */
+public class SlidingWindowAllExample {
 
-public class TumblingWindowAllExample {
-    public void executeJob(ParameterTool parameterTool) throws Exception {
+    private void executeJob(ParameterTool parameterTool) throws Exception {
 
         StreamExecutionEnvironment execEnv;
         DataStream<Tuple3<String, String, Long>> selectDS;
@@ -37,11 +33,12 @@ public class TumblingWindowAllExample {
 
         selectDS = DataStreamGenerator.getC04ProjectedDataStream(execEnv, parameterTool);
 
-        windowedStream = selectDS.timeWindowAll(Time.seconds(5));
+
+        windowedStream = selectDS.timeWindowAll(Time.seconds(25), Time.seconds(5));
 
         // Above code and the following  one are same.
 //        AllWindowedStream<Tuple3<String, String, Long>, TimeWindow> windowedStream = selectDS
-//                .windowAll(TumblingProcessingTimeWindows.of(Time.of(5, TimeUnit.SECONDS)));
+//                .windowAll(SlidingProcessingTimeWindows.of(Time.seconds(25),Time.seconds(5)));
 
         result = windowedStream.sum(2);
 
@@ -53,7 +50,7 @@ public class TumblingWindowAllExample {
 
     public static void main(String[] args) throws Exception {
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        TumblingWindowAllExample window = new TumblingWindowAllExample();
+        SlidingWindowAllExample window = new SlidingWindowAllExample();
         window.executeJob(parameterTool);
 
     }
