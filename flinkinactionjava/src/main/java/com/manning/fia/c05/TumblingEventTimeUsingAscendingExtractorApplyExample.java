@@ -48,7 +48,7 @@ public class TumblingEventTimeUsingAscendingExtractorApplyExample {
 
         selectDS = dataStream.map(new NewsFeedMapper3());
 
-        timestampsAndWatermarksDS = selectDS.assignTimestampsAndWatermarks(new TimestampAndWatermarkAssigner());
+        timestampsAndWatermarksDS = selectDS.assignTimestampsAndWatermarks(new PeriodicTimestampAndWatermarkAssigner());
         //timestampsAndWatermarksDS = selectDS.assignTimestampsAndWatermarks(new TimestampAndWatermarkAssignerAsc());
 
         keyedDS = timestampsAndWatermarksDS.keyBy(1, 2);
@@ -62,7 +62,7 @@ public class TumblingEventTimeUsingAscendingExtractorApplyExample {
 
     }
 
-    private static class TimestampAndWatermarkAssignerAsc extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>>{   	 
+    private static class AscendingTimestampAndWatermarkAssigner extends AscendingTimestampExtractor<Tuple5<Long, String, String, String, String>>{   	 
         @Override
         public long extractAscendingTimestamp(Tuple5<Long, String, String, String, String> element) {
             long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
@@ -70,16 +70,18 @@ public class TumblingEventTimeUsingAscendingExtractorApplyExample {
             return millis;
         }
     }
-    private static class TimestampAndWatermarkAssigner implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>>{
+    
+    private static class PeriodicTimestampAndWatermarkAssigner implements AssignerWithPeriodicWatermarks<Tuple5<Long, String, String, String, String>>{
    	 private long maxTimestamp=0;
 
-		@Override
-		public long extractTimestamp(Tuple5<Long, String, String, String, String> element,
-		      long previousElementTimestamp) {
+		 @Override
+		 public long extractTimestamp(Tuple5<Long, String, String, String, String> element,
+		                              long previousElementTimestamp) {
          long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
                .parseDateTime(element.f3).getMillis();
-       this.maxTimestamp = Math.max(millis, maxTimestamp);
-       return millis;		}
+         this.maxTimestamp = Math.max(millis, maxTimestamp);
+         return millis;		
+      }
 
 		@Override
 		public Watermark getCurrentWatermark() {		
