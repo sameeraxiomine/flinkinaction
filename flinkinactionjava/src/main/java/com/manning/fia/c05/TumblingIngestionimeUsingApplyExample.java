@@ -56,7 +56,7 @@ public class TumblingIngestionimeUsingApplyExample {
         sectionResult=sectionWindowedStream.apply(new SectionAggregator());        
         sectionResult.print();
 
-        execEnv.execute("NewsFlink Ingestion Time Pipeline");
+        execEnv.execute("NewsFlink Ingestion Time");
     }
 
 
