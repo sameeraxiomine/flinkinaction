@@ -62,14 +62,10 @@ public class TumblingEventTimeUsingUsingGeneratedWatermarkApplyExample {
 
     private static class TimestampAndWatermarkAssigner implements
             AssignerWithPunctuatedWatermarks<NewsFeed> {
-
-
-        @Nullable
         @Override
-        public Watermark checkAndGetNextWatermark(NewsFeed newsFeed, long l) {
-            return newsFeed instanceof WaterMarksNewsFeed ? new Watermark(l) : null;
+        public Watermark checkAndGetNextWatermark(NewsFeed newsFeed, long extractedTs) {
+            return newsFeed instanceof WaterMarksNewsFeed ? new Watermark(extractedTs) : null;
         }
-
         @Override
         public long extractTimestamp(NewsFeed newsFeed, long l) {
             long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss").parseDateTime(newsFeed.getStartTimeStamp()).getMillis();

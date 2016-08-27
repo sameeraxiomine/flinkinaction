@@ -38,7 +38,7 @@ public class TumblingEventTimeUsingApplyForParallelDataSource {
         data= NewsFeedCustomParallelDataSource.createCustomPartitionData(parameterTool);
         eventStream = execEnv.addSource(new NewsFeedRichParallelSource(data, parameterTool));
         keyedDS = eventStream.keyBy("section","subSection");
-        windowedStream = keyedDS.timeWindow(Time.seconds(15));
+        windowedStream = keyedDS.timeWindow(Time.seconds(5));
 
         result = windowedStream.apply(new ApplyFunction4());
 

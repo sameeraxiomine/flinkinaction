@@ -58,7 +58,7 @@ public class NewsFeedCustomParallelDataSource {
             otherNewsFeeds = new ArrayList<>(10);
             for (NewsFeed newsFeed : loopNewsFeeds) {
                 clonedNewsFeed = SerializationUtils.clone(newsFeed);
-                clonedNewsFeed.setEventId(newsFeed.getEventId() + 10);
+                clonedNewsFeed.setEventId(newsFeed.getEventId() + 20);
 
                 Long newStartTimeStamp = Long.valueOf(newsFeed.getStartTimeStamp()) + startSecondsToIncrease;
                 Long newEndTimeStamp = Long.valueOf(newsFeed.getEndTimeStamp()) + endSecondsToIncrease;

@@ -18,7 +18,7 @@ import java.util.Map;
 public class NewsFeedRichParallelSource extends RichParallelSourceFunction<NewsFeed> {
 
     private Map<Integer, List<NewsFeed>> data;
-    private Map<Integer, Long> delaysBetweenEvents;
+    
     private long threadSleepInterval;
     private int index = -1;
     private int watermarkEventNEvents = 5;
@@ -53,7 +53,6 @@ public class NewsFeedRichParallelSource extends RichParallelSourceFunction<NewsF
                     .getMillis();
             ctx.collectWithTimestamp(newsFeed, startTs);
             Thread.currentThread().sleep(this.threadSleepInterval);
-
             if (i % this.watermarkEventNEvents == 0) {
                 ctx.emitWatermark(new Watermark(startTs));
             }
@@ -62,7 +61,7 @@ public class NewsFeedRichParallelSource extends RichParallelSourceFunction<NewsF
         if (newsFeed != null) {
             long startTs = DateTimeFormat.forPattern("yyyyMMddHHmmss")
                     .parseDateTime(newsFeed.getStartTimeStamp())
-                    .getMillis();
+                    .getMillis();            
             ctx.emitWatermark(new Watermark(startTs));
         }
 

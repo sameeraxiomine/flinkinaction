@@ -97,7 +97,7 @@ public class NewsFeedParser {
         return newsFeed;
     }
 
-    public static NewsFeed mapRow2(String value) {
+    public static NewsFeed mapRowForNewsFeedWithWM(String value) {
         final NewsFeed newsFeed;
         final String[] tokens = StringUtils.splitPreserveAllTokens(value, "|");
 
@@ -126,9 +126,8 @@ public class NewsFeedParser {
             newsFeed = new NewsFeed(eventId, startTimeStamp, pageId, referrer, section, subSection, topic, keywords,
                     endTimeStamp, deviceType, applicationUser);
         } else {
-            String waterMark = tokens[13];
             newsFeed = new WaterMarksNewsFeed(eventId, startTimeStamp, pageId, referrer, section, subSection, topic, keywords,
-                    endTimeStamp, deviceType, applicationUser, "W".equals(waterMark));
+                    endTimeStamp, deviceType, applicationUser);
         }
 
         return newsFeed;
