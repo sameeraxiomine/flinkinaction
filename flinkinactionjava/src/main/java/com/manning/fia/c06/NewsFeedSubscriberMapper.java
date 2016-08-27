@@ -1,4 +1,4 @@
-package com.manning.fia.ch06;
+package com.manning.fia.c06;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedParser;

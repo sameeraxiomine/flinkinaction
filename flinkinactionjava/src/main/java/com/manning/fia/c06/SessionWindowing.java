@@ -1,4 +1,4 @@
-package com.manning.fia.ch06;
+package com.manning.fia.c06;
 
 import java.util.ArrayList;
 import java.util.List;

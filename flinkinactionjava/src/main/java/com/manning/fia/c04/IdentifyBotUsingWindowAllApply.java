@@ -1,13 +1,10 @@
 package com.manning.fia.c04;
 
-import com.manning.fia.transformations.media.ExtractIPAddressMapper;
-import com.manning.fia.utils.NewsFeedDataSource;
-import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.AllWindowedStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
@@ -27,13 +24,14 @@ public class IdentifyBotUsingWindowAllApply {
         StreamExecutionEnvironment execEnv;
         DataStream<String> selectDS;
         AllWindowedStream<String, TimeWindow> ws1;
-        DataStream<Tuple3<String, String, Long>> result;
 
         execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
         selectDS = DataStreamGenerator.getC04BotDataStream(execEnv, parameterTool);
 
-        ws1 = selectDS.timeWindowAll(Time.seconds(2), Time.seconds(1));
+//        ws1 = selectDS.timeWindowAll(Time.seconds(2), Time.seconds(1));
+
+        ws1 = selectDS.windowAll(SlidingProcessingTimeWindows.of(Time.seconds(5), Time.seconds(2)));
 
         DataStream<String> result1 = ws1.apply(new AllApplyFunction());
 
