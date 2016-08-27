@@ -25,7 +25,7 @@ public class LateArrivalHandlingExample3 {
 		data.add(Tuple4.of(0,11, 1,6998l));
 		data.add(Tuple4.of(0,4, 1,4999l));
 		data.add(Tuple4.of(0,3, 1,3999l));
-		data.add(Tuple4.of(0,13, 1,7999l));
+		data.add(Tuple4.of(0,12, 1,6999l));
 		data.add(Tuple4.of(0,2, 1,2999l));
 		data.add(Tuple4.of(0,1, 1,1999l));
 

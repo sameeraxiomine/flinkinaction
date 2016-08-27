@@ -17,42 +17,36 @@ import org.apache.flink.util.Collector;
 import com.manning.fia.utils.Event;
 
 public class C05HelperFunctions {
-	public static class MyBoundedOutOfOrderedness extends BoundedOutOfOrdernessTimestampExtractor<Tuple4<Integer,Integer,Integer,Long>> {
+	public static class MyBoundedOutOfOrderedness
+	      extends BoundedOutOfOrdernessTimestampExtractor<Tuple4<Integer, Integer, Integer, Long>> {
 
 		public MyBoundedOutOfOrderedness(Time maxOutOfOrderness) {
 			super(maxOutOfOrderness);
 		}
+
 		/*
+		 * @Override public final Watermark getCurrentWatermark() { // this
+		 * guarantees that the watermark never goes backwards. long potentialWM =
+		 * currentMaxTimestamp - maxOutOfOrderness; if(potentialWM >=
+		 * lastEmittedWatermark) { lastEmittedWatermark = potentialWM; } return
+		 * new Watermark(lastEmittedWatermark); }
+		 */
 		@Override
-		public final Watermark getCurrentWatermark() {
-			// this guarantees that the watermark never goes backwards.
-			long potentialWM = currentMaxTimestamp - maxOutOfOrderness;
-			if(potentialWM >= lastEmittedWatermark) {
-				lastEmittedWatermark = potentialWM;
-			}
-			return new Watermark(lastEmittedWatermark);
-		}
-		*/
-		@Override
-		public long extractTimestamp(Tuple4<Integer,Integer,Integer,Long> element) {
+		public long extractTimestamp(Tuple4<Integer, Integer, Integer, Long> element) {
 			return element.f3;
 		}
-
 	}
-	
-	public static class BasicWaterMarkAssigner implements AssignerWithPeriodicWatermarks<Tuple4<Integer,Integer,Integer,Long>> {
-		private static final long serialVersionUID = 1L;
-		private long maxTimestamp = 0;
-		private long priorTimestamp = 0;
 
+	public static class BasicWaterMarkAssigner
+	      implements AssignerWithPeriodicWatermarks<Tuple4<Integer, Integer, Integer, Long>> {		
+		private long maxTimestamp = 0;
 		@Override
 		public Watermark getCurrentWatermark() {
-			System.err.println("WM="+this.maxTimestamp);
-			return new Watermark(this.maxTimestamp);
+						return new Watermark(this.maxTimestamp);
 		}
 
 		@Override
-		public long extractTimestamp(Tuple4<Integer,Integer,Integer,Long> element, long previousElementTimestamp) {
+		public long extractTimestamp(Tuple4<Integer, Integer, Integer, Long> element, long previousElementTimestamp) {
 			long millis = element.f3;
 			maxTimestamp = Math.max(maxTimestamp, millis);
 			// Date m = new Date(millis);
@@ -60,24 +54,28 @@ public class C05HelperFunctions {
 			return Long.valueOf(millis);
 		}
 	}
+
 	@SuppressWarnings("serial")
 	public static class BasicApplyFunction implements
-			WindowFunction<Tuple4<Integer,Integer, Integer,Long>, Tuple4<Long, Long, List<Integer>, Integer>, Tuple, TimeWindow> {
+	                              WindowFunction<Tuple4<Integer, Integer, Integer, Long>, 
+	                                             Tuple4<Long, Long, List<Integer>, Integer>, 
+	                                             Tuple, 
+	                                             TimeWindow> {
 		@Override
-		public void apply(Tuple key, TimeWindow window, Iterable<Tuple4<Integer,Integer, Integer,Long>> inputs,
-				Collector<Tuple4<Long, Long, List<Integer>, Integer>> out) throws Exception {
-			System.err.println("Apply Thread Id"+Thread.currentThread().getId());
+		public void apply(Tuple key, 
+				            TimeWindow window, 
+				            Iterable<Tuple4<Integer, Integer, Integer, Long>> inputs,
+		                  Collector<Tuple4<Long, Long, List<Integer>, Integer>> out) 
+		                  		throws Exception {			
 			List<Integer> eventIds = new ArrayList<>(0);
 			int sum = 0;
-			Iterator<Tuple4<Integer,Integer, Integer,Long>> iter = inputs.iterator();
+			Iterator<Tuple4<Integer, Integer, Integer, Long>> iter = inputs.iterator();
 			while (iter.hasNext()) {
-				Tuple4<Integer,Integer, Integer,Long> input = iter.next();
+				Tuple4<Integer, Integer, Integer, Long> input = iter.next();
 				eventIds.add(input.f1);
 				sum += input.f2;
 			}
-
 			out.collect(new Tuple4<>(window.getStart(), window.getEnd(), eventIds, sum));
-
 		}
 	}
 }

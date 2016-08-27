@@ -17,24 +17,17 @@ public class OutOfOrderArrivalHandlingExample2 {
 		//https://docs.google.com/document/d/1Xp-YBf87vLTduYSivgqWVEMjYUmkA-hyb4muX3KRl08/edit#
 		List<Tuple4<Integer,Integer,Integer,Long>> data = new ArrayList<>();
 				
-		//data.add(new Event(7999, Tuple2.of(0, 100)));
-		//Drop when WM>=END_TIME(4999)+LATENESS(2000)
-		//data.add(new Event(6999, Tuple2.of(0, 1)));
-		//data.add(Tuple4.of(0,1, 1,6999l));//All lost
-		//data.add(Tuple4.of(0,12, 1,6999l));
-		data.add(Tuple4.of(0,1, 1,199l));
-		data.add(Tuple4.of(0,2, 1,2999l));
-		data.add(Tuple4.of(0,3, 1,3999l));
-		data.add(Tuple4.of(0,11, 1,6998l));
-		data.add(Tuple4.of(0,12, 1,6999l));
-		data.add(Tuple4.of(0,4, 1,4999l));
-		data.add(Tuple4.of(0,10, 1,5998l));
+		data.add(Tuple4.of(0, 1, 1, 1999l));
+		data.add(Tuple4.of(0, 2, 1, 2999l));
+		data.add(Tuple4.of(0, 3, 1, 3999l));
+		data.add(Tuple4.of(0, 11, 1, 6998l));
+		data.add(Tuple4.of(0, 12, 1, 6999l));
+		data.add(Tuple4.of(0, 4, 1, 4999l));		
 		
 		StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(1);
 		
 		execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-		// Slightly out of order
 		DataStream<Tuple4<Integer,Integer,Integer,Long>> eventStream = execEnv.addSource(new SampleSource(data,1000)).setParallelism(1)
 				.assignTimestampsAndWatermarks(new C05HelperFunctions.MyBoundedOutOfOrderedness(Time.seconds(2)));
 		DataStream<Tuple4<Integer, Integer,Integer,Long>> selectDS = eventStream.project(0,1,2,3);
