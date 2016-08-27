@@ -1,6 +1,9 @@
 package com.manning.fia.c05;
 
 import com.manning.fia.model.media.NewsFeed;
+import com.manning.fia.transformations.media.NewsFeedMapper3;
+import com.manning.fia.utils.DataSourceFactory;
+import com.manning.fia.utils.custom.NewsFeedCustomDataSourceEmittingWM;
 import com.manning.fia.utils.custom.NewsFeedCustomParallelDataSource;
 import com.manning.fia.utils.custom.NewsFeedRichParallelSource;
 import org.apache.flink.api.java.tuple.Tuple;
@@ -27,26 +30,24 @@ import java.util.Map;
 public class TumblingIngestionimeUsingApplyExample {
 
     public void executeJob(ParameterTool parameterTool) throws Exception {
-        final Map<Integer, List<NewsFeed>> data;
-        final DataStream<NewsFeed> eventStream;
-        final StreamExecutionEnvironment execEnv;
-        final int parallelism = parameterTool.getInt("parallelism", 5);
-        final KeyedStream<NewsFeed, Tuple> keyedDS;
-        final DataStream<Tuple3<List<Long>,String,Long>> projectedDataStream;
-        final KeyedStream<Tuple3<List<Long>,String,Long>, Tuple> sectionKeyedDS;
-        final WindowedStream<NewsFeed, Tuple, TimeWindow> windowedStream;
-        final WindowedStream<Tuple3<List<Long>,String,Long>, Tuple, TimeWindow> sectionWindowedStream;
-        final DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
-        final DataStream<Tuple5<Long, Long, List<Long>,  String, Long>> sectionResult;
+        DataStream<String> eventStream;
+        StreamExecutionEnvironment execEnv;
+        int parallelism = parameterTool.getInt("parallelism", 1);
+        KeyedStream<Tuple5<Long, String, String, String, String>, Tuple> keyedDS;
+        DataStream<Tuple3<List<Long>,String,Long>> projectedDataStream;
+        KeyedStream<Tuple3<List<Long>,String,Long>, Tuple> sectionKeyedDS;
+        WindowedStream<Tuple5<Long, String, String, String, String>, Tuple, TimeWindow> windowedStream;
+        WindowedStream<Tuple3<List<Long>,String,Long>, Tuple, TimeWindow> sectionWindowedStream;
+        DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
+        DataStream<Tuple5<Long, Long, List<Long>,  String, Long>> sectionResult;
 
         execEnv = StreamExecutionEnvironment.createLocalEnvironment(parallelism);
         execEnv.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
 
-        data= NewsFeedCustomParallelDataSource.createCustomPartitionData(parameterTool);
-        eventStream = execEnv.addSource(new NewsFeedRichParallelSource(data, parameterTool));
-        keyedDS = eventStream.keyBy("section","subSection");
+        eventStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
+        keyedDS = eventStream.map(new NewsFeedMapper3()).keyBy(1,2);
         windowedStream = keyedDS.timeWindow(Time.seconds(5));
-        result = windowedStream.apply(new ApplyFunctionWithDomainObject());
+        result = windowedStream.apply(new ApplyFunction());
         result.print();
         
         projectedDataStream=result.project(2,3,5);
