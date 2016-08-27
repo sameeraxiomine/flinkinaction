@@ -48,7 +48,7 @@ public class TumblingIngestionimeUsingApplyForParallelDataSource {
         sectionKeyedDS=keyedDS.keyBy("section");
         sectionWindowedStream=sectionKeyedDS.timeWindow((Time.seconds(10)));
 
-        result = windowedStream.apply(new ApplyFunction4());
+        result = windowedStream.apply(new ApplyFunctionWithDomainObject());
         sectionResult=sectionWindowedStream.apply(new ApplyFunction5());
 
         result.print();

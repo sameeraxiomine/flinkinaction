@@ -52,7 +52,7 @@ public class TumblingEventTimeUsingUsingGeneratedWatermarkApplyExample {
 
         windowedStream = keyedDS.timeWindow(Time.seconds(15));
 
-        result = windowedStream.apply(new ApplyFunction4());
+        result = windowedStream.apply(new ApplyFunctionWithDomainObject());
 
         result.print();
 
