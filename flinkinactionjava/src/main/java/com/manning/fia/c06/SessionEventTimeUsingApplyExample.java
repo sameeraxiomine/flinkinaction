@@ -3,7 +3,7 @@ package com.manning.fia.c06;
 import com.manning.fia.utils.NewsFeedDataSource;
 import java.util.List;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -11,13 +11,13 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
-import org.apache.flink.streaming.api.watermark.Watermark;
+import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.joda.time.format.DateTimeFormat;
 
+// Run with newsfeed_for_session_windows and threadsleepinterval = 500ms
 public class SessionEventTimeUsingApplyExample {
 
   private void executeJob(ParameterTool parameterTool) throws Exception{
@@ -42,7 +42,7 @@ public class SessionEventTimeUsingApplyExample {
         .map(new NewsFeedSubscriberMapper());
 
     DataStream<Tuple6<String, Long, String, String, String, String>> timestampsAndWatermarksDS =
-      selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
+      selectDS.assignTimestampsAndWatermarks(new SessionAscendingTimestampAndWatermarkAssigner());
 
     KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS = timestampsAndWatermarksDS
         .keyBy(
@@ -54,9 +54,9 @@ public class SessionEventTimeUsingApplyExample {
           });
 
     WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream = keyedDS
-        .window(EventTimeSessionWindows.withGap(Time.seconds(2)));
+        .window(EventTimeSessionWindows.withGap(Time.seconds(4)));
 
-    DataStream<Tuple5<String, List<Long>, Long, Long, Long>> result = windowedStream
+    DataStream<Tuple3<String, List<Long>, Long>> result = windowedStream
         .apply(new ApplySessionWindowFunction());
 
     result.print();
@@ -64,32 +64,12 @@ public class SessionEventTimeUsingApplyExample {
     execEnv.execute("Event Time Session Window Apply");
   }
 
-  private static class NewsFeedTimeStamp implements
-      AssignerWithPeriodicWatermarks<Tuple6<String, Long, String, String, String, String>> {
-    private static final long serialVersionUID = 1L;
-    private long maxTimestamp = 0;
-    private long priorTimestamp = 0;
-    private long lastTimeOfWaterMarking = System.currentTimeMillis();
-
+  private static class SessionAscendingTimestampAndWatermarkAssigner
+    extends AscendingTimestampExtractor<Tuple6<String, Long, String, String, String, String>> {
     @Override
-    public Watermark getCurrentWatermark() {
-      if (maxTimestamp == priorTimestamp) {
-        long advance = (System.currentTimeMillis() - lastTimeOfWaterMarking);
-        maxTimestamp += advance;// Start advancing
-      }
-      priorTimestamp = maxTimestamp;
-      lastTimeOfWaterMarking = System.currentTimeMillis();
-      return new Watermark(maxTimestamp);
-    }
-
-    @Override
-    public long extractTimestamp(
-      Tuple6<String, Long, String, String, String, String> element,
-        long previousElementTimestamp) {
-      long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
-          .parseDateTime(element.f4).getMillis();
-      maxTimestamp = Math.max(maxTimestamp, millis);
-      return millis;
+    public long extractAscendingTimestamp(Tuple6<String, Long, String, String, String, String> element) {
+      return DateTimeFormat.forPattern("yyyyMMddHHmmss")
+        .parseDateTime(element.f4).getMillis();
     }
   }
 
