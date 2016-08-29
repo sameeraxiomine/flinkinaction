@@ -10,9 +10,10 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
-import org.apache.flink.streaming.api.windowing.triggers.CountTrigger;
+import org.apache.flink.streaming.api.windowing.triggers.PurgingTrigger;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 
+// run with parallelism = 1 and threadSleepInterval = 1
 public class GlobalWindowsCountWithCustomTrigger {
 
   private void executeJob(final ParameterTool parameters) throws Exception {
@@ -27,7 +28,7 @@ public class GlobalWindowsCountWithCustomTrigger {
 
     windowedStream = keyedDS.window(GlobalWindows.create());
 
-    windowedStream.trigger(NewsTimeoutTrigger.of(CountTrigger.of(3), 10));
+    windowedStream.trigger(PurgingTrigger.of(NewsCountTimeoutTrigger.of(3, 3000)));
 
     result = windowedStream.sum(2);
 
