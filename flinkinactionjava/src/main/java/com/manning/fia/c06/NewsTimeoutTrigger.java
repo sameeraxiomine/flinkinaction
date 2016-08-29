@@ -45,7 +45,6 @@ public class NewsTimeoutTrigger<T, W extends Window> extends Trigger<T, W> {
       startTimeState.update(currentTime);
       triggerContext.registerProcessingTimeTimer(currentTime + sessionTimeout);
     }
-    System.out.println(window.maxTimestamp());
     return TriggerResult.FIRE_AND_PURGE;
   }
 
