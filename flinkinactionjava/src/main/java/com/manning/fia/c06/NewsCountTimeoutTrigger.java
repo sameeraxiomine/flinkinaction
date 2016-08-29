@@ -34,14 +34,15 @@ public class NewsCountTimeoutTrigger<T, W extends Window> extends Trigger<T, W> 
     // Get the Current Timestamp
     final long currentTimeStamp = System.currentTimeMillis();
 
-    // Increment the Count each time onElement() is invoked
-    final long presentCount = countState.value() + 1;
-
     if (timeOutState.value() == null) {
       long currentTime = triggerContext.getCurrentProcessingTime();
       timeOutState.update(currentTime);
       triggerContext.registerProcessingTimeTimer(currentTime + timeOutInMs);
     }
+
+    // Increment the Count each time onElement() is invoked
+    final long presentCount = countState.value() + 1;
+
 
     // Get the time out value
     final long timeoutValue = timeOutState.value();
