@@ -436,22 +436,22 @@ public class MediaBatchTransformations {
 
     public static void main(String[] args) throws Exception {
         MediaBatchTransformations.usingMap();
-//        MediaBatchTransformations.usingProject();
-//        MediaBatchTransformations.usingFilter();
-//        MediaBatchTransformations.usingMapPartition();
-//        MediaBatchTransformations.usingReduce();
-//        MediaBatchTransformations.usingAggregation();
-//        MediaBatchTransformations.usingSum();
-//        MediaBatchTransformations.usingGroupReduceSortedKeys();
-//        MediaBatchTransformations.usingKeySelectorAndGroupReduce();
-//        MediaBatchTransformations.usingGroupReduceSortedKeysWithKeySelector();
-//        MediaBatchTransformations.usingGroupCombine();
-//        MediaBatchTransformations.usingBasicJoin();
-//        MediaBatchTransformations.usingBasicJoinWithTupleAndObject();
-//        MediaBatchTransformations.usingBasicJoinWithTupleAndTuple();
-//        MediaBatchTransformations.usingJoinWithProjection();
-//        MediaBatchTransformations.usingJoinWithHint();
-//        MediaBatchTransformations.usingJoinWithHintUtility();
+        MediaBatchTransformations.usingProject();
+        MediaBatchTransformations.usingFilter();
+        MediaBatchTransformations.usingMapPartition();
+        MediaBatchTransformations.usingReduce();
+        MediaBatchTransformations.usingAggregation();
+        MediaBatchTransformations.usingSum();
+        MediaBatchTransformations.usingGroupReduceSortedKeys();
+        MediaBatchTransformations.usingKeySelectorAndGroupReduce();
+        MediaBatchTransformations.usingGroupReduceSortedKeysWithKeySelector();
+        MediaBatchTransformations.usingGroupCombine();
+        MediaBatchTransformations.usingBasicJoin();
+        MediaBatchTransformations.usingBasicJoinWithTupleAndObject();
+        MediaBatchTransformations.usingBasicJoinWithTupleAndTuple();
+        MediaBatchTransformations.usingJoinWithProjection();
+        MediaBatchTransformations.usingJoinWithHint();
+        MediaBatchTransformations.usingJoinWithHintUtility();
     }
 
 }
