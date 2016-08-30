@@ -5,7 +5,7 @@
 	<parent>
         <artifactId>flinkinaction</artifactId>
         <groupId>com.manning</groupId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2-RELEASE</version>
     </parent>
 	
 	<artifactId>flinkinactionjava</artifactId>
