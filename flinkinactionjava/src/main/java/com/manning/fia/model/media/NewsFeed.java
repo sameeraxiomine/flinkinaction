@@ -1,10 +1,12 @@
 package com.manning.fia.model.media;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 @SuppressWarnings("serial")
-public class NewsFeed extends BaseNewsFeed {
+public class NewsFeed implements Serializable{
 
+    private long eventId;
 
     // pageId
     private long pageId;
@@ -23,7 +25,7 @@ public class NewsFeed extends BaseNewsFeed {
     private String[] keywords;
 
     // startTimestamp,endTimeStamp
-
+    private String startTimeStamp;
 
     private String endTimeStamp;
 
@@ -36,17 +38,29 @@ public class NewsFeed extends BaseNewsFeed {
     public NewsFeed() {
     }
 
-    public NewsFeed(long eventId, String startTimeStamp, long pageId, String referrer, String section, String subSection, String topic, String[] keywords, String endTimeStamp, String deviceType, ApplicationUser user) {
-        super(eventId, startTimeStamp);
+    public NewsFeed(long eventId, long pageId, String referrer, String section,
+                    String subSection, String topic, String[] keywords,
+                    String startTimeStamp, String endTimeStamp, String type,
+                    ApplicationUser user) {
+        this.eventId = eventId;
         this.pageId = pageId;
         this.referrer = referrer;
         this.section = section;
         this.subSection = subSection;
         this.topic = topic;
         this.keywords = keywords;
+        this.startTimeStamp = startTimeStamp;
         this.endTimeStamp = endTimeStamp;
-        this.deviceType = deviceType;
+        this.deviceType = type;
         this.user = user;
+    }
+
+    public long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(long eventId) {
+        this.eventId = eventId;
     }
 
     public long getPageId() {
@@ -97,6 +111,14 @@ public class NewsFeed extends BaseNewsFeed {
         this.keywords = keywords;
     }
 
+    public String getStartTimeStamp() {
+        return startTimeStamp;
+    }
+
+    public void setStartTimeStamp(String startTimeStamp) {
+        this.startTimeStamp = startTimeStamp;
+    }
+
     public String getEndTimeStamp() {
         return endTimeStamp;
     }
@@ -122,55 +144,36 @@ public class NewsFeed extends BaseNewsFeed {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof NewsFeed)) return false;
-        if (!super.equals(o)) return false;
-
-        NewsFeed NewsFeed = (NewsFeed) o;
-
-        if (pageId != NewsFeed.pageId) return false;
-        if (referrer != null ? !referrer.equals(NewsFeed.referrer) : NewsFeed.referrer != null) return false;
-        if (section != null ? !section.equals(NewsFeed.section) : NewsFeed.section != null) return false;
-        if (subSection != null ? !subSection.equals(NewsFeed.subSection) : NewsFeed.subSection != null) return false;
-        if (topic != null ? !topic.equals(NewsFeed.topic) : NewsFeed.topic != null) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(keywords, NewsFeed.keywords)) return false;
-        if (endTimeStamp != null ? !endTimeStamp.equals(NewsFeed.endTimeStamp) : NewsFeed.endTimeStamp != null)
-            return false;
-        if (deviceType != null ? !deviceType.equals(NewsFeed.deviceType) : NewsFeed.deviceType != null) return false;
-        return user != null ? user.equals(NewsFeed.user) : NewsFeed.user == null;
-
-    }
-
-    @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (int) (pageId ^ (pageId >>> 32));
-        result = 31 * result + (referrer != null ? referrer.hashCode() : 0);
-        result = 31 * result + (section != null ? section.hashCode() : 0);
-        result = 31 * result + (subSection != null ? subSection.hashCode() : 0);
-        result = 31 * result + (topic != null ? topic.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(keywords);
-        result = 31 * result + (endTimeStamp != null ? endTimeStamp.hashCode() : 0);
-        result = 31 * result + (deviceType != null ? deviceType.hashCode() : 0);
-        result = 31 * result + (user != null ? user.hashCode() : 0);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (eventId ^ (eventId >>> 32));
         return result;
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        NewsFeed other = (NewsFeed) obj;
+        if (eventId != other.eventId)
+            return false;
+        return true;
+    }
+
+
+    @Override
     public String toString() {
-        return "NewsFeed{" +
-                "pageId=" + pageId +
-                ", referrer='" + referrer + '\'' +
-                ", section='" + section + '\'' +
-                ", subSection='" + subSection + '\'' +
-                ", topic='" + topic + '\'' +
-                ", keywords=" + Arrays.toString(keywords) +
-                ", endTimeStamp='" + endTimeStamp + '\'' +
-                ", deviceType='" + deviceType + '\'' +
-                ", user=" + user +
-                super.toString() +
-                '}';
+        return "NewsFeed{" + "eventId=" + eventId + ", pageId=" + pageId
+                + ", referrer='" + referrer + '\'' + ", section='" + section
+                + '\'' + ", subSection='" + subSection + '\'' + ", topic='"
+                + topic + '\'' + ", keywords=" + Arrays.toString(keywords)
+                + ", startTimeStamp=" + startTimeStamp + ", endTimeStamp="
+                + endTimeStamp + ", type='" + deviceType + '\'' + ", user=" + user
+                + '}';
     }
 }

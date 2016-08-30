@@ -50,7 +50,7 @@ public class NewsFeedParser {
         final String subscriberId = tokens[11];
         final String ipAddress = tokens[12];
         final ApplicationUser applicationUser = new ApplicationUser(uuid, subscriberId, ipAddress);
-        newsFeed = new NewsFeed(eventId, startTimeStamp, pageId, referrer, section, subSection, topic, keywords,
+        newsFeed = new NewsFeed(eventId,  pageId, referrer, section, subSection, topic, keywords,startTimeStamp,
                 endTimeStamp, deviceType, applicationUser);
 
 
