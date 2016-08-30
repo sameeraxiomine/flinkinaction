@@ -11,7 +11,9 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
+import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -42,7 +44,7 @@ public class SessionEventTimeUsingApplyExample {
         .map(new NewsFeedSubscriberMapper());
 
     DataStream<Tuple6<String, Long, String, String, String, String>> timestampsAndWatermarksDS =
-      selectDS.assignTimestampsAndWatermarks(new SessionAscendingTimestampAndWatermarkAssigner());
+      selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
     KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS = timestampsAndWatermarksDS
         .keyBy(
@@ -54,7 +56,7 @@ public class SessionEventTimeUsingApplyExample {
           });
 
     WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream = keyedDS
-        .window(EventTimeSessionWindows.withGap(Time.seconds(4)));
+        .window(EventTimeSessionWindows.withGap(Time.seconds(5)));
 
     DataStream<Tuple3<String, List<Long>, Long>> result = windowedStream
         .apply(new ApplySessionWindowFunction());
@@ -62,6 +64,35 @@ public class SessionEventTimeUsingApplyExample {
     result.print();
 
     execEnv.execute("Event Time Session Window Apply");
+  }
+
+  private static class NewsFeedTimeStamp implements
+    AssignerWithPeriodicWatermarks<Tuple6<String, Long, String, String, String, String>> {
+    private static final long serialVersionUID = 1L;
+    private long maxTimestamp = 0;
+    private long priorTimestamp = 0;
+    private long lastTimeOfWaterMarking = System.currentTimeMillis();
+
+    @Override
+    public Watermark getCurrentWatermark() {
+      if (maxTimestamp == priorTimestamp) {
+        long advance = (System.currentTimeMillis() - lastTimeOfWaterMarking);
+        maxTimestamp += advance;// Start advancing
+      }
+      priorTimestamp = maxTimestamp;
+      lastTimeOfWaterMarking = System.currentTimeMillis();
+      return new Watermark(maxTimestamp);
+    }
+
+    @Override
+    public long extractTimestamp(
+      Tuple6<String, Long, String, String, String, String> element,
+        long previousElementTimestamp) {
+      long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
+          .parseDateTime(element.f4).getMillis();
+      maxTimestamp = Math.max(maxTimestamp, millis);
+      return millis;
+    }
   }
 
   private static class SessionAscendingTimestampAndWatermarkAssigner

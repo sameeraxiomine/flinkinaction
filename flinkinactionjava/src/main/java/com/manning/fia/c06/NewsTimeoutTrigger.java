@@ -25,12 +25,12 @@ public class NewsTimeoutTrigger<T, W extends Window> extends Trigger<T, W> {
   @Override
   public TriggerResult onElement(T newsFeed, long timestamp, W window,
                                  TriggerContext triggerContext) throws Exception {
-//    ValueState<Long> startTimeState = triggerContext.getPartitionedState(stateDesc);
-//    if (startTimeState.value() == null) {
-//      long currentTime = triggerContext.getCurrentProcessingTime();
-//      startTimeState.update(currentTime);
-//      triggerContext.registerProcessingTimeTimer(currentTime + sessionTimeout);
-//    }
+    ValueState<Long> startTimeState = triggerContext.getPartitionedState(stateDesc);
+    if (startTimeState.value() == null) {
+      long currentTime = triggerContext.getCurrentProcessingTime();
+      startTimeState.update(currentTime);
+      triggerContext.registerProcessingTimeTimer(currentTime + sessionTimeout);
+    }
     TriggerResult triggerResult = nestedTrigger.onElement(newsFeed, timestamp, window, triggerContext);
     return triggerResult.isFire() ? TriggerResult.FIRE_AND_PURGE : triggerResult;
   }
