@@ -1,8 +1,9 @@
 package com.manning.fia.c06;
 
-import com.manning.fia.c04.DataStreamGenerator;
-import com.manning.fia.utils.NewsFeedSocket;
-import org.apache.flink.api.java.tuple.Tuple;
+import com.manning.fia.transformations.media.NewsFeedMapper;
+import com.manning.fia.utils.DataSourceFactory;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -18,18 +19,26 @@ public class GlobalWindowsCountWithCustomTrigger {
 
   private void executeJob(final ParameterTool parameters) throws Exception {
     StreamExecutionEnvironment execEnv;
-    KeyedStream<Tuple3<String, String, Long>, Tuple> keyedDS;
-    WindowedStream<Tuple3<String, String, Long>, Tuple, GlobalWindow> windowedStream;
+    WindowedStream<Tuple3<String, String, Long>, Tuple2<String, String>, GlobalWindow> windowedStream;
     DataStream<Tuple3<String, String, Long>> result;
 
     execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
-    keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameters);
+    DataStream<String> dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameters));
+
+    DataStream<Tuple3<String, String, Long>> selectDS = dataStream.map(new NewsFeedMapper()).project(1, 2, 4);
+
+    KeyedStream<Tuple3<String, String, Long>, Tuple2<String, String>> keyedDS =
+      selectDS.keyBy(new KeySelector<Tuple3<String, String, Long>, Tuple2<String, String>>() {
+        @Override
+        public Tuple2<String, String> getKey(Tuple3<String, String, Long> tuple3) throws Exception {
+          return new Tuple2<>(tuple3.f0, tuple3.f1);
+        }
+      });
 
     windowedStream = keyedDS.window(GlobalWindows.create());
 
-    windowedStream.trigger(PurgingTrigger.of(NewsCountTimeoutTrigger.of(3, 3000)));
-
+    windowedStream.trigger(PurgingTrigger.of(NewsCountTimeoutTrigger.of(3, 6000)));
     result = windowedStream.sum(2);
 
     result.print();
@@ -39,7 +48,6 @@ public class GlobalWindowsCountWithCustomTrigger {
 
   public static void main(final String[] args) throws Exception {
     ParameterTool parameterTool = ParameterTool.fromArgs(args);
-    new NewsFeedSocket("/media/pipe/newsfeed_for_count_windows").start();
     GlobalWindowsCountWithCustomTrigger window = new GlobalWindowsCountWithCustomTrigger();
     window.executeJob(parameterTool);
 
