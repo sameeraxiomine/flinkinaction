@@ -33,7 +33,6 @@ public class SlidingWindowAllExample {
 
         selectDS = DataStreamGenerator.getC04ProjectedDataStream(execEnv, parameterTool);
 
-
         windowedStream = selectDS.timeWindowAll(Time.seconds(25), Time.seconds(5));
 
         // Above code and the following  one are same.
