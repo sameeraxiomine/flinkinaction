@@ -19,7 +19,7 @@ public class SlidingNewsFlinkEventTimeWindow extends WindowAssigner<NewsFeed, Ti
   private final long slide;
   private final long size;
 
-  public SlidingNewsFlinkEventTimeWindow(long slide, long size) {
+  public SlidingNewsFlinkEventTimeWindow(long size, long slide) {
     this.slide = slide;
     this.size = size;
   }
@@ -49,7 +49,7 @@ public class SlidingNewsFlinkEventTimeWindow extends WindowAssigner<NewsFeed, Ti
 
   @Override
   public Trigger<NewsFeed, TimeWindow> getDefaultTrigger(StreamExecutionEnvironment streamExecutionEnvironment) {
-    return NewsCountEventTimeOutTrigger.of(3, 10000);
+    return NewsCountEventTimeOutTrigger.of(3);
   }
 
   @Override

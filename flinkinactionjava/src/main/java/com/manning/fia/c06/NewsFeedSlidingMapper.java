@@ -8,7 +8,7 @@ public class NewsFeedSlidingMapper implements MapFunction<String, NewsFeed>{
   @Override
   public NewsFeed map(String value)
     throws Exception {
-    NewsFeed newsFeed = NewsFeedParser.mapRowForNewsFeedWithWM(value);
+    NewsFeed newsFeed = NewsFeedParser.mapRowForNewsFeedWithSlide(value);
     return newsFeed;
   }
 }
