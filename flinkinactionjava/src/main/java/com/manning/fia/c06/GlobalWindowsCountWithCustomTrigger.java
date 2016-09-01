@@ -6,6 +6,7 @@ import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
@@ -23,6 +24,7 @@ public class GlobalWindowsCountWithCustomTrigger {
     DataStream<Tuple3<String, String, Long>> result;
 
     execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+    execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
     DataStream<String> dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameters));
 

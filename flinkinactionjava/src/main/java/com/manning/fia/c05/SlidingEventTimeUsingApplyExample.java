@@ -53,7 +53,7 @@ public class SlidingEventTimeUsingApplyExample {
 
         result.print();
 
-        execEnv.execute("Tumbling Event Time Window Apply");
+        execEnv.execute("Sliding Event Time Window Apply");
     }
 
     private static class NewsFeedTimeStamp

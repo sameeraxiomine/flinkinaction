@@ -12,14 +12,15 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
+import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.joda.time.format.DateTimeFormat;
 
 public class CustomWindowAssignerExample {
 
-  private void executeJob(ParameterTool parameterTool) throws Exception{
+  private void executeJob(final ParameterTool parameterTool) throws Exception{
     StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
       .getExecutionEnvironment();
 
@@ -27,9 +28,11 @@ public class CustomWindowAssignerExample {
 
     execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-    final DataStream<String> dataStream;
+//    final DataStream<String> dataStream = execEnv.socketTextStream("localhost", 9000);
 
     boolean isKafka = parameterTool.getBoolean("isKafka", false);
+
+    final DataStream<String> dataStream;
 
     if (isKafka) {
       dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
@@ -40,7 +43,7 @@ public class CustomWindowAssignerExample {
     DataStream<NewsFeed> selectDS = dataStream.map(new NewsFeedSlidingMapper());
 
     DataStream<NewsFeed> timestampsAndWatermarksDS =
-      selectDS.assignTimestampsAndWatermarks(new SessionAscendingTimestampAndWatermarkAssigner());
+      selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
     KeyedStream<NewsFeed, Tuple2<String, String>> keyedDS = timestampsAndWatermarksDS
       .keyBy(
@@ -53,9 +56,9 @@ public class CustomWindowAssignerExample {
 
     WindowedStream<NewsFeed, Tuple2<String, String>, TimeWindow> windowedStream = keyedDS
       // Custom Window Assigner
-      .window(SlidingNewsFlinkEventTimeWindow.of(Time.seconds(10), Time.seconds(3)))
+      .window(SlidingNewsFlinkEventTimeWindow.of(Time.seconds(3), Time.seconds(2)));
       // Custom Trigger
-      .trigger(NewsCountEventTimeOutTrigger.of(3));
+//      .trigger(NewsCountEventTimeTrigger.of(2));
 
     DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result =
       windowedStream.apply(new ApplyCustomWindowFunction());
@@ -65,17 +68,37 @@ public class CustomWindowAssignerExample {
     execEnv.execute("Event Time Session Window Apply");
   }
 
-  private static class SessionAscendingTimestampAndWatermarkAssigner
-    extends AscendingTimestampExtractor<NewsFeed> {
+  private static class NewsFeedTimeStamp
+    implements AssignerWithPeriodicWatermarks<NewsFeed> {
+    private static final long serialVersionUID = 1L;
+    private long maxTimestamp = 0;
+    private long priorTimestamp = 0;
+    private long lastTimeOfWaterMarking = System.currentTimeMillis();
+
     @Override
-    public long extractAscendingTimestamp(NewsFeed element) {
-      return DateTimeFormat.forPattern("yyyyMMddHHmmss")
+    public Watermark getCurrentWatermark() {
+      if (maxTimestamp == priorTimestamp) {
+        long advance = (System.currentTimeMillis() - lastTimeOfWaterMarking);
+        maxTimestamp += advance;// Start advancing
+      }
+      priorTimestamp = maxTimestamp;
+      lastTimeOfWaterMarking = System.currentTimeMillis();
+      return new Watermark(maxTimestamp);
+    }
+
+    @Override
+    public long extractTimestamp(NewsFeed element, long previousElementTimestamp) {
+      long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
         .parseDateTime(element.getStartTimeStamp()).getMillis();
+      maxTimestamp = Math.max(maxTimestamp, millis);
+      return millis;
     }
   }
 
+
   public static void main(String[] args) throws Exception {
     ParameterTool parameterTool = ParameterTool.fromArgs(args);
+//    new NewsFeedSocket("/media/pipe/newsfeed_for_custom_sliding_windows").start();
     CustomWindowAssignerExample window = new CustomWindowAssignerExample();
     window.executeJob(parameterTool);
   }

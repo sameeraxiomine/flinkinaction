@@ -10,18 +10,15 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.joda.time.format.DateTimeFormat;
 
-public class ApplyCustomWindowFunction implements WindowFunction<
-  NewsFeed,
+public class ApplyCustomWindowFunction implements WindowFunction<NewsFeed,
   Tuple6<Long, Long, List<Long>, String, String, Long>,
-  Tuple2<String, String>,
-  TimeWindow> {
+  Tuple2<String, String>, TimeWindow> {
 
   @Override
   public void apply(Tuple2<String, String> key,
                     TimeWindow window,
                     Iterable<NewsFeed> inputs,
-                    Collector<Tuple6<Long, Long, List<Long>, String, String, Long>> out) throws
-    Exception {
+                    Collector<Tuple6<Long, Long, List<Long>, String, String, Long>> out) throws Exception {
     String section = key.f0;
     String subSection = key.f1;
     List<Long> eventIds = new ArrayList<>(0);
@@ -31,7 +28,7 @@ public class ApplyCustomWindowFunction implements WindowFunction<
       if (input != null) {
         eventIds.add(input.getEventId());
         long startTime = getTimeInMillis(input.getStartTimeStamp());
-        long endTime = getTimeInMillis(((NewsFeed) input).getEndTimeStamp());
+        long endTime = getTimeInMillis(input.getEndTimeStamp());
         totalTimeSpent += (endTime - startTime);
       }
     }
