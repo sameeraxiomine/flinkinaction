@@ -8,7 +8,7 @@ import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
 import org.apache.flink.streaming.api.windowing.windows.Window;
 
-public class NewsCountEventTimeOutTrigger<T, W extends Window> extends Trigger<T, W> {
+public class NewsCountEventTimeTrigger<T, W extends Window> extends Trigger<T, W> {
   private static final long serialVersionUID = 1L;
 
   private long maxCount = 0L;
@@ -16,24 +16,27 @@ public class NewsCountEventTimeOutTrigger<T, W extends Window> extends Trigger<T
   private final ValueStateDescriptor<Long> countDescriptor =
     new ValueStateDescriptor<>("count", LongSerializer.INSTANCE, 0L);
 
-  private NewsCountEventTimeOutTrigger(long maxCount) {
+  private NewsCountEventTimeTrigger(long maxCount) {
     this.maxCount = maxCount;
   }
 
   @Override
   public TriggerResult onElement(T element, long timestamp,
                                  W window, TriggerContext triggerContext) throws Exception {
+
+    // Register event timer for window maxTimestamp
+    triggerContext.registerEventTimeTimer(window.maxTimestamp());
+
     final ValueState<Long> countState = triggerContext.getPartitionedState(countDescriptor);
 
     // Increment the Count of seen elements each time onElement() is invoked
-    final long presentCount = countState.value() + 1;
+    countState.update(countState.value() + 1);
 
-    // Fire the trigger if either of maxCount is reached or watermark has passed the Window's maxTimeStamp
-    if (presentCount >= maxCount || window.maxTimestamp() <= triggerContext.getCurrentWatermark()) {
-      return process(countState);
+    // Fire the trigger early if maxCount is reached
+    if (countState.value() >= maxCount || window.maxTimestamp() <= triggerContext.getCurrentWatermark()) {
+      countState.update(0L);
+      return TriggerResult.FIRE_AND_PURGE;
     }
-
-    countState.update(presentCount);
 
     return TriggerResult.CONTINUE;
   }
@@ -47,7 +50,7 @@ public class NewsCountEventTimeOutTrigger<T, W extends Window> extends Trigger<T
   @Override
   public TriggerResult onEventTime(long timestamp, W window,
                                    TriggerContext triggerContext) throws Exception {
-    return TriggerResult.FIRE;
+    return timestamp == window.maxTimestamp() ? TriggerResult.FIRE_AND_PURGE : TriggerResult.CONTINUE;
   }
 
   @Override
@@ -77,13 +80,13 @@ public class NewsCountEventTimeOutTrigger<T, W extends Window> extends Trigger<T
    * Creates a CountTimeout trigger from the given {@code Trigger}.
    * @param maxCount Maximum Count of Trigger
    */
-  public static <T, W extends Window> NewsCountEventTimeOutTrigger<T, W> of(long maxCount) {
-    return new NewsCountEventTimeOutTrigger<>(maxCount);
+  public static <T, W extends Window> NewsCountEventTimeTrigger<T, W> of(long maxCount) {
+    return new NewsCountEventTimeTrigger<>(maxCount);
   }
 
   @Override
   public String toString() {
-    return "NewsCountEventTimeOutTrigger{" +
+    return "NewsCountEventTimeTrigger{" +
       "maxCount=" + maxCount + '}';
   }
 }

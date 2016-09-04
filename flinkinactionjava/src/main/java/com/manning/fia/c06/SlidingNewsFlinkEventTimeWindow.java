@@ -47,9 +47,17 @@ public class SlidingNewsFlinkEventTimeWindow extends WindowAssigner<NewsFeed, Ti
     }
   }
 
+  public long getSlide() {
+    return slide;
+  }
+
+  public long getSize() {
+    return size;
+  }
+
   @Override
   public Trigger<NewsFeed, TimeWindow> getDefaultTrigger(StreamExecutionEnvironment streamExecutionEnvironment) {
-    return NewsCountEventTimeOutTrigger.of(3);
+    return NewsCountEventTimeTrigger.of(3);
   }
 
   @Override

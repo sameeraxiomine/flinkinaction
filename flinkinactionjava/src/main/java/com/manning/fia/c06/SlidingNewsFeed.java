@@ -4,7 +4,10 @@ import com.manning.fia.model.media.ApplicationUser;
 import com.manning.fia.model.media.NewsFeed;
 
 public class SlidingNewsFeed extends NewsFeed {
-  private final long slide;
+  private long slide;
+
+  public SlidingNewsFeed() {
+  }
 
   public SlidingNewsFeed(long eventId, String startTimeStamp, long pageId, String referrer, String section, String subSection,
                          String topic, String[] keywords, String endTimeStamp, String deviceType,
@@ -16,5 +19,9 @@ public class SlidingNewsFeed extends NewsFeed {
 
   public long getSlide() {
     return slide;
+  }
+
+  public void setSlide(final long slide) {
+    this.slide = slide;
   }
 }
