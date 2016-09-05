@@ -3,7 +3,7 @@ package com.manning.fia.c06;
 import com.manning.fia.utils.NewsFeedDataSource;
 import java.util.List;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -12,7 +12,6 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
-import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -21,10 +20,15 @@ import org.joda.time.format.DateTimeFormat;
 
 // Run with newsfeed_for_session_windows and threadsleepinterval = 500ms
 public class SessionEventTimeUsingApplyExample {
-
   private void executeJob(ParameterTool parameterTool) throws Exception{
-    StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-        .getExecutionEnvironment();
+    StreamExecutionEnvironment execEnv;
+    DataStream<Tuple6<String, Long, String, String, String, String>> selectDS;
+    DataStream<Tuple6<String, Long, String, String, String, String>> timestampsAndWatermarksDS;
+    KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS;
+    WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream;
+    DataStream<Tuple5<Long, Long, String, List<Long>, Long>> result;
+
+    execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
 
     execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
 
@@ -40,14 +44,11 @@ public class SessionEventTimeUsingApplyExample {
       dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
     }
 
-    DataStream<Tuple6<String, Long, String, String, String, String>> selectDS = dataStream
-        .map(new NewsFeedSubscriberMapper());
+    selectDS = dataStream.map(new NewsFeedSubscriberMapper());
 
-    DataStream<Tuple6<String, Long, String, String, String, String>> timestampsAndWatermarksDS =
-      selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
+    timestampsAndWatermarksDS = selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-    KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS = timestampsAndWatermarksDS
-        .keyBy(
+    keyedDS = timestampsAndWatermarksDS.keyBy(
           new KeySelector<Tuple6<String, Long, String, String, String, String>, String>() {
             @Override
             public String getKey(Tuple6<String, Long, String, String, String, String> tuple6) throws Exception {
@@ -55,11 +56,9 @@ public class SessionEventTimeUsingApplyExample {
             }
           });
 
-    WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream = keyedDS
-        .window(EventTimeSessionWindows.withGap(Time.seconds(5)));
+    windowedStream = keyedDS.window(EventTimeSessionWindows.withGap(Time.seconds(5)));
 
-    DataStream<Tuple3<String, List<Long>, Long>> result = windowedStream
-        .apply(new ApplySessionWindowFunction());
+    result = windowedStream.apply(new ApplySessionWindowFunction());
 
     result.print();
 
@@ -92,15 +91,6 @@ public class SessionEventTimeUsingApplyExample {
           .parseDateTime(element.f4).getMillis();
       maxTimestamp = Math.max(maxTimestamp, millis);
       return millis;
-    }
-  }
-
-  private static class SessionAscendingTimestampAndWatermarkAssigner
-    extends AscendingTimestampExtractor<Tuple6<String, Long, String, String, String, String>> {
-    @Override
-    public long extractAscendingTimestamp(Tuple6<String, Long, String, String, String, String> element) {
-      return DateTimeFormat.forPattern("yyyyMMddHHmmss")
-        .parseDateTime(element.f4).getMillis();
     }
   }
 
