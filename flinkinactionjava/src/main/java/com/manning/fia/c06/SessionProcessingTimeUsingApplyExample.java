@@ -3,7 +3,7 @@ package com.manning.fia.c06;
 import com.manning.fia.utils.NewsFeedDataSource;
 import java.util.List;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -21,9 +21,14 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
  */
 
 public class SessionProcessingTimeUsingApplyExample {
-
   private void executeJob(ParameterTool parameterTool) throws Exception{
-    StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
+    StreamExecutionEnvironment execEnv;
+    DataStream<Tuple6<String, Long, String, String, String, String>> selectDS;
+    KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS;
+    WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream;
+    DataStream<Tuple5<Long, Long, String, List<Long>, Long>> result;
+
+    execEnv = StreamExecutionEnvironment
         .getExecutionEnvironment();
 
     execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
@@ -40,11 +45,9 @@ public class SessionProcessingTimeUsingApplyExample {
       dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
     }
 
-    DataStream<Tuple6<String, Long, String, String, String, String>> selectDS = dataStream
-      .map(new NewsFeedSubscriberMapper());
+    selectDS = dataStream.map(new NewsFeedSubscriberMapper());
 
-    KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS = selectDS
-      .keyBy(
+    keyedDS = selectDS.keyBy(
         new KeySelector<Tuple6<String, Long, String, String, String, String>, String>() {
           @Override
           public String getKey(Tuple6<String, Long, String, String, String, String> tuple6) throws Exception {
@@ -52,11 +55,9 @@ public class SessionProcessingTimeUsingApplyExample {
           }
         });
 
-    WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream = keyedDS
-      .window(ProcessingTimeSessionWindows.withGap(Time.seconds(3)));
+    windowedStream = keyedDS.window(ProcessingTimeSessionWindows.withGap(Time.seconds(3)));
 
-    DataStream<Tuple3<String, List<Long>, Long>> result = windowedStream
-      .apply(new ApplySessionWindowFunction());
+    result = windowedStream.apply(new ApplySessionWindowFunction());
 
     result.print();
 

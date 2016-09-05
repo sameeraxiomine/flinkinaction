@@ -1,6 +1,5 @@
 package com.manning.fia.c06;
 
-import java.io.IOException;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeutils.base.LongSerializer;
@@ -11,18 +10,27 @@ import org.apache.flink.streaming.api.windowing.windows.Window;
 public class NewsCountTimeoutTrigger<T, W extends Window> extends Trigger<T, W> {
   private static final long serialVersionUID = 1L;
 
-  private long maxCount = 0L;
-  private long timeOutInMs = 0L;
-
   private final ValueStateDescriptor<Long> countDescriptor =
     new ValueStateDescriptor<>("count", LongSerializer.INSTANCE, 0L);
 
   private final ValueStateDescriptor<Long> timeOutDescriptor =
-    new ValueStateDescriptor<>("timeout", LongSerializer.INSTANCE, null);
+    new ValueStateDescriptor<>("timeout", LongSerializer.INSTANCE, -1L);
 
-  private NewsCountTimeoutTrigger(long maxCount, long timeOutInMs) {
+  private long maxCount = 0L;
+  private long timeOutInMs = 0L;
+
+  private NewsCountTimeoutTrigger(final long maxCount, final long timeOutInMs) {
     this.maxCount = maxCount;
     this.timeOutInMs = timeOutInMs;
+  }
+
+  /**
+   * Creates a CountTimeout trigger from the given {@code Trigger}.
+   * @param maxCount       Maximum Count of Trigger
+   * @param sessionTimeout Session Timeout for Trigger to fire
+   */
+  public static <T, W extends Window> NewsCountTimeoutTrigger<T, W> of(long maxCount, long sessionTimeout) {
+    return new NewsCountTimeoutTrigger<>(maxCount, sessionTimeout);
   }
 
   @Override
@@ -31,27 +39,42 @@ public class NewsCountTimeoutTrigger<T, W extends Window> extends Trigger<T, W> 
     final ValueState<Long> countState = triggerContext.getPartitionedState(countDescriptor);
     final ValueState<Long> timeOutState = triggerContext.getPartitionedState(timeOutDescriptor);
 
-    // Get the Current Timestamp
-    final long currentTimeStamp = System.currentTimeMillis();
-
-    if (timeOutState.value() == null) {
-      long currentTime = triggerContext.getCurrentProcessingTime();
-      timeOutState.update(currentTime);
-      triggerContext.registerProcessingTimeTimer(currentTime + timeOutInMs);
-    }
+    Long timeSinceLastEvent = 0L;
 
     // Increment the Count of seen elements each time onElement() is invoked
     final long presentCount = countState.value() + 1;
 
-    // Get the time out value
-    final long timeoutValue = timeOutState.value();
+    // Update the Count State
+    countState.update(presentCount);
 
-    // Fire the trigger if either of maxCount is reached or current Time > timeout value
-    if (presentCount >= maxCount || currentTimeStamp > timeoutValue) {
-      return process(timeOutState, countState);
+    if (timeOutState.value() == -1L) {
+
+      long currentTime = triggerContext.getCurrentProcessingTime();
+
+      timeOutState.update(currentTime + timeOutInMs);
+
+      triggerContext.registerProcessingTimeTimer(currentTime + timeOutInMs);
+
+    } else {
+
+      final long lastTimeOutSeen = timeOutState.value();
+
+      timeSinceLastEvent = timestamp - lastTimeOutSeen;
+
+      triggerContext.deleteProcessingTimeTimer(lastTimeOutSeen + timeOutInMs);
+
+      triggerContext.registerProcessingTimeTimer(timestamp + timeOutInMs);
+
+      timeOutState.update(timestamp + timeOutInMs);
     }
 
-    countState.update(presentCount);
+    // Fire the trigger if either of maxCount is reached or current Time > timeout value
+    if (presentCount >= maxCount || (timestamp >= (timeSinceLastEvent + timeOutInMs))) {
+      triggerContext.deleteProcessingTimeTimer(timeOutState.value());
+      timeOutState.update(-1L);
+      countState.update(0L);
+      return TriggerResult.FIRE;
+    }
 
     return TriggerResult.CONTINUE;
   }
@@ -59,21 +82,13 @@ public class NewsCountTimeoutTrigger<T, W extends Window> extends Trigger<T, W> 
   @Override
   public TriggerResult onProcessingTime(long timestamp, W window,
                                         TriggerContext triggerContext) throws Exception {
-//    final ValueState<Long> timeOut = triggerContext.getPartitionedState(timeOutDescriptor);
-//    final ValueState<Long> count = triggerContext.getPartitionedState(countDescriptor);
-//    if (timeOut.value() == timestamp) {
-//      return process(timeOut, count);
-//    }
-
     return TriggerResult.FIRE;
   }
 
   @Override
   public TriggerResult onEventTime(long timestamp, W window,
                                    TriggerContext triggerContext) throws Exception {
-    return timestamp == window.maxTimestamp() ?
-      TriggerResult.FIRE :
-      TriggerResult.CONTINUE;
+    return TriggerResult.CONTINUE;
   }
 
   @Override
@@ -84,36 +99,14 @@ public class NewsCountTimeoutTrigger<T, W extends Window> extends Trigger<T, W> 
     final Long timeOut = timeOutState.value();
     final Long count = countState.value();
 
-    if (timeOut != null) {
+    if (timeOut != -1L) {
       timeOutState.clear();
       triggerContext.deleteProcessingTimeTimer(timeOut);
     }
 
-    if (count != null) {
+    if (count != 0) {
       countState.clear();
     }
-  }
-
-  /**
-   *
-   * @param timeOut - The present TimeOut Value
-   * @param count - The present Count
-   * @return {@code TriggerResult}
-   * @throws IOException
-   */
-  private TriggerResult process(ValueState<Long> timeOut, ValueState<Long> count) throws IOException {
-    timeOut.update(null);
-    count.update(0L);
-    return TriggerResult.FIRE;
-  }
-
-  /**
-   * Creates a CountTimeout trigger from the given {@code Trigger}.
-   * @param maxCount Maximum Count of Trigger
-   * @param sessionTimeout Session Timeout for Trigger to fire
-   */
-  public static <T, W extends Window> NewsCountTimeoutTrigger<T, W> of(long maxCount, long sessionTimeout) {
-    return new NewsCountTimeoutTrigger<>(maxCount, sessionTimeout);
   }
 
   @Override

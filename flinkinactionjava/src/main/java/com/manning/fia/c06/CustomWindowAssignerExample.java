@@ -57,8 +57,6 @@ public class CustomWindowAssignerExample {
     WindowedStream<NewsFeed, Tuple2<String, String>, TimeWindow> windowedStream = keyedDS
       // Custom Window Assigner
       .window(SlidingNewsFlinkEventTimeWindow.of(Time.seconds(3), Time.seconds(2)));
-      // Custom Trigger
-//      .trigger(NewsCountEventTimeTrigger.of(2));
 
     DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result =
       windowedStream.apply(new ApplyCustomWindowFunction());

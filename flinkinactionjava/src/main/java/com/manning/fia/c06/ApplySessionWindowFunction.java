@@ -2,7 +2,7 @@ package com.manning.fia.c06;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -11,11 +11,11 @@ import org.joda.time.format.DateTimeFormat;
 
 public class ApplySessionWindowFunction implements WindowFunction<
     Tuple6<String, Long, String, String, String, String>,
-    Tuple3<String, List<Long>, Long>, String, TimeWindow> {
+    Tuple5<Long, Long, String, List<Long>, Long>, String, TimeWindow> {
 
   @Override
   public void apply(String key, TimeWindow timeWindow, Iterable<Tuple6<String, Long, String, String, String, String>> inputs,
-                    Collector<Tuple3<String, List<Long>, Long>> collector) throws Exception {
+                    Collector<Tuple5<Long, Long, String, List<Long>, Long>> collector) throws Exception {
 
     List<Long> eventIds = new ArrayList<>();
     long timespent = 0L;
@@ -27,10 +27,11 @@ public class ApplySessionWindowFunction implements WindowFunction<
       timespent += (endTime - startTime);
     }
 
-    collector.collect(new Tuple3<>(
+    collector.collect(new Tuple5<>(
+      formatWindowTime(timeWindow.getStart()),formatWindowTime(timeWindow.getEnd()),
       key,
       eventIds,
-      timespent
+      timeWindow.getEnd() - timeWindow.getStart()
     ));
 
   }
