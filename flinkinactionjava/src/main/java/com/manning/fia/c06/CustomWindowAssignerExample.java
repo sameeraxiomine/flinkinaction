@@ -1,7 +1,7 @@
 package com.manning.fia.c06;
 
 import com.manning.fia.model.media.NewsFeed;
-import com.manning.fia.utils.NewsFeedDataSource;
+import com.manning.fia.utils.DataSourceFactory;
 import java.util.List;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -21,32 +21,24 @@ import org.joda.time.format.DateTimeFormat;
 public class CustomWindowAssignerExample {
 
   private void executeJob(final ParameterTool parameterTool) throws Exception{
-    StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
-      .getExecutionEnvironment();
+    StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+    DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
+    WindowedStream<NewsFeed, Tuple2<String, String>, TimeWindow> windowedStream;
+    KeyedStream<NewsFeed, Tuple2<String, String>> keyedDS;
+    final DataStream<String> dataStream;
 
     execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
 
     execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-//    final DataStream<String> dataStream = execEnv.socketTextStream("localhost", 9000);
-
-    boolean isKafka = parameterTool.getBoolean("isKafka", false);
-
-    final DataStream<String> dataStream;
-
-    if (isKafka) {
-      dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-    } else {
-      dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-    }
+    dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
 
     DataStream<NewsFeed> selectDS = dataStream.map(new NewsFeedSlidingMapper());
 
     DataStream<NewsFeed> timestampsAndWatermarksDS =
       selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-    KeyedStream<NewsFeed, Tuple2<String, String>> keyedDS = timestampsAndWatermarksDS
-      .keyBy(
+    keyedDS = timestampsAndWatermarksDS.keyBy(
         new KeySelector<NewsFeed, Tuple2<String, String>>() {
           @Override
           public Tuple2<String, String> getKey(NewsFeed newsFeed) throws Exception {
@@ -54,12 +46,10 @@ public class CustomWindowAssignerExample {
           }
         });
 
-    WindowedStream<NewsFeed, Tuple2<String, String>, TimeWindow> windowedStream = keyedDS
-      // Custom Window Assigner
-      .window(SlidingNewsFlinkEventTimeWindow.of(Time.seconds(3), Time.seconds(2)));
+    windowedStream = keyedDS.window(SlidingNewsFlinkEventTimeWindow.of(Time.seconds(3),
+                                                                       Time.seconds(2)));
 
-    DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result =
-      windowedStream.apply(new ApplyCustomWindowFunction());
+    result = windowedStream.apply(new ApplyCustomWindowFunction());
 
     result.print();
 

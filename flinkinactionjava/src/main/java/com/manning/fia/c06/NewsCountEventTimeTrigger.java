@@ -1,6 +1,5 @@
 package com.manning.fia.c06;
 
-import java.io.IOException;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeutils.base.LongSerializer;
@@ -25,7 +24,7 @@ public class NewsCountEventTimeTrigger<T, W extends Window> extends Trigger<T, W
                                  W window, TriggerContext triggerContext) throws Exception {
 
     // Register event timer for window maxTimestamp
-    triggerContext.registerEventTimeTimer(window.maxTimestamp());
+//    triggerContext.registerEventTimeTimer(window.maxTimestamp());
 
     final ValueState<Long> countState = triggerContext.getPartitionedState(countDescriptor);
 
@@ -36,9 +35,11 @@ public class NewsCountEventTimeTrigger<T, W extends Window> extends Trigger<T, W
     if (countState.value() >= maxCount || window.maxTimestamp() <= triggerContext.getCurrentWatermark()) {
       countState.update(0L);
       return TriggerResult.FIRE_AND_PURGE;
+    } else {
+      // Register event timer for window maxTimestamp
+      triggerContext.registerEventTimeTimer(window.maxTimestamp());
+      return TriggerResult.CONTINUE;
     }
-
-    return TriggerResult.CONTINUE;
   }
 
   @Override
@@ -50,7 +51,9 @@ public class NewsCountEventTimeTrigger<T, W extends Window> extends Trigger<T, W
   @Override
   public TriggerResult onEventTime(long timestamp, W window,
                                    TriggerContext triggerContext) throws Exception {
-    return timestamp == window.maxTimestamp() ? TriggerResult.FIRE_AND_PURGE : TriggerResult.CONTINUE;
+    return timestamp == window.maxTimestamp() ?
+      TriggerResult.FIRE_AND_PURGE :
+      TriggerResult.CONTINUE;
   }
 
   @Override
@@ -60,20 +63,9 @@ public class NewsCountEventTimeTrigger<T, W extends Window> extends Trigger<T, W
     final Long count = countState.value();
     triggerContext.deleteEventTimeTimer(window.maxTimestamp());
 
-    if (count != null) {
+    if (count != 0L) {
       countState.clear();
     }
-  }
-
-  /**
-   *
-   * @param count - The present Count
-   * @return {@code TriggerResult}
-   * @throws IOException
-   */
-  private TriggerResult process(ValueState<Long> count) throws IOException {
-    count.update(0L);
-    return TriggerResult.FIRE;
   }
 
   /**

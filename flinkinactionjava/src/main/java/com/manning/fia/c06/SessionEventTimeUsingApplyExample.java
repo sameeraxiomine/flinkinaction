@@ -1,8 +1,8 @@
 package com.manning.fia.c06;
 
-import com.manning.fia.utils.NewsFeedDataSource;
+import com.manning.fia.utils.DataSourceFactory;
 import java.util.List;
-import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -24,8 +24,8 @@ public class SessionEventTimeUsingApplyExample {
     StreamExecutionEnvironment execEnv;
     DataStream<Tuple6<String, Long, String, String, String, String>> selectDS;
     DataStream<Tuple6<String, Long, String, String, String, String>> timestampsAndWatermarksDS;
-    KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS;
-    WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream;
+    KeyedStream<Tuple6<String, Long, String, String, String, String>, Tuple> keyedDS;
+    WindowedStream<Tuple6<String, Long, String, String, String, String>, Tuple, TimeWindow> windowedStream;
     DataStream<Tuple5<Long, Long, String, List<Long>, Long>> result;
 
     execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -36,25 +36,13 @@ public class SessionEventTimeUsingApplyExample {
 
     final DataStream<String> dataStream;
 
-    boolean isKafka = parameterTool.getBoolean("isKafka", false);
-
-    if (isKafka) {
-      dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
-    } else {
-      dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
-    }
+    dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
 
     selectDS = dataStream.map(new NewsFeedSubscriberMapper());
 
     timestampsAndWatermarksDS = selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-    keyedDS = timestampsAndWatermarksDS.keyBy(
-          new KeySelector<Tuple6<String, Long, String, String, String, String>, String>() {
-            @Override
-            public String getKey(Tuple6<String, Long, String, String, String, String> tuple6) throws Exception {
-              return tuple6.f0;
-            }
-          });
+    keyedDS = timestampsAndWatermarksDS.keyBy(0);
 
     windowedStream = keyedDS.window(EventTimeSessionWindows.withGap(Time.seconds(5)));
 
