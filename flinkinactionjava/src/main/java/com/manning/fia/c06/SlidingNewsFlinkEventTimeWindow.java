@@ -1,7 +1,5 @@
 package com.manning.fia.c06;
 
-import com.manning.fia.model.media.NewsFeed;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,12 +9,13 @@ import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.WindowAssigner;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-public class SlidingNewsFlinkEventTimeWindow extends WindowAssigner<NewsFeed, TimeWindow> {
+public class SlidingNewsFlinkEventTimeWindow extends WindowAssigner<Object, TimeWindow> {
 
-  private final long slide;
+  private long slide;
   private final long size;
 
   public SlidingNewsFlinkEventTimeWindow(long size, long slide) {
@@ -25,10 +24,10 @@ public class SlidingNewsFlinkEventTimeWindow extends WindowAssigner<NewsFeed, Ti
   }
 
   @Override
-  public Collection<TimeWindow> assignWindows(NewsFeed newsFeed, long timestamp,
+  public Collection<TimeWindow> assignWindows(Object newsFeed, long timestamp,
                                               WindowAssignerContext windowAssignerContext) {
 
-    long slide = newsFeed instanceof SlidingNewsFeed ? ((SlidingNewsFeed) newsFeed).getSlide() : this.slide;
+    slide = newsFeed instanceof SlidingNewsFeed ? ((SlidingNewsFeed) newsFeed).getSlide() : this.slide;
 
     if (timestamp > Long.MIN_VALUE) {
       List<TimeWindow> windows = new ArrayList<>((int) (size / slide));
@@ -56,8 +55,8 @@ public class SlidingNewsFlinkEventTimeWindow extends WindowAssigner<NewsFeed, Ti
   }
 
   @Override
-  public Trigger<NewsFeed, TimeWindow> getDefaultTrigger(StreamExecutionEnvironment streamExecutionEnvironment) {
-    return NewsCountEventTimeTrigger.of(3);
+  public Trigger<Object, TimeWindow> getDefaultTrigger(StreamExecutionEnvironment streamExecutionEnvironment) {
+    return EventTimeTrigger.create();
   }
 
   @Override

@@ -26,6 +26,7 @@ public class NewsCountTimeoutTrigger<T, W extends Window> extends Trigger<T, W> 
 
   /**
    * Creates a CountTimeout trigger from the given {@code Trigger}.
+   *
    * @param maxCount       Maximum Count of Trigger
    * @param sessionTimeout Session Timeout for Trigger to fire
    */
@@ -68,7 +69,7 @@ public class NewsCountTimeoutTrigger<T, W extends Window> extends Trigger<T, W> 
       timeOutState.update(timestamp + timeOutInMs);
     }
 
-    // Fire the trigger if either of maxCount is reached or current Time > timeout value
+    // Fire the trigger if either of maxCount is reached or timestamp > (timeout + last timestamp)
     if (presentCount >= maxCount || (timestamp >= (timeSinceLastEvent + timeOutInMs))) {
       triggerContext.deleteProcessingTimeTimer(timeOutState.value());
       timeOutState.update(-1L);

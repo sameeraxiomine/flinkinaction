@@ -2,7 +2,7 @@ package com.manning.fia.c06;
 
 import com.manning.fia.utils.NewsFeedDataSource;
 import java.util.List;
-import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -24,8 +24,8 @@ public class SessionProcessingTimeUsingApplyExample {
   private void executeJob(ParameterTool parameterTool) throws Exception{
     StreamExecutionEnvironment execEnv;
     DataStream<Tuple6<String, Long, String, String, String, String>> selectDS;
-    KeyedStream<Tuple6<String, Long, String, String, String, String>, String> keyedDS;
-    WindowedStream<Tuple6<String, Long, String, String, String, String>, String, TimeWindow> windowedStream;
+    KeyedStream<Tuple6<String, Long, String, String, String, String>, Tuple> keyedDS;
+    WindowedStream<Tuple6<String, Long, String, String, String, String>, Tuple, TimeWindow> windowedStream;
     DataStream<Tuple5<Long, Long, String, List<Long>, Long>> result;
 
     execEnv = StreamExecutionEnvironment
@@ -47,13 +47,7 @@ public class SessionProcessingTimeUsingApplyExample {
 
     selectDS = dataStream.map(new NewsFeedSubscriberMapper());
 
-    keyedDS = selectDS.keyBy(
-        new KeySelector<Tuple6<String, Long, String, String, String, String>, String>() {
-          @Override
-          public String getKey(Tuple6<String, Long, String, String, String, String> tuple6) throws Exception {
-            return tuple6.f0;
-          }
-        });
+    keyedDS = selectDS.keyBy(0);
 
     windowedStream = keyedDS.window(ProcessingTimeSessionWindows.withGap(Time.seconds(3)));
 
