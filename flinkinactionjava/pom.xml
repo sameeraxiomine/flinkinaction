@@ -18,7 +18,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<flink.version>1.2-Snapshot</flink.version>
 	</properties>
-
+<!-- 
 	<repositories>
 		<repository>
 			<id>apache.snapshots</id>
@@ -30,7 +30,7 @@
 			<snapshots/>
 		</repository>
 	</repositories>
-
+ -->
 
 	<profiles>
 		<profile>
