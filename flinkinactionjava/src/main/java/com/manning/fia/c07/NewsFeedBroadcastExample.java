@@ -2,9 +2,7 @@ package com.manning.fia.c07;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.model.media.Page;
-import com.manning.fia.transformations.media.DomainObjectBasedPageMapper;
-import com.manning.fia.transformations.media.NewsFeedParser;
-import com.manning.fia.transformations.media.PageParser;
+import com.manning.fia.transformations.media.*;
 import com.manning.fia.utils.DateUtils;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
@@ -28,21 +26,20 @@ public class NewsFeedBroadcastExample {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
-        DataSet<Tuple6<Long, String, String, String, String, Long>> result;
-        int parallelism = parameterTool.getInt("parallelism", 1);
+        final DataSet<Tuple6<Long, String, String, String, String, Long>> result;
+        final DataSet<String> newsFeeds;
+        final ExecutionEnvironment execEnv;
+        final DataSet<String> pageInformationValues;
+        final DataSet<Page> pageInformationDataSet;
 
-        ExecutionEnvironment execEnv = ExecutionEnvironment
-                .createLocalEnvironment(parallelism);
+        final int parallelism = parameterTool.getInt("parallelism", 1);
+        execEnv = ExecutionEnvironment.createLocalEnvironment(parallelism);
+        newsFeeds = execEnv.fromCollection(NewsFeedParser.parseData());
+        pageInformationValues = execEnv.fromCollection(PageParser.parseData());
+        pageInformationDataSet = pageInformationValues.map(new DomainObjectBasedPageMapper());
 
-        DataSet<String> newsFeeds = execEnv.fromCollection(NewsFeedParser
-                .parseData());
-        DataSet<String> pageInformationValues = execEnv
-                .fromCollection(PageParser.parseData());
-
-        DataSet<Page> pageInformationDataSet = pageInformationValues
-                .map(new DomainObjectBasedPageMapper());
-
-        result = newsFeeds.map(new BroadcastMapper()).withBroadcastSet(pageInformationDataSet, "pageInformation");
+        result = newsFeeds.map(new BroadcastMapper())
+                .withBroadcastSet(pageInformationDataSet, "pageInformation");
         result.print();
     }
 
@@ -54,13 +51,14 @@ public class NewsFeedBroadcastExample {
     }
 
     private static class BroadcastMapper extends RichMapFunction<String,
-            Tuple6<Long,
-                    String, String, String, String, Long>> {
+            Tuple6<Long, String, String, String, String, Long>> {
         Map<Long, String> map = new HashMap<>();
         DateUtils dateUtils = new DateUtils();
 
         @Override
         public void open(Configuration parameters) throws Exception {
+
+            super.open(parameters);
             Collection<Page> collection = getRuntimeContext().getBroadcastVariable("pageInformation");
             for (Page page : collection) {
                 map.put(page.getId(), page.getAuthor());
@@ -69,9 +67,10 @@ public class NewsFeedBroadcastExample {
 
         @Override
         public Tuple6<Long, String, String, String, String, Long> map(String value) throws Exception {
+            final Tuple6<Long, String, String, String, String, Long> tuple6;
             final NewsFeed newsFeed = NewsFeedParser.mapRow(value);
             final long timeSpent = dateUtils.getTimeSpentOnPage(newsFeed);
-            final Tuple6<Long, String, String, String, String, Long> tuple6 = new Tuple6<>(newsFeed.getPageId(),
+            tuple6 = new Tuple6<>(newsFeed.getPageId(),
                     newsFeed.getSection(),
                     newsFeed.getSubSection(),
                     newsFeed.getTopic(),
