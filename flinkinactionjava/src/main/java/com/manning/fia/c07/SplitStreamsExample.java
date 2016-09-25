@@ -3,6 +3,7 @@ package com.manning.fia.c07;
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper6;
 import com.manning.fia.utils.NewsFeedDataSource;
+import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -28,11 +29,11 @@ import java.util.List;
 public class SplitStreamsExample {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
+        final DataStream<String> dataStream;
         StreamExecutionEnvironment execEnv = StreamExecutionEnvironment
                 .getExecutionEnvironment();
-        execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
-
-        final DataStream<String> dataStream;
+        final int parallelism = parameterTool.getInt("parallelism", 1);
+        execEnv.setParallelism(parallelism);
         boolean isKafka = parameterTool.getBoolean("isKafka", false);
         if (isKafka) {
             dataStream = execEnv.addSource(NewsFeedDataSource.getKafkaDataSource(parameterTool));
@@ -40,11 +41,7 @@ public class SplitStreamsExample {
             dataStream = execEnv.addSource(NewsFeedDataSource.getCustomDataSource(parameterTool));
         }
 
-
-
-        DataStream<NewsFeed> selectDS = dataStream
-                .map(new NewsFeedMapper6());
-
+        DataStream<NewsFeed> selectDS = dataStream.map(new NewsFeedMapper6());
 
         SplitStream<NewsFeed> splitStream = selectDS.
                 split(new
