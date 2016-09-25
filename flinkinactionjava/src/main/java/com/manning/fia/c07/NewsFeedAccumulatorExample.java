@@ -39,8 +39,8 @@ public class NewsFeedAccumulatorExample {
                 .reduce(new AccumulatorReducer());
         reducerResult.print();
         result = execEnv.getLastJobExecutionResult();
-
-        System.out.println(result.getAccumulatorResult("pageViewsBySectionSubSection"));
+        IntCounter counter = result.getAccumulatorResult("pageViewsBySectionSubSection");
+        System.out.println(counter);
 
 
 

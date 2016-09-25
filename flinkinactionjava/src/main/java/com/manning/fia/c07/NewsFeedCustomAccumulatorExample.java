@@ -40,8 +40,8 @@ public class NewsFeedCustomAccumulatorExample {
         mapperResult = newsFeeds.map(new AccumulatorMapper());
         mapperResult.print();
         result = execEnv.getLastJobExecutionResult();
-
-        System.out.println(result.getAccumulatorResult("keywords"));
+        SetAccumulator<StringValue> acc = result.getAccumulatorResult("keywords");
+        System.out.println(acc);//This needs rework
 
 
     }
