@@ -1,9 +1,8 @@
-package com.manning.fia.c07;
+package com.manning.fia.newc06;
 
 import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.transformations.media.NewsFeedMapper6;
 import com.manning.fia.utils.NewsFeedDataSource;
-import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.DataStream;

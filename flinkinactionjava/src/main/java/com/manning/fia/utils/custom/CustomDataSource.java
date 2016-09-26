@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * Created by hari on 7/17/16.
  */
-public class NewsFeedCustomDataSource implements SourceFunction<String>{
+public class CustomDataSource implements SourceFunction<String>{
 
 
     private ParameterTool parameterTool;
 
-    public NewsFeedCustomDataSource(ParameterTool parameterTool) {
+    public CustomDataSource(ParameterTool parameterTool) {
         this.parameterTool = parameterTool;
     }
 
@@ -22,9 +22,9 @@ public class NewsFeedCustomDataSource implements SourceFunction<String>{
     public void run(SourceContext<String> sourceContext) throws Exception {
 
         final String fileName=parameterTool.get("fileName");
-        final List<String> newsFeeds = NewsFeedParser.parseData(fileName);
+        final List<String> list = NewsFeedParser.parseData(fileName);
         final int threadSleepInterval=parameterTool.getInt("threadSleepInterval",0);
-        for (String newsFeed : newsFeeds) {
+        for (String newsFeed : list) {
             sourceContext.collect(newsFeed);
             Thread.currentThread().sleep(threadSleepInterval);
         }

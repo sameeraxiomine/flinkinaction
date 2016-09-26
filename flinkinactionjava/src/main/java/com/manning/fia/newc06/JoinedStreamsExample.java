@@ -1,28 +1,19 @@
-package com.manning.fia.c07;
+package com.manning.fia.newc06;
 
-import com.manning.fia.model.media.ApplicationUser;
-import com.manning.fia.model.media.NewsFeed;
-import com.manning.fia.transformations.media.NewsFeedMapper6;
-import com.manning.fia.utils.NewsFeedDataSource;
-import com.manning.fia.utils.SensorParser;
+import com.manning.fia.utils.DataSourceFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.functions.JoinFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SplitStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.joda.time.format.DateTimeFormat;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
 
@@ -33,6 +24,8 @@ public class JoinedStreamsExample {
 
     private void executeJob(ParameterTool parameterTool) throws Exception {
 
+        DataStream<String> temparatureDataStream;
+        DataStream<String> pressureDataStream;
         DataStream<Tuple3<String, Double, String>> temparatureStream;
         DataStream<Tuple3<String, Double, String>> pressureStream;
 
@@ -43,11 +36,11 @@ public class JoinedStreamsExample {
         execEnv.setParallelism(parallelism);
         execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        temparatureStream = execEnv.fromCollection
-                (SensorParser.parseData("/sensors/pipe/temparaturesensors"));
+        temparatureDataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
+        pressureDataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
 
-        pressureStream = execEnv.fromCollection
-                (SensorParser.parseData("/sensors/pipe/pressuresensors"));
+        temparatureStream = temparatureDataStream.map(new SensorMapper());
+        pressureStream = pressureDataStream.map(new SensorMapper());
 
 
         temparatureStream = temparatureStream.
@@ -62,6 +55,14 @@ public class JoinedStreamsExample {
                 .apply(new SensorJoin());
 
         execEnv.execute("Joined Streams Example");
+    }
+
+    private class SensorMapper implements MapFunction<String, Tuple3<String, Double, String>> {
+        @Override
+        public Tuple3<String, Double, String> map(String value) throws Exception {
+            final String[] tokens = StringUtils.splitPreserveAllTokens(value, "|");
+            return new Tuple3<>(tokens[0], Double.valueOf(tokens[1]), tokens[2]);
+        }
     }
 
     private static class SensorJoin implements JoinFunction<Tuple3<String, Double, String>,
@@ -117,6 +118,7 @@ public class JoinedStreamsExample {
         JoinedStreamsExample window = new JoinedStreamsExample();
         window.executeJob(parameterTool);
     }
+}
 
 
 
