@@ -1,25 +1,18 @@
-package com.manning.fia.c07;
+package com.manning.fia.newc06;
 
 import com.manning.fia.model.media.NewsFeed;
-import com.manning.fia.transformations.media.NewsFeedMapper;
 import com.manning.fia.transformations.media.NewsFeedParser;
 import com.manning.fia.utils.DateUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.accumulators.Accumulator;
-import org.apache.flink.api.common.accumulators.IntCounter;
 import org.apache.flink.api.common.functions.RichMapFunction;
-import org.apache.flink.api.common.functions.RichReduceFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.types.StringValue;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 
 /**
