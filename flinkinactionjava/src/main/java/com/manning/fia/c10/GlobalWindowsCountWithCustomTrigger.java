@@ -1,4 +1,4 @@
-package com.manning.fia.c06;
+package com.manning.fia.c10;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import com.manning.fia.utils.DataSourceFactory;

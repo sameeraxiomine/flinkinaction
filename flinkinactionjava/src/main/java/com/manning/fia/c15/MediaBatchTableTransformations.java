@@ -1,4 +1,4 @@
-package com.manning.fia.c10;
+package com.manning.fia.c15;
 
 import com.manning.fia.transformations.media.NewsFeedMapper;
 import com.manning.fia.transformations.media.NewsFeedParser;

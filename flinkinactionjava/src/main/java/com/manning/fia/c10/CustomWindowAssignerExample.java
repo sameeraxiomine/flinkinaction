@@ -1,9 +1,10 @@
-package com.manning.fia.c06;
+package com.manning.fia.c10;
 
+import com.manning.fia.model.media.NewsFeed;
 import com.manning.fia.utils.DataSourceFactory;
 import java.util.List;
-import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -13,48 +14,50 @@ import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.watermark.Watermark;
-import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.joda.time.format.DateTimeFormat;
 
-// Run with newsfeed_for_session_windows and threadsleepinterval = 500ms
-public class SessionEventTimeUsingApplyExample {
-  private void executeJob(ParameterTool parameterTool) throws Exception{
-    StreamExecutionEnvironment execEnv;
-    DataStream<Tuple6<String, Long, String, String, String, String>> selectDS;
-    DataStream<Tuple6<String, Long, String, String, String, String>> timestampsAndWatermarksDS;
-    KeyedStream<Tuple6<String, Long, String, String, String, String>, Tuple> keyedDS;
-    WindowedStream<Tuple6<String, Long, String, String, String, String>, Tuple, TimeWindow> windowedStream;
-    DataStream<Tuple5<Long, Long, String, List<Long>, Long>> result;
+public class CustomWindowAssignerExample {
 
-    execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+  private void executeJob(final ParameterTool parameterTool) throws Exception{
+    StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.getExecutionEnvironment();
+    DataStream<Tuple6<Long, Long, List<Long>, String, String, Long>> result;
+    WindowedStream<NewsFeed, Tuple2<String, String>, TimeWindow> windowedStream;
+    KeyedStream<NewsFeed, Tuple2<String, String>> keyedDS;
+    final DataStream<String> dataStream;
 
     execEnv.setParallelism(parameterTool.getInt("parallelism", execEnv.getParallelism()));
 
     execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-    final DataStream<String> dataStream;
-
     dataStream = execEnv.addSource(DataSourceFactory.getDataSource(parameterTool));
 
-    selectDS = dataStream.map(new NewsFeedSubscriberMapper());
+    DataStream<NewsFeed> selectDS = dataStream.map(new NewsFeedSlidingMapper());
 
-    timestampsAndWatermarksDS = selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
+    DataStream<NewsFeed> timestampsAndWatermarksDS =
+      selectDS.assignTimestampsAndWatermarks(new NewsFeedTimeStamp());
 
-    keyedDS = timestampsAndWatermarksDS.keyBy(0);
+    keyedDS = timestampsAndWatermarksDS.keyBy(
+        new KeySelector<NewsFeed, Tuple2<String, String>>() {
+          @Override
+          public Tuple2<String, String> getKey(NewsFeed newsFeed) throws Exception {
+            return new Tuple2<>(newsFeed.getSection(), newsFeed.getSubSection());
+          }
+        });
 
-    windowedStream = keyedDS.window(EventTimeSessionWindows.withGap(Time.seconds(5)));
+    windowedStream = keyedDS.window(SlidingNewsFlinkEventTimeWindow.of(Time.seconds(3),
+                                                                       Time.seconds(2)));
 
-    result = windowedStream.apply(new ApplySessionWindowFunction());
+    result = windowedStream.apply(new ApplyCustomWindowFunction());
 
     result.print();
 
     execEnv.execute("Event Time Session Window Apply");
   }
 
-  private static class NewsFeedTimeStamp implements
-    AssignerWithPeriodicWatermarks<Tuple6<String, Long, String, String, String, String>> {
+  private static class NewsFeedTimeStamp
+    implements AssignerWithPeriodicWatermarks<NewsFeed> {
     private static final long serialVersionUID = 1L;
     private long maxTimestamp = 0;
     private long priorTimestamp = 0;
@@ -72,21 +75,20 @@ public class SessionEventTimeUsingApplyExample {
     }
 
     @Override
-    public long extractTimestamp(
-      Tuple6<String, Long, String, String, String, String> element,
-        long previousElementTimestamp) {
+    public long extractTimestamp(NewsFeed element, long previousElementTimestamp) {
       long millis = DateTimeFormat.forPattern("yyyyMMddHHmmss")
-          .parseDateTime(element.f4).getMillis();
+        .parseDateTime(element.getStartTimeStamp()).getMillis();
       maxTimestamp = Math.max(maxTimestamp, millis);
       return millis;
     }
   }
 
+
   public static void main(String[] args) throws Exception {
     ParameterTool parameterTool = ParameterTool.fromArgs(args);
-    SessionEventTimeUsingApplyExample window = new SessionEventTimeUsingApplyExample();
+//    new NewsFeedSocket("/media/pipe/newsfeed_for_custom_sliding_windows").start();
+    CustomWindowAssignerExample window = new CustomWindowAssignerExample();
     window.executeJob(parameterTool);
   }
-
 
 }

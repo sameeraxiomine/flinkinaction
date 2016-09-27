@@ -1,6 +1,6 @@
 package com.manning.fia.transformations.media;
 
-import com.manning.fia.c06.SlidingNewsFeed;
+import com.manning.fia.c10.SlidingNewsFeed;
 import com.manning.fia.model.media.ApplicationUser;
 import com.manning.fia.model.media.BaseNewsFeed;
 import com.manning.fia.model.media.NewsFeed;
