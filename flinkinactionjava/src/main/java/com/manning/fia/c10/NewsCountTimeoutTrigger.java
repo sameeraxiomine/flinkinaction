@@ -1,4 +1,4 @@
-package com.manning.fia.c06;
+package com.manning.fia.c10;
 
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
