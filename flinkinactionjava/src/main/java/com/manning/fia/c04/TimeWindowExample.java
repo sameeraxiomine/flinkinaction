@@ -35,7 +35,7 @@ public class TimeWindowExample {
         execEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         keyedDS = DataStreamGenerator.getC04KeyedStream(execEnv, parameterTool);
         
-        int tumblingInterval = parameterTool.getInt("tumbleInterval",3);
+        int tumblingInterval = parameterTool.getInt("tumbleInterval",4);
         int slidingInterval = parameterTool.getInt("slideInterval",0);
         if(slidingInterval>0){
         	windowedStream = keyedDS.timeWindow(Time.seconds(tumblingInterval),Time.seconds(slidingInterval));	
