@@ -1,6 +1,6 @@
 package com.manning.fia.utils;
 
-import com.manning.fia.utils.custom.NewsFeedCustomDataSource;
+import com.manning.fia.utils.custom.CustomDataSource;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
@@ -18,6 +18,6 @@ public class DataSourceFactory {
                     new SimpleStringSchema(),
                     parameterTool.getProperties());
         }
-        return new NewsFeedCustomDataSource(parameterTool);
+        return new CustomDataSource(parameterTool);
     }
 }
