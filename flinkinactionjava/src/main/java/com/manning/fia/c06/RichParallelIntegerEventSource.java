@@ -31,14 +31,12 @@ public class RichParallelIntegerEventSource extends RichParallelSourceFunction<I
 
 	@Override
 	public void open(Configuration configuration) {
-		int numberTasks = getRuntimeContext().getNumberOfParallelSubtasks();
 		this.index = getRuntimeContext().getIndexOfThisSubtask();
 	}
 
 	public void run(SourceContext<Integer> sourceContext) throws Exception {
 		for(int i=0;i<this.noOfEvents;i++){
 			sourceContext.collect(this.index);
-			Thread.currentThread().sleep(100);		
 		}
 	}
 

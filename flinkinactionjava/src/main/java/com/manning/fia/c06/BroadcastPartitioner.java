@@ -8,7 +8,7 @@ public class BroadcastPartitioner {
       StreamExecutionEnvironment execEnv =
             StreamExecutionEnvironment.createLocalEnvironment(20);
       execEnv.setParallelism(2);      
-      DataStream<Integer> source = execEnv.addSource(new RichParallelIntegerEventSource(1));      
+      DataStream<Integer> source = execEnv.addSource(new RichParallelIntegerEventSource(4));      
       source.broadcast().printToErr().setParallelism(4);
 		execEnv.execute();
 	}
