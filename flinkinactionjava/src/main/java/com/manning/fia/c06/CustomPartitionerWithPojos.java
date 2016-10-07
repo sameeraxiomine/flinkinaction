@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.flink.api.common.functions.Partitioner;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple1;
+import org.apache.flink.contrib.streaming.DataStreamUtils;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class CustomPartitionerWithPojos {
@@ -20,7 +22,14 @@ public class CustomPartitionerWithPojos {
 		}
 		return data;
 	}
-
+/*
+ * Emphasize the key difference between custom and other forms of partitioning. 
+ * In other forms of partitioning it does not matter what the elements contain, the partitioner only needs
+ * to decide which channel to send the element to. The relationship is between a source channel and a destination channel. 
+ * All records from a given source parition will go to a set of destination partitions regardless of the contents.
+ * 
+ * In Custom Partitioning the partitioner is explicitly decides based on the element contents which partition receives it
+ */
 	public static void main(String[] args) throws Exception {
 		StreamExecutionEnvironment execEnv = StreamExecutionEnvironment.createLocalEnvironment(20);
 		int defaultParallelism = 8;
@@ -40,7 +49,7 @@ public class CustomPartitionerWithPojos {
 
 		};
 		//source.partitionCustom(partitioner, selector).printToErr().setParallelism(4);
-		source.partitionCustom(partitioner, "i").printToErr().setParallelism(4);
+		source.partitionCustom(partitioner, "i").printToErr().setParallelism(4);		
 		execEnv.execute();
 	}
 
