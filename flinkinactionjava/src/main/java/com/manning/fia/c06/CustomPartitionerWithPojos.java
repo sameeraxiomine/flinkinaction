@@ -39,7 +39,8 @@ public class CustomPartitionerWithPojos {
 			}
 
 		};
-		source.partitionCustom(partitioner, selector).printToErr().setParallelism(4);
+		//source.partitionCustom(partitioner, selector).printToErr().setParallelism(4);
+		source.partitionCustom(partitioner, "i").printToErr().setParallelism(4);
 		execEnv.execute();
 	}
 
