@@ -1,5 +1,6 @@
 package com.manning.fia.c06;
 
+import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -8,8 +9,8 @@ public class RescalePartitioner {
       StreamExecutionEnvironment execEnv =
             StreamExecutionEnvironment.createLocalEnvironment(20);
       execEnv.setParallelism(2);      
-      DataStream<Integer> source = execEnv.addSource(new RichParallelIntegerEventSource(4));      
-      source.rescale().printToErr().setParallelism(4);
+      DataStream<Tuple1<Integer>> source = execEnv.addSource(new RichParallelTuple1EventSource(4));      
+      source.rescale().printToErr().setParallelism(4);      
 		execEnv.execute();
 	}
 }
