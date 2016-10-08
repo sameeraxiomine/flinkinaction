@@ -35,20 +35,10 @@ public class CustomPartitionerWithPojos {
 		Partitioner<Integer> partitioner = new Partitioner<Integer>() {
 			@Override
 			public int partition(Integer key, int numPartitions) {
-				return ((key) / (8 / numPartitions));
+				return ((key) / (defaultParallelism / numPartitions));
 			}
 		};
-		/*
-		KeySelector<MyPojo, Integer> selector = new KeySelector<MyPojo, Integer>() {
-			@Override
-			public Integer getKey(MyPojo value) throws Exception {
-				return value.getI();
-			}
-
-		};
-		*/
-		//source.partitionCustom(partitioner, selector).printToErr().setParallelism(4);
-		source.partitionCustom(partitioner, "i").printToErr().setParallelism(4);		
+		source.partitionCustom(partitioner, "i").print().setParallelism(4);		
 		execEnv.execute();
 	}
 

@@ -9,17 +9,17 @@ public class CustomPartitioner {
 
 	public static void main(String[] args) throws Exception{
 		  StreamExecutionEnvironment execEnv =
-	            StreamExecutionEnvironment.createLocalEnvironment(20);
+	            StreamExecutionEnvironment.getExecutionEnvironment();
 		  int defaultParallelism = 8;
-	      execEnv.setParallelism(defaultParallelism);
-	      DataStream<Tuple1<Integer>> source = execEnv.addSource(new RichParallelTuple1EventSource(1));
-	      Partitioner<Integer> partitioner = new Partitioner<Integer>(){	      	
+	     execEnv.setParallelism(defaultParallelism);
+	     DataStream<Tuple1<Integer>> source = execEnv.addSource(new RichParallelTuple1EventSource(1));
+	     Partitioner<Integer> partitioner = new Partitioner<Integer>(){	      	
 				@Override
 				public int partition(Integer key, int numPartitions) {
 					return ((key)/(defaultParallelism/numPartitions));
 				}	      	
 	      };
-			source.partitionCustom(partitioner,0).printToErr().setParallelism(4);			
+			source.partitionCustom(partitioner,0).print().setParallelism(4);			
 			execEnv.execute();
 	}
 

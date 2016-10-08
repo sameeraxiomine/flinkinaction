@@ -7,10 +7,10 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 public class RescalePartitioner {
 	public static void main(String[] args) throws Exception{
       StreamExecutionEnvironment execEnv =
-            StreamExecutionEnvironment.createLocalEnvironment(20);
+            StreamExecutionEnvironment.getExecutionEnvironment();
       execEnv.setParallelism(2);      
       DataStream<Tuple1<Integer>> source = execEnv.addSource(new RichParallelTuple1EventSource(4));      
-      source.rescale().printToErr().setParallelism(4);      
+      source.rescale().print().setParallelism(4);      
 		execEnv.execute();
 	}
 }

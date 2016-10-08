@@ -7,10 +7,10 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 public class BroadcastPartitioner {
 	public static void main(String[] args) throws Exception{
       StreamExecutionEnvironment execEnv =
-            StreamExecutionEnvironment.createLocalEnvironment(20);
+            StreamExecutionEnvironment.getExecutionEnvironment();
       execEnv.setParallelism(2);      
       DataStream<Tuple1<Integer>> source = execEnv.addSource(new RichParallelTuple1EventSource(4));      
-      source.broadcast().printToErr().setParallelism(4);
+      source.broadcast().print().setParallelism(4);
 		execEnv.execute();
 	}
 }
