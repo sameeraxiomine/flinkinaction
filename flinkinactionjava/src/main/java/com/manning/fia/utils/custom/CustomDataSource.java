@@ -21,7 +21,7 @@ public class CustomDataSource implements SourceFunction<String>{
     @Override
     public void run(SourceContext<String> sourceContext) throws Exception {
 
-        final String fileName=parameterTool.get("fileName");
+        final String fileName=parameterTool.get("fileName","/media/pipe/newsfeed");
         final List<String> list = NewsFeedParser.parseData(fileName);
         final int threadSleepInterval=parameterTool.getInt("threadSleepInterval",0);
         for (String newsFeed : list) {
