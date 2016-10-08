@@ -13,7 +13,7 @@ public class NewsFeedDataSource {
 
     public static SourceFunction<String> getKafkaDataSource(ParameterTool parameterTool) {
         return new FlinkKafkaConsumer09<String>(
-                "newsfeed2",
+                parameterTool.getRequired("topic"),
                 new SimpleStringSchema(),
                 parameterTool.getProperties());
     }
