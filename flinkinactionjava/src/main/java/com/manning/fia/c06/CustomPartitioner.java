@@ -16,7 +16,7 @@ public class CustomPartitioner {
 	      Partitioner<Integer> partitioner = new Partitioner<Integer>(){	      	
 				@Override
 				public int partition(Integer key, int numPartitions) {
-					return ((key)/(8/numPartitions));
+					return ((key)/(defaultParallelism/numPartitions));
 				}	      	
 	      };
 			source.partitionCustom(partitioner,0).printToErr().setParallelism(4);			

@@ -5,10 +5,7 @@ import java.util.List;
 
 import org.apache.flink.api.common.functions.Partitioner;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple1;
-import org.apache.flink.contrib.streaming.DataStreamUtils;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class CustomPartitionerWithPojos {
@@ -41,6 +38,7 @@ public class CustomPartitionerWithPojos {
 				return ((key) / (8 / numPartitions));
 			}
 		};
+		/*
 		KeySelector<MyPojo, Integer> selector = new KeySelector<MyPojo, Integer>() {
 			@Override
 			public Integer getKey(MyPojo value) throws Exception {
@@ -48,6 +46,7 @@ public class CustomPartitionerWithPojos {
 			}
 
 		};
+		*/
 		//source.partitionCustom(partitioner, selector).printToErr().setParallelism(4);
 		source.partitionCustom(partitioner, "i").printToErr().setParallelism(4);		
 		execEnv.execute();

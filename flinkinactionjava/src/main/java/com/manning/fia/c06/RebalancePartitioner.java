@@ -9,7 +9,7 @@ public class RebalancePartitioner {
 	public static void main(String[] args) throws Exception{
       StreamExecutionEnvironment execEnv =
             StreamExecutionEnvironment.createLocalEnvironment(20);
-      execEnv.setParallelism(1);      
+      execEnv.setParallelism(2);      
       DataStream<Tuple1<Integer>> source = execEnv.addSource(new RichParallelTuple1EventSource(4));
 		source.rebalance().printToErr().setParallelism(2);
 		execEnv.execute();

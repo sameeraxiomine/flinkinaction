@@ -33,7 +33,7 @@ public class RichParallelTuple1EventSource extends RichParallelSourceFunction<Tu
 
 	@Override
 	public void open(Configuration configuration) {
-		this.index = getRuntimeContext().getIndexOfThisSubtask();
+		this.index = getRuntimeContext().getIndexOfThisSubtask();		
 	}
 
 	public void run(SourceContext<Tuple1<Integer>> sourceContext) throws Exception {
