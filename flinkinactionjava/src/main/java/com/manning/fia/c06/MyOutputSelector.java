@@ -13,7 +13,7 @@ public class MyOutputSelector implements OutputSelector<Tuple3<String, Integer, 
 		 List<String> output = new ArrayList<String>();
 		 String type = value.f2;
 		 output.add(type);
-        return output;
+       return output;
 	}      		
 }
 

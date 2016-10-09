@@ -24,15 +24,19 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 public class RulesSource implements SourceFunction<Tuple2<String, Integer>> {
+	private boolean running = true;
 	public void run(SourceContext<Tuple2<String, Integer>> sourceContext) throws Exception {
 		Thread.currentThread().sleep(10000);
-		sourceContext.collect(Tuple2.of("temperature", 50));
-		sourceContext.collect(Tuple2.of("pressure", 500));
-		Thread.currentThread().sleep(5000);
-		sourceContext.collect(Tuple2.of("temperature", 60));
-		sourceContext.collect(Tuple2.of("pressure", 600));
-	}
+		while(running){
+			sourceContext.collect(Tuple2.of("temperature", 50));
+			sourceContext.collect(Tuple2.of("pressure", 500));
+			Thread.currentThread().sleep(5000);
+			sourceContext.collect(Tuple2.of("temperature", 60));
+			sourceContext.collect(Tuple2.of("pressure", 600));	}
+			Thread.currentThread().sleep(5000);
+		}		
 
 	public void cancel() {
+		running = false;
 	}
 }
