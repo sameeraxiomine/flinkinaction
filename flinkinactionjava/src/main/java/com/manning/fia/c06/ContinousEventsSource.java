@@ -26,7 +26,7 @@ import java.util.Random;
 public class ContinousEventsSource implements SourceFunction<Tuple2<String, Integer>> {
 	public static int[] temperatures = {40,50,60,70,80,90,100,110,120,130};
 	public static int[] pressures = {400,500,600,700,800,900,1000,1100,1200,1300};
-	private boolean running = true;
+	private volatile  boolean running = true;
 	private Random rnd= new Random();
 	public void run(SourceContext<Tuple2<String, Integer>> sourceContext) throws Exception {
 		while(running){
