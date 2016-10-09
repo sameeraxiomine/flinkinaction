@@ -18,18 +18,19 @@
 
 package com.manning.fia.c06;
 
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
-public class RulesSource implements SourceFunction<Tuple3<String, Integer,Long>> {
-	public void run(SourceContext<Tuple3<String, Integer,Long>> sourceContext) throws Exception {
+public class RulesSource implements SourceFunction<Tuple2<String, Integer>> {
+	public void run(SourceContext<Tuple2<String, Integer>> sourceContext) throws Exception {
 		Thread.currentThread().sleep(10000);
-		sourceContext.collect(Tuple3.of("temperature", 50, System.currentTimeMillis()));
-		sourceContext.collect(Tuple3.of("pressure", 500, System.currentTimeMillis()));
+		sourceContext.collect(Tuple2.of("temperature", 50));
+		sourceContext.collect(Tuple2.of("pressure", 500));
 		Thread.currentThread().sleep(5000);
-		sourceContext.collect(Tuple3.of("temperature", 60, System.currentTimeMillis()));
-		sourceContext.collect(Tuple3.of("pressure", 600, System.currentTimeMillis()));
+		sourceContext.collect(Tuple2.of("temperature", 60));
+		sourceContext.collect(Tuple2.of("pressure", 600));
 	}
 
 	public void cancel() {

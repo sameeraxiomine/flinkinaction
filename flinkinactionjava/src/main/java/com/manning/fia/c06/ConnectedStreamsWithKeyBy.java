@@ -20,30 +20,30 @@ import com.manning.fia.c06.ConnectedStreamsWithBroadcast.RulesCoMapFunction;
 
 public class ConnectedStreamsWithKeyBy {
 	public static class RulesCoMapFunction
-	      implements CoFlatMapFunction<Tuple3<String, Integer,Long>, 
-	                               Tuple3<String, Integer,Long>, 
-	                               Tuple4<String, Integer, String,String>> {
+	      implements CoFlatMapFunction<Tuple2<String, Integer>, 
+	                               Tuple2<String, Integer>, 
+	                               Tuple3<String, Integer, String>> {
 		Integer threshold = null;
 		private String convertDateTimeToString(long millis){
 			return DateTimeFormat.forPattern("yyyyMMddHHmmss").print(millis);
 		}
 		@Override
-		public void flatMap1(Tuple3<String, Integer,Long> event,
-				Collector<Tuple4<String, Integer, String, String>> out) throws Exception {			
+		public void flatMap1(Tuple2<String, Integer> event,
+				Collector<Tuple3<String, Integer, String>> out) throws Exception {			
 			if (threshold != null) {
 				if (event.f1 < threshold) {
-					out.collect(Tuple4.of(event.f0, event.f1, "ALERT",convertDateTimeToString(event.f2)));
+					out.collect(Tuple3.of(event.f0, event.f1, "ALERT"));
 				} else {
-					out.collect(Tuple4.of(event.f0, event.f1, "NORMAL",convertDateTimeToString(event.f2)));					
+					out.collect(Tuple3.of(event.f0, event.f1, "NORMAL"));					
 				}
 			} else {
-				out.collect(Tuple4.of(event.f0, event.f1, "NORULE",convertDateTimeToString(event.f2)));				
+				out.collect(Tuple3.of(event.f0, event.f1, "NORULE"));				
 			}
 			
 		}
 
 		@Override
-		public void flatMap2(Tuple3<String, Integer,Long> rule,Collector<Tuple4<String, Integer, String, String>> out) throws Exception {					
+		public void flatMap2(Tuple2<String, Integer> rule,Collector<Tuple3<String, Integer, String>> out) throws Exception {					
 			threshold = rule.f1;
 		}
 	}
@@ -52,16 +52,16 @@ public class ConnectedStreamsWithKeyBy {
       StreamExecutionEnvironment execEnv =
             StreamExecutionEnvironment.createLocalEnvironment(5);
       execEnv.setParallelism(5);      
-      DataStream<Tuple3<String,Integer,Long>> rulesSource = execEnv.addSource(new RulesSource());      
-      DataStream<Tuple3<String,Integer,Long>> eventSource = execEnv.addSource(new EventsSource());
-      ConnectedStreams<Tuple3<String, Integer,Long>, Tuple3<String, Integer,Long>> connectedStream = 
+      DataStream<Tuple2<String,Integer>> rulesSource = execEnv.addSource(new RulesSource());      
+      DataStream<Tuple2<String,Integer>> eventSource = execEnv.addSource(new ContinousEventsSource());
+      ConnectedStreams<Tuple2<String, Integer>, Tuple2<String, Integer>> connectedStream = 
       		eventSource.connect(rulesSource).keyBy(0, 0);      
 		
-      SplitStream<Tuple4<String, Integer, String, String>> splitStream = 
+      SplitStream<Tuple3<String, Integer, String>> splitStream = 
       		connectedStream.flatMap(new RulesCoMapFunction()).split(new MyOutputSelector());
-      DataStream<Tuple4<String, Integer, String, String> > normal = splitStream.select("NORMAL");
-      DataStream<Tuple4<String, Integer, String, String> > alerts = splitStream.select("ALERT");
-      DataStream<Tuple4<String, Integer, String, String> > normalButNoRules = splitStream.select("NORULE");
+      DataStream<Tuple3<String, Integer, String> > normal = splitStream.select("NORMAL");
+      DataStream<Tuple3<String, Integer, String> > alerts = splitStream.select("ALERT");
+      DataStream<Tuple3<String, Integer, String> > normalButNoRules = splitStream.select("NORULE");
       alerts.printToErr();
       normal.print();
       normalButNoRules.print();
