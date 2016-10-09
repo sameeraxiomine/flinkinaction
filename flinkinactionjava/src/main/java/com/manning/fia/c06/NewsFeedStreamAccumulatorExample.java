@@ -42,7 +42,7 @@ public class NewsFeedStreamAccumulatorExample {
 
     public class CustomDataSource implements SourceFunction<String> {
 
-
+        private volatile  boolean running = true;
         private ParameterTool parameterTool;
 
         public CustomDataSource(ParameterTool parameterTool) {
@@ -70,7 +70,7 @@ public class NewsFeedStreamAccumulatorExample {
 
         @Override
         public void cancel() {
-
+            running=false;
         }
     }
 
