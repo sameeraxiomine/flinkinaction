@@ -9,13 +9,13 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
 
 public class VariableClosureExample {
-	public static class RulesMapFunction
+	public static class RulesAndEventsMapFunction
 	      implements FlatMapFunction<Tuple2<String, Integer>, 
 	                               Tuple3<String, Integer, String>> {
 		private Integer temperatureThreshold = null;
 		private Integer pressureThreshold = null;
 		
-		public RulesMapFunction(int temperatureThreshold,int pressureThreshold){
+		public RulesAndEventsMapFunction(int temperatureThreshold,int pressureThreshold){
 			this.temperatureThreshold = temperatureThreshold;
 			this.pressureThreshold = pressureThreshold;
 		}
@@ -39,7 +39,7 @@ public class VariableClosureExample {
       execEnv.setParallelism(5);      
       DataStream<Tuple2<String,Integer>> eventSource = execEnv.addSource(new ContinousEventsSource());
       SplitStream<Tuple3<String, Integer, String>> splitStream = 
-      		eventSource.flatMap(new RulesMapFunction(45,450)).split(new MyOutputSelector());
+      		eventSource.flatMap(new RulesAndEventsMapFunction(45,450)).split(new MyOutputSelector());
       DataStream<Tuple3<String, Integer, String> > normal = splitStream.select("NORMAL");
       DataStream<Tuple3<String, Integer, String> > alerts = splitStream.select("ALERT");
       alerts.printToErr();
