@@ -1,11 +1,15 @@
 package com.manning.fia.c06;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.ConnectedStreams;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -16,34 +20,30 @@ import org.apache.flink.streaming.api.functions.co.CoMapFunction;
 import org.apache.flink.util.Collector;
 import org.joda.time.format.DateTimeFormat;
 
-public class ConnectedStreamsWithBroadcast {
-	public static class RulesCoMapFunction
-	      implements CoFlatMapFunction<Tuple3<String, Integer,Long>, 
-	                               Tuple3<String, Integer,Long>, 
+public class VariableClosureExample {
+	public static class RulesMapFunction
+	      implements FlatMapFunction<Tuple3<String, Integer,Long>, 
 	                               Tuple4<String, Integer, String,String>> {
-		Map<String, Integer> thresholdByType = new HashMap<>();
+		private Integer temperatureThreshold = null;
+		private Integer pressureThreshold = null;
+		
+		public RulesMapFunction(int temperatureThreshold,int pressureThreshold){
+			this.temperatureThreshold = temperatureThreshold;
+			this.pressureThreshold = pressureThreshold;
+		}
 		private String convertDateTimeToString(long millis){
 			return DateTimeFormat.forPattern("yyyyMMddHHmmss").print(millis);
 		}
+	
 		@Override
-		public void flatMap1(Tuple3<String, Integer,Long> event,
-				Collector<Tuple4<String, Integer, String, String>> out) throws Exception {
-			Integer threshold = this.thresholdByType.get(event.f0);
-			if (threshold != null) {
-				if (event.f1 < threshold) {
-					out.collect(Tuple4.of(event.f0, event.f1, "ALERT",convertDateTimeToString(event.f2)));
-				} else {
-					out.collect(Tuple4.of(event.f0, event.f1, "NORMAL",convertDateTimeToString(event.f2)));					
-				}
+		public void flatMap(Tuple3<String, Integer, Long> event, Collector<Tuple4<String, Integer, String, String>> out)
+		      throws Exception {
+			int threshold = event.f0.equals("temperature")?temperatureThreshold:pressureThreshold;
+			if (event.f1 < threshold) {
+				out.collect(Tuple4.of(event.f0, event.f1, "ALERT",convertDateTimeToString(event.f2)));
 			} else {
-				out.collect(Tuple4.of(event.f0, event.f1, "NORULE",convertDateTimeToString(event.f2)));				
+				out.collect(Tuple4.of(event.f0, event.f1, "NORMAL",convertDateTimeToString(event.f2)));					
 			}
-			
-		}
-
-		@Override
-		public void flatMap2(Tuple3<String, Integer,Long> rule,Collector<Tuple4<String, Integer, String, String>> out) throws Exception {
-			thresholdByType.put(rule.f0, rule.f1);		
 		}
 	}
 
@@ -51,18 +51,13 @@ public class ConnectedStreamsWithBroadcast {
       StreamExecutionEnvironment execEnv =
             StreamExecutionEnvironment.createLocalEnvironment(5);
       execEnv.setParallelism(5);      
-      DataStream<Tuple3<String,Integer,Long>> rulesSource = execEnv.addSource(new RulesSource());      
       DataStream<Tuple3<String,Integer,Long>> eventSource = execEnv.addSource(new ContinousEventsSource());
-      ConnectedStreams<Tuple3<String, Integer,Long>, Tuple3<String, Integer,Long>> connectedStream = 
-      		eventSource.connect(rulesSource.broadcast());      
       SplitStream<Tuple4<String, Integer, String, String>> splitStream = 
-      		connectedStream.flatMap(new RulesCoMapFunction()).split(new MyOutputSelector());
+      		eventSource.flatMap(new RulesMapFunction(45,450)).split(new MyOutputSelector());
       DataStream<Tuple4<String, Integer, String, String> > normal = splitStream.select("NORMAL");
       DataStream<Tuple4<String, Integer, String, String> > alerts = splitStream.select("ALERT");
-      DataStream<Tuple4<String, Integer, String, String> > normalButNoRules = splitStream.select("NORULE");
       alerts.printToErr();
       normal.print();
-      normalButNoRules.print();
 		execEnv.execute();
 	}
 }
