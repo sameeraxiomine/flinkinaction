@@ -19,75 +19,68 @@ public class CEPExample {
 
 
     public void executeJob(ParameterTool parameterTool) throws Exception {
-        DataStream<EngineComponentModule> stream;
+        DataStream<SensorEvent> stream;
         final StreamExecutionEnvironment execEnv;
         final int parallelism = parameterTool.getInt("parallelism", 1);
         execEnv = StreamExecutionEnvironment.createLocalEnvironment(parallelism);
 
         execEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        stream = execEnv.addSource(new ECMSourceFunction());
+        stream = execEnv.addSource(new VehicleTelematicsSourceFunction());
 
 
-        Pattern<Sensor, ?> pattern =
-                Pattern.<Sensor>begin("start")
-                        .subtype(SpeedSensor.class)
-                        .where(new FilterFunction<SpeedSensor>() {
+        Pattern<SensorEvent, ?> pattern =
+                Pattern.<SensorEvent>begin("start")
+                        .subtype(SpeedSensorEvent.class)
+                        .where(new FilterFunction<SpeedSensorEvent>() {
                             @Override
-                            public boolean filter(SpeedSensor speedSensor) throws Exception {
-                                return speedSensor.getReading() > 65;
+                            public boolean filter(SpeedSensorEvent speedSensor) throws Exception {
+                                return speedSensor.reading > 65;
                             }
                         })
                         .next("next")
-                        .subtype(BrakeSensor.class)
-                        .where(new FilterFunction<BrakeSensor>() {
+                        .subtype(BrakeSensorEvent.class)
+                        .where(new FilterFunction<BrakeSensorEvent>() {
                             @Override
-                            public boolean filter(BrakeSensor brakeSensor) throws Exception {
-                                return brakeSensor.getReading() > 5;
+                            public boolean filter(BrakeSensorEvent brakeSensor) throws Exception {
+                                return brakeSensor.reading > 5;
                             }
                         })
                         .followedBy("end")
-                        .subtype(SpeedSensor.class)
-                        .where(new FilterFunction<SpeedSensor>() {
+                        .subtype(SpeedSensorEvent.class)
+                        .where(new FilterFunction<SpeedSensorEvent>() {
                             @Override
-                            public boolean filter(SpeedSensor speedSensor) throws Exception {
-                                return speedSensor.getReading() < 60;
+                            public boolean filter(SpeedSensorEvent speedSensor) throws Exception {
+                                return speedSensor.reading < 60;
                             }
                         }).within(Time.milliseconds(10));
 
 
-        final DataStream<Sensor> sensorStream;
-
+        
+        final DataStream<SensorEvent> sensorStream;
          //keyby deviceId
-        stream=stream.keyBy(new KeySelector<EngineComponentModule, Integer>() {
+        sensorStream=stream.keyBy(new KeySelector<SensorEvent, Integer>() {
             @Override
-            public Integer getKey(EngineComponentModule engineComponentModule) throws Exception {
-                return engineComponentModule.getDeviceId();
+            public Integer getKey(SensorEvent SensorEvent) throws Exception {
+                return SensorEvent.getDeviceId();
             }
         });
-
+        
         //create SensorStream
-        sensorStream = stream.map(new MapFunction<EngineComponentModule, Sensor>() {
+        /*
+        sensorStream = stream.map(new MapFunction<SensorEvent, SensorEvent>() {
             @Override
-            public Sensor map(EngineComponentModule engineComponentModule) throws Exception {
-                return engineComponentModule.getSensor();
+            public SensorEvent map(SensorEvent sensorEvent) throws Exception {
+                return sensorEvent;
             }
         });
-
-        DataStream<String> result = CEP.pattern(sensorStream, pattern)
+*/
+        DataStream<Alert> result = CEP.pattern(sensorStream, pattern)
                 .select(
-                        new PatternSelectFunction<Sensor, String>() {
+                        new PatternSelectFunction<SensorEvent, Alert>() {
                             @Override
-                            public String select(Map<String, Sensor> pattern) throws Exception {
-                                StringBuilder builder = new StringBuilder();
-                                builder.append(pattern.get("start").getType()).append("-----------")
-                                        .append(pattern.get("start").getReading()).append("-----------")
-                                        .append(pattern.get("next").getType()).append("-----------")
-                                        .append(pattern.get("next").getReading()).append("------------")
-                                        .append(pattern.get("end").getType()).append("-----------")
-                                        .append(pattern.get("end").getReading());
-
-                                return builder.toString();
+                            public Alert select(Map<String, SensorEvent> pattern) throws Exception {
+                           	  return new Alert(pattern.get("start"),pattern.get("next"),pattern.get("end"));
                             }
                         });
         result.printToErr();
