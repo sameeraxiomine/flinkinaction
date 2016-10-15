@@ -32,8 +32,8 @@ public class VehicleTelematicsSourceFunction implements SourceFunction<SensorEve
    		 ctx.collectWithTimestamp(speedEvent, speedEvent.timestamp);
    		 ctx.collectWithTimestamp(brakeEvent, brakeEvent.timestamp);
    		 wmTs = brakeEvent.timestamp-1;
-   		 ctx.emitWatermark(new Watermark(wmTs));
-   		 Thread.currentThread().sleep(1000);
+   		 ctx.emitWatermark(new Watermark(wmTs));   		 
+   		 Thread.currentThread().sleep(100);
    	 }
    	 ctx.emitWatermark(new Watermark(wmTs+1000));//Push the WM forward to flush all events to CEP
     }

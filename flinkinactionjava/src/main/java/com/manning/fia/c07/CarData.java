@@ -5,7 +5,7 @@ import java.util.List;
 
 public class CarData {
 	private static int[] CAR_IDS = { 1, 2, 3, 4, 5 };
-	private int noOfEvents = 10;
+	
 	private EngineControlModule[] ecms = new EngineControlModule[CAR_IDS.length];
 	// SpeedLimit & TimeStamp
 	private static SpeedSensorEvent[] SPEED_SENSOR = { new SpeedSensorEvent(100, 70, 5L),
@@ -27,7 +27,7 @@ public class CarData {
 		for (int i = 0; i < CAR_IDS.length; i++) {
 			ecms[i] = new EngineControlModule(CAR_IDS.length);
 		}
-		for (int i = 0; i < this.noOfEvents; i++) {
+		for (int i = 0; i < SPEED_SENSOR.length; i++) {
 			for (int j = 0; j < ecms.length; j++) {
 				speedEvents.add(ecms[j].receiveSensorEvents(SPEED_SENSOR[i]));
 				brakeEvents.add(ecms[j].receiveSensorEvents(BRAKE_SENSOR[i]));
@@ -36,12 +36,10 @@ public class CarData {
 	}
 
 	public int getNoOfEvents() {
-		return noOfEvents;
+		return this.speedEvents.size();
 	}
 
-	public void setNoOfEvents(int noOfEvents) {
-		this.noOfEvents = noOfEvents;
-	}
+
 
 	public List<SensorEvent> getSpeedEvents() {
 		return speedEvents;
