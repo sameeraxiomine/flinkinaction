@@ -86,7 +86,7 @@ public class InsuranceCEPExample {
         stream.assignTimestampsAndWatermarks(new AssignerWithPunctuatedWatermarks<Car>() {
             @Override
             public Watermark checkAndGetNextWatermark(Car car, long timeStamp) {
-                return new Watermark(timeStamp);
+                return new Watermark(timeStamp-1);
             }
 
             @Override
@@ -136,7 +136,7 @@ public class InsuranceCEPExample {
                                 return builder.toString();
                             }
                         });
-        result.print();
+        result.printToErr();
         execEnv.execute();
     }
 
