@@ -26,12 +26,18 @@
   <properties>
     <joda.time.version>2.9.2</joda.time.version>
     <slf4j.version>1.7.12</slf4j.version>
-    <flink.version>1.1.2</flink.version>
+    <flink.version>1.2-Snapshot</flink.version>
     <maven.compiler.target>1.8</maven.compiler.target>
     <mscala.version>3.2.0</mscala.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-cep_2.10</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-core</artifactId>
