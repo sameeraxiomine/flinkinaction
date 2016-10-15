@@ -28,7 +28,7 @@ public abstract class SensorEvent implements Serializable{
 
 	@Override
 	public String toString() {
-		return "SensorEvent [id=" + id + ", reading=" + reading + ", timestamp=" + timestamp + ", deviceId=" + deviceId
+		return "SensorEvent [deviceId=" + deviceId + ", sensorId=" + id + ", reading=" + reading + ", timestamp=" + timestamp  
 		      + "]";
 	}
 

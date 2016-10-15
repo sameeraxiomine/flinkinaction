@@ -8,4 +8,8 @@ public class BrakeSensorEvent extends SensorEvent {
     public BrakeSensorEvent(int id, double reading, long timeStamp) {
         super(id, reading, timeStamp);
     }
+    
+    public BrakeSensorEvent copy(){
+   	 return new BrakeSensorEvent(this.id,this.reading,this.timestamp);
+    }
 }

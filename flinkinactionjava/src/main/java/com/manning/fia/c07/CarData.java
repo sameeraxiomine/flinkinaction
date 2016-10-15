@@ -25,12 +25,12 @@ public class CarData {
 
 	public CarData() {
 		for (int i = 0; i < CAR_IDS.length; i++) {
-			ecms[i] = new EngineControlModule(CAR_IDS.length);
+			ecms[i] = new EngineControlModule(CAR_IDS[i]);
 		}
 		for (int i = 0; i < SPEED_SENSOR.length; i++) {
 			for (int j = 0; j < ecms.length; j++) {
-				speedEvents.add(ecms[j].receiveSensorEvents(SPEED_SENSOR[i]));
-				brakeEvents.add(ecms[j].receiveSensorEvents(BRAKE_SENSOR[i]));
+				speedEvents.add(ecms[j].receiveSensorEvents(SPEED_SENSOR[i].copy()));
+				brakeEvents.add(ecms[j].receiveSensorEvents(BRAKE_SENSOR[i].copy()));
 			}
 		}
 	}

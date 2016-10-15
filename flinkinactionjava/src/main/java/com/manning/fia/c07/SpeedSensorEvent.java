@@ -10,5 +10,8 @@ public class SpeedSensorEvent extends SensorEvent {
     public SpeedSensorEvent(int id, double reading, long timeStamp) {
         super(id, reading, timeStamp);
     }
-
+    
+    public SpeedSensorEvent copy(){
+   	 return new SpeedSensorEvent(this.id,this.reading,this.timestamp);
+    }
 }
