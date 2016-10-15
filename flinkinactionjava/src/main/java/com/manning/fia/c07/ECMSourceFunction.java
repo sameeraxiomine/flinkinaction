@@ -1,17 +1,16 @@
 package com.manning.fia.c07;
 
 import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
 
 /**
  * Created by hari on 10/15/16.
  */
-public class ECMSourceFunction implements ParallelSourceFunction<EngineCarModule> {
+public class ECMSourceFunction implements ParallelSourceFunction<EngineComponentModule> {
 
     volatile boolean running=true;
 
-    private static int[] CAR_ID={1,2};
+    private static int[] DEVICE_ID ={1};
     // SpeedLimit & TimeStamp
     private static SpeedSensor[] SPEED_SENSOR = {
             new SpeedSensor(100,70, 5L),
@@ -42,24 +41,30 @@ public class ECMSourceFunction implements ParallelSourceFunction<EngineCarModule
     };
 
     @Override
-    public void run(SourceContext<EngineCarModule> ctx) throws Exception {
+    public void run(SourceContext<EngineComponentModule> ctx) throws Exception {
 
-        int i=0;
-        EngineCarModule speedSensor;
-        EngineCarModule brakeSensor;
-        while (i<10){
-            //FOR SPEED
-            speedSensor=SPEED_SENSOR[i];
-            speedSensor.setCarId(CAR_ID[0]);
-            ctx.collectWithTimestamp(speedSensor,speedSensor.getTimeStamp());
-            ctx.emitWatermark(new Watermark(speedSensor.getTimeStamp()));
 
-            // FOR BRAKE
-            brakeSensor=BRAKE_SENSOR[i];
-            brakeSensor.setCarId(CAR_ID[0]);
-            ctx.collectWithTimestamp(brakeSensor,brakeSensor.getTimeStamp());
-            ctx.emitWatermark(new Watermark(brakeSensor.getTimeStamp()));
-            i++;
+
+        for (int idCounter=0;idCounter<DEVICE_ID.length;idCounter++) {
+            int deviceId= DEVICE_ID[idCounter];
+            for (int i=0;i<SPEED_SENSOR.length;i++) {
+                //FOR SPEED
+                Sensor speedSensor = SPEED_SENSOR[i];
+                EngineComponentModule engineComponentModule = new EngineComponentModule(deviceId,
+                        speedSensor);
+
+                ctx.collectWithTimestamp(engineComponentModule, speedSensor.getTimeStamp());
+                ctx.emitWatermark(new Watermark(speedSensor.getTimeStamp()));
+
+                // FOR BRAKE
+                Sensor brakeSensor = BRAKE_SENSOR[i];
+                EngineComponentModule engineComponentModule1 = new EngineComponentModule(deviceId,
+                        brakeSensor);
+                ctx.collectWithTimestamp(engineComponentModule1, brakeSensor.getTimeStamp());
+
+                ctx.emitWatermark(new Watermark(brakeSensor.getTimeStamp()));
+
+            }
         }
 
 

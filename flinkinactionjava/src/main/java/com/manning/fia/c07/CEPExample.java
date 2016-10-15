@@ -1,6 +1,8 @@
 package com.manning.fia.c07;
 
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.cep.CEP;
 import org.apache.flink.cep.PatternSelectFunction;
@@ -8,21 +10,16 @@ import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.AssignerWithPunctuatedWatermarks;
 
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
 import java.util.Map;
-import java.util.Random;
 
 public class CEPExample {
 
 
-
     public void executeJob(ParameterTool parameterTool) throws Exception {
-        final DataStream<EngineCarModule> stream;
+        DataStream<EngineComponentModule> stream;
         final StreamExecutionEnvironment execEnv;
         final int parallelism = parameterTool.getInt("parallelism", 1);
         execEnv = StreamExecutionEnvironment.createLocalEnvironment(parallelism);
@@ -32,8 +29,8 @@ public class CEPExample {
         stream = execEnv.addSource(new ECMSourceFunction());
 
 
-        Pattern<EngineCarModule, ?> pattern =
-                Pattern.<EngineCarModule>begin("start")
+        Pattern<Sensor, ?> pattern =
+                Pattern.<Sensor>begin("start")
                         .subtype(SpeedSensor.class)
                         .where(new FilterFunction<SpeedSensor>() {
                             @Override
@@ -59,14 +56,35 @@ public class CEPExample {
                         }).within(Time.milliseconds(10));
 
 
-        DataStream<String> result = CEP.pattern(stream, pattern)
+        final DataStream<Sensor> sensorStream;
+
+         //keyby deviceId
+        stream=stream.keyBy(new KeySelector<EngineComponentModule, Integer>() {
+            @Override
+            public Integer getKey(EngineComponentModule engineComponentModule) throws Exception {
+                return engineComponentModule.getDeviceId();
+            }
+        });
+
+        //create SensorStream
+        sensorStream = stream.map(new MapFunction<EngineComponentModule, Sensor>() {
+            @Override
+            public Sensor map(EngineComponentModule engineComponentModule) throws Exception {
+                return engineComponentModule.getSensor();
+            }
+        });
+
+        DataStream<String> result = CEP.pattern(sensorStream, pattern)
                 .select(
-                        new PatternSelectFunction<EngineCarModule, String>() {
+                        new PatternSelectFunction<Sensor, String>() {
                             @Override
-                            public String select(Map<String, EngineCarModule> pattern) throws Exception {
+                            public String select(Map<String, Sensor> pattern) throws Exception {
                                 StringBuilder builder = new StringBuilder();
-                                builder.append(pattern.get("start").getReading()).append("-----------")
+                                builder.append(pattern.get("start").getType()).append("-----------")
+                                        .append(pattern.get("start").getReading()).append("-----------")
+                                        .append(pattern.get("next").getType()).append("-----------")
                                         .append(pattern.get("next").getReading()).append("------------")
+                                        .append(pattern.get("end").getType()).append("-----------")
                                         .append(pattern.get("end").getReading());
 
                                 return builder.toString();
